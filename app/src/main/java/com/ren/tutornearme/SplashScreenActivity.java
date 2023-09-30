@@ -83,14 +83,6 @@ public class SplashScreenActivity extends AppCompatActivity {
                 .setGoogleButtonId(R.id.btn_google_sign_in)
                 .build();
 
-        /*startActivityIntent.launch(AuthUI.getInstance()
-                .createSignInIntentBuilder()
-                .setAuthMethodPickerLayout(authMethodPickerLayout)
-                .setIsSmartLockEnabled(false)
-                .setTheme(R.style.LoginTheme)
-                .setAvailableProviders(providers)
-                .build());*/
-
         startActivityForResult(AuthUI.getInstance()
                 .createSignInIntentBuilder()
                 .setAuthMethodPickerLayout(authMethodPickerLayout)
@@ -113,21 +105,6 @@ public class SplashScreenActivity extends AppCompatActivity {
         }
     }
 
-   /* ActivityResultLauncher<Intent> startActivityIntent = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                    } else {
-                        Toast.makeText(SplashScreenActivity.this, "[ERROR]: "
-                                + (data != null ? data.toString() : ""),Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-*/
     private void delaySplashScreen() {
         Completable.timer(5, TimeUnit.SECONDS, AndroidSchedulers.mainThread()).subscribe(new Action() {
             @Override
