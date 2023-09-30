@@ -12,7 +12,20 @@
           "package_name": "com.ren.tutornearme"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "829105347924-90bu2s0ctio9v729i72embuirk9j31su.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ren.tutornearme",
+            "certificate_hash": "9b33609e1989ceba45385de973e126ae3fd2baec"
+          }
+        },
+        {
+          "client_id": "829105347924-m2gnok002tu672t2hdnunhe982oir7t9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyC-1BvdOWaeE8TBLSirdcAT80QX7FCQlrc"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "829105347924-m2gnok002tu672t2hdnunhe982oir7t9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
