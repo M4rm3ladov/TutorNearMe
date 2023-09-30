@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "829105347924",
+    "project_id": "tutornearme-a8ad4",
+    "storage_bucket": "tutornearme-a8ad4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:829105347924:android:c48bd29036f2e48c42bcc1",
+        "android_client_info": {
+          "package_name": "com.ren.tutornearme"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-1BvdOWaeE8TBLSirdcAT80QX7FCQlrc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
