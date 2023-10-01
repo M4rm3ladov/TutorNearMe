@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Tutor Near Me</string>
+    <string name="account_creation_message">Let\'s start creating your account</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="slogan_message">Find the right tutor in your area</string>
+    <string name="get_started">Get Started</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="continue_text">Continue</string>
+    <string name="barangay">Barangay</string>
 </resources>
