@@ -36,10 +36,18 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
     implementation("com.google.firebase:firebase-auth:22.1.2")
+    implementation("com.google.firebase:firebase-core:21.1.1")
+    implementation("com.google.firebase:firebase-storage:20.2.1")
     implementation("com.firebaseui:firebase-ui-auth:8.0.2")
 
+    // like bloc and riverpod
     implementation("io.reactivex.rxjava2:rxjava:2.2.21")
     implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
+
+    implementation("com.google.firebase:firebase-database:20.2.2")
+    // api access
+    implementation("com.android.volley:volley:1.2.1")
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
