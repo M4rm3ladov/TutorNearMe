@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <!--
+    android:padding="18dp"
+
+    <ProgressBar
+        android:id="@+id/login_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        style="@android:style/Widget.ProgressBar.Large"
+        android:visibility="gone"/>
+
+    <include layout="@layout/app_banner"/>
+
+    <Button
+        android:id="@+id/get_started_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/get_started"
+        android:layout_alignParentBottom="true"/> -->
+    <Button
+        android:id="@+id/phone_sign_in_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>
