@@ -45,6 +45,7 @@ dependencies {
     implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
 
     implementation("com.google.firebase:firebase-database:20.2.2")
+    implementation("com.google.firebase:firebase-firestore:24.8.1")
     // api access
     implementation("com.android.volley:volley:1.2.1")
 
