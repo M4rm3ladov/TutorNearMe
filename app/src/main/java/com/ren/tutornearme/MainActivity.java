@@ -21,6 +21,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.FirebaseUserMetadata;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -77,16 +78,25 @@ public class MainActivity extends AppCompatActivity {
         providers = Arrays.asList(
                 new AuthUI.IdpConfig.PhoneBuilder().setAllowedCountries(Collections.singletonList("ph")).build(),
                 new AuthUI.IdpConfig.GoogleBuilder().build());
-        firebaseAuth = FirebaseAuth.getInstance();
 
+        firebaseAuth = FirebaseAuth.getInstance();
         authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 currentUser = firebaseAuth.getCurrentUser();
                 if (currentUser != null) {
-                    Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
-                    startActivity(intent);
-                    finish();
+                    // Navigate to Home screen if has an existing phone number else navigate to register
+                    FirebaseUserMetadata metadata = currentUser.getMetadata();
+                    if (metadata.getCreationTimestamp() == metadata.getLastSignInTimestamp()) {
+                        // New user
+                        Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Log.d("OLDUSER", "onAuthStateChanged: ");
+                        // TODO: move to home screen
+                    }
+
                 } else {
                     showLoginLayout();
                 }
