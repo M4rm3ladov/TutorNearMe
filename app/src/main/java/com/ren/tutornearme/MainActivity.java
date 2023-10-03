@@ -40,13 +40,13 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     private List<AuthUI.IdpConfig> providers = new ArrayList<>();
+    private ActivityResultLauncher<Intent> signInLauncher;
     private FirebaseAuth firebaseAuth;
     private FirebaseAuth.AuthStateListener authStateListener;
     private FirebaseUser currentUser;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CollectionReference collectionReference = db.collection(Common.TUTOR_INFO_REFERENCE);
-    private ActivityResultLauncher<Intent> signInLauncher;
-    private boolean userExists = false;
+    private boolean hasRegisteredData = false;
 
     @Override
     protected void onStart() {
@@ -80,62 +80,58 @@ public class MainActivity extends AppCompatActivity {
                 new AuthUI.IdpConfig.GoogleBuilder().build());
 
         firebaseAuth = FirebaseAuth.getInstance();
+
+
         authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+
                 currentUser = firebaseAuth.getCurrentUser();
+
                 if (currentUser != null) {
                     // Navigate to Home screen if has an existing phone number else navigate to register
                     FirebaseUserMetadata metadata = currentUser.getMetadata();
-                    if (metadata.getCreationTimestamp() == metadata.getLastSignInTimestamp()) {
-                        // New user
-                        Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
-                        startActivity(intent);
-                        finish();
-                    } else {
-                        Log.d("OLDUSER", "onAuthStateChanged: ");
-                        // TODO: move to home screen
-                    }
+
+                    // check if current user has registered info before
+                    collectionReference.whereEqualTo("uid", currentUser.getUid())
+                        .get()
+                        .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                            @Override
+                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                for (QueryDocumentSnapshot document: queryDocumentSnapshots) {
+                                    if (document.exists()) {
+                                        if (currentUser.getUid().equals(document.getString("uid"))) {
+                                            hasRegisteredData = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (!hasRegisteredData) {
+                                    //if (metadata.getCreationTimestamp() == metadata.getLastSignInTimestamp()) {
+                                    // New user
+                                    Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                    //}
+                                } else {
+                                    // TODO: move to home screen
+                                    Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                hasRegisteredData = false;
+                            }
+                        });
 
                 } else {
                     showLoginLayout();
                 }
             }
         };
-    }
-
-    private void saveUserToDatabase(String currentUserId) {
-        Map<String, String> userObj = new HashMap<>();
-        userObj.put("userId", currentUserId);
-
-        collectionReference.add(userObj)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        documentReference.get()
-                            .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                @Override
-                                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                    if (documentSnapshot.exists()) {
-                                        Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
-                                        intent.putExtra("uid", currentUserId);
-                                        startActivity(intent);
-                                        finish();
-                                    }
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-
-                                    }
-                                });
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-
-                    }
-                });
     }
 
     private void showLoginLayout() {
