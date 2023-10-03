@@ -1,22 +1,25 @@
 package com.ren.tutornearme.model;
 
-public class Tutor {
+public class TutorInfo {
     private String uid;
     private String firstName;
     private String lastName;
+    private String gender;
     private String phoneNumber;
     private String address;
+    private String resume;
+    private String validId;
 
-    private double rating;
-
-    public Tutor() {}
-    public Tutor(String uid, String firstName, String lastName, String phoneNumber, String address, double rating) {
+    public TutorInfo() {}
+    public TutorInfo(String uid, String firstName, String lastName, String gender, String phoneNumber, String address, String resume, String validId) {
         this.uid = uid;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.gender = gender;
         this.phoneNumber = phoneNumber;
         this.address = address;
-        this.rating = rating;
+        this.resume = resume;
+        this.validId = validId;
     }
 
     public String getUid() {
@@ -59,11 +62,27 @@ public class Tutor {
         this.address = address;
     }
 
-    public double getRating() {
-        return rating;
+    public String getGender() {
+        return gender;
     }
 
-    public void setRating(double rating) {
-        this.rating = rating;
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getResume() {
+        return resume;
+    }
+
+    public void setResume(String resume) {
+        this.resume = resume;
+    }
+
+    public String getValidId() {
+        return validId;
+    }
+
+    public void setValidId(String validId) {
+        this.validId = validId;
     }
 }
