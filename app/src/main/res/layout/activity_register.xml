@@ -5,6 +5,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="16dp">
 
+    <ProgressBar
+        android:id="@+id/register_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        style="@android:style/Widget.ProgressBar.Large"
+        android:visibility="gone"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -55,10 +63,19 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/gender_input_layout"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:helperTextTextColor="@color/red"
             app:helperTextEnabled="false">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="10dp"
+                android:text="@string/gender"
+                android:textSize="17sp"
+                android:textColor="@color/gray"/>
 
             <RadioGroup
                 android:id="@+id/gender_radio_group"
@@ -72,14 +89,23 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:text="@string/male"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="20dp"/>
+                        android:textSize="16sp"
+                        android:layout_weight="1" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/female_radio_button"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:text="@string/female"
+                        android:textSize="16sp"
+                        android:layout_weight="1"/>
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/private_gender_radio_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="@string/i_d_rather_not_say"
+                        android:textSize="16sp"
                         android:layout_weight="1"/>
 
             </RadioGroup>
