@@ -28,6 +28,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.ren.tutornearme.model.TutorInfo;
 import com.ren.tutornearme.util.Common;
 
 import java.util.ArrayList;
@@ -98,12 +99,14 @@ public class MainActivity extends AppCompatActivity {
                         .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                             @Override
                             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                for (QueryDocumentSnapshot document: queryDocumentSnapshots) {
-                                    if (document.exists()) {
-                                        if (currentUser.getUid().equals(document.getString("uid"))) {
-                                            hasRegisteredData = true;
-                                            break;
-                                        }
+                                for (QueryDocumentSnapshot documentSnapshot: queryDocumentSnapshots) {
+                                    if (documentSnapshot.exists()) {
+                                        //if (currentUser.getUid().equals(document.getString("uid"))) {
+                                            // Store data to static tutor obj
+                                        Common.currentTutor = documentSnapshot.toObject(TutorInfo.class);
+                                        hasRegisteredData = true;
+                                        break;
+                                        //}
                                     }
                                 }
                                 if (!hasRegisteredData) {
@@ -114,7 +117,6 @@ public class MainActivity extends AppCompatActivity {
                                     finish();
                                     //}
                                 } else {
-                                    // TODO: move to home screen
                                     Intent intent = new Intent(MainActivity.this, HomeActivity.class);
                                     startActivity(intent);
                                     finish();
