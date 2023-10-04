@@ -9,9 +9,11 @@ public class TutorInfo {
     private String address;
     private String resume;
     private String validId;
+    private long createdDate;
+    private long updatedDate;
 
     public TutorInfo() {}
-    public TutorInfo(String uid, String firstName, String lastName, String gender, String phoneNumber, String address, String resume, String validId) {
+    public TutorInfo(String uid, String firstName, String lastName, String gender, String phoneNumber, String address, String resume, String validId, long createdDate, long updatedDate) {
         this.uid = uid;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -20,6 +22,8 @@ public class TutorInfo {
         this.address = address;
         this.resume = resume;
         this.validId = validId;
+        this.createdDate = createdDate;
+        this.updatedDate = updatedDate;
     }
 
     public String getUid() {
@@ -84,5 +88,37 @@ public class TutorInfo {
 
     public void setValidId(String validId) {
         this.validId = validId;
+    }
+
+    public long getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(long createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public long getUpdatedDate() {
+        return updatedDate;
+    }
+
+    public void setUpdatedDate(long updatedDate) {
+        this.updatedDate = updatedDate;
+    }
+
+    @Override
+    public String toString() {
+        return "TutorInfo{" +
+                "uid='" + uid + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", gender='" + gender + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", address='" + address + '\'' +
+                ", resume='" + resume + '\'' +
+                ", validId='" + validId + '\'' +
+                ", createdDate=" + createdDate +
+                ", updatedDate=" + updatedDate +
+                '}';
     }
 }
