@@ -8,10 +8,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthMethodPickerLayout;
 import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract;
 import com.firebase.ui.auth.IdpResponse;
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult;
@@ -19,6 +19,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseUserMetadata;
@@ -125,6 +126,8 @@ public class MainActivity extends AppCompatActivity {
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
+                                Snackbar.make(findViewById(android.R.id.content), "[ERROR]: "
+                                        + e.getMessage(), Snackbar.LENGTH_SHORT).show();
                                 hasRegisteredData = false;
                             }
                         });
@@ -147,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 .createSignInIntentBuilder()
                 .setAuthMethodPickerLayout(authMethodPickerLayout)
                 .setIsSmartLockEnabled(false)
+                .setLockOrientation(true)
                 .setTheme(R.style.LoginTheme)
                 .setAvailableProviders(providers)
                 .build());
@@ -158,12 +162,22 @@ public class MainActivity extends AppCompatActivity {
             // Successfully signed in
             currentUser = firebaseAuth.getCurrentUser();
         } else {
-            // Sign in failed. If response is null the user canceled the
-            // sign-in flow using the back button. Otherwise check
-            // response.getError().getErrorCode() and handle the error.
-            // ...
-            Toast.makeText(MainActivity.this, "[ERROR]: "
-                            + response.getError().getMessage(), Toast.LENGTH_SHORT).show();
+
+            // Sign in failed
+            if (response == null) {
+                // User pressed back button
+                Snackbar.make(findViewById(android.R.id.content), "[ERROR]: "
+                        + "Sign in cancelled", Snackbar.LENGTH_LONG).show();
+                return;
+            } else if (Objects.requireNonNull(response.getError()).getErrorCode() == ErrorCodes.NO_NETWORK) {
+                Snackbar.make(findViewById(android.R.id.content), "[ERROR]: "
+                        + "No internet connection", Snackbar.LENGTH_LONG).show();
+                return;
+            }
+
+            Snackbar.make(findViewById(android.R.id.content), "[ERROR]: "
+                    + "Unknown Error", Snackbar.LENGTH_LONG).show();
+            Log.e("SIGN_IN_ERROR", "Sign-in error: ", response.getError());
         }
     }
 
