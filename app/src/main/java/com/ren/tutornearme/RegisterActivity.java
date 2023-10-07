@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -249,15 +250,16 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                             .addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    Toast.makeText(RegisterActivity.this,
-                                            "[ERROR]: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    Snackbar.make(findViewById(android.R.id.content),
+                                            "[ERROR]: " + e.getMessage(), Snackbar.LENGTH_SHORT).show();
                                 }
                             });
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(RegisterActivity.this, "[ERROR]: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        Snackbar.make(findViewById(android.R.id.content), "[ERROR]: " + e.getMessage(),
+                                Snackbar.LENGTH_LONG).show();
                     }
                 });
         }
