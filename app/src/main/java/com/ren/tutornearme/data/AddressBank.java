@@ -15,7 +15,7 @@ import java.util.List;
 
 public class AddressBank {
     ArrayList<String> barangayArrayList = new ArrayList<>();
-    private String url = "https://psgc.gitlab.io/api/cities/097332000/barangays.json";
+    private final String url = "https://psgc.gitlab.io/api/cities/097332000/barangays.json";
 
     public List<String> getBarangays(final AddressListAsyncResponse callBack) {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
@@ -43,5 +43,8 @@ public class AddressBank {
         });
         VolleySingleton.getInstance().addToRequestQueue(jsonArrayRequest);
         return barangayArrayList;
+    }
+    public interface AddressListAsyncResponse {
+        void processFinished(ArrayList<String> barangayArrayList);
     }
 }
