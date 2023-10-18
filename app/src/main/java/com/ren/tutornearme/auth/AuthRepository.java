@@ -1,40 +1,31 @@
 package com.ren.tutornearme.auth;
 
-import android.app.Application;
-import android.content.Intent;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.ren.tutornearme.HomeActivity;
-import com.ren.tutornearme.MainActivity;
-import com.ren.tutornearme.RegisterActivity;
 import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.model.TutorInfo;
-import com.ren.tutornearme.util.Common;
+import static com.ren.tutornearme.util.Common.currentTutor;
+import static com.ren.tutornearme.util.Common.TUTOR_INFO_REFERENCE;
 
 public class AuthRepository {
     private final FirebaseAuth firebaseAuth;
     private FirebaseUser currentUser;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private FirebaseAuth.AuthStateListener authStateListener;
-    private final CollectionReference collectionReference = db.collection(Common.TUTOR_INFO_REFERENCE);
+    private final CollectionReference collectionReference = db.collection(TUTOR_INFO_REFERENCE);
 
     public AuthRepository() {
         firebaseAuth = FirebaseAuth.getInstance();
     }
+
 
     public MutableLiveData<Boolean> checkIfSignedIn() {
         MutableLiveData<Boolean> mutableLiveData = new MutableLiveData<>();
@@ -66,8 +57,9 @@ public class AuthRepository {
                                 if (documentSnapshot.exists()) {
                                     // Store data to static tutor obj
                                     if (currentUser.getUid().equals(documentSnapshot.getString("uid"))) {
-                                        Common.currentTutor = documentSnapshot.toObject(TutorInfo.class);
+                                        currentTutor = documentSnapshot.toObject(TutorInfo.class);
                                         dataOrException.data = true;
+                                        break;
                                     } else
                                         dataOrException.data = false;
                                 } else
