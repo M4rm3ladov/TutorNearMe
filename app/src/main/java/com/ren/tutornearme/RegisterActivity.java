@@ -1,7 +1,8 @@
 package com.ren.tutornearme;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,21 +18,13 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ServerValue;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.ren.tutornearme.data.AddressBank;
-import com.ren.tutornearme.data.AddressListAsyncResponse;
+import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.model.TutorInfo;
-import com.ren.tutornearme.util.Common;
+import com.ren.tutornearme.profile.ProfileViewModel;
 import com.ren.tutornearme.util.InputValidatorHelper;
 
 import java.util.ArrayList;
@@ -47,19 +40,20 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     private ProgressBar progressBar;
     private boolean isValid = true;
     private List<String> barangayList;
-    private InputValidatorHelper inputValidatorHelper = new InputValidatorHelper();
+    private final InputValidatorHelper inputValidatorHelper = new InputValidatorHelper();
 
-    private FirebaseAuth firebaseAuth;
-    private FirebaseAuth.AuthStateListener authStateListener;
+    /*private FirebaseAuth firebaseAuth;
     private FirebaseUser currentUser;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference collectionReference = db.collection(Common.TUTOR_INFO_REFERENCE);
+    private CollectionReference collectionReference = db.collection(Common.TUTOR_INFO_REFERENCE);*/
+    private ProfileViewModel profileViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        firebaseAuth = FirebaseAuth.getInstance();
+        //firebaseAuth = FirebaseAuth.getInstance();
 
         progressBar = findViewById(R.id.register_progress_bar);
 
@@ -85,19 +79,30 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         registerButton.setOnClickListener(this);
 
         // Populate barangay auto complete edit text
-        barangayList = new AddressBank().getBarangays(new AddressListAsyncResponse() {
+        initBarangayList();
+        initAuthViewModel();
+
+        // Input validations
+        attachInputListeners();
+    }
+
+    private void initBarangayList() {
+        barangayList = new AddressBank().getBarangays(new AddressBank.AddressListAsyncResponse() {
             @Override
             public void processFinished(ArrayList<String> barangayArrayList) {
                 // Add barangay list to adapter
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(RegisterActivity.this,
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(RegisterActivity.this,
                         android.R.layout.simple_dropdown_item_1line, barangayArrayList);
                 AutoCompleteTextView barangayTextView = (AutoCompleteTextView)
                         findViewById(R.id.barangay_auto_textview);
                 barangayTextView.setAdapter(adapter);
             }
         });
-        // Input validations
-        attachInputListeners();
+    }
+    private void initAuthViewModel() {
+        profileViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory
+                .getInstance(getApplication()))
+                .get(ProfileViewModel.class);
     }
 
     private void attachInputListeners() {
@@ -159,7 +164,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void onFocusChange(View view, boolean isFocused) {
                 String barangayName = barangayEditText.getText().toString().trim();
-                if (!isFocused) {
+                if (!isFocused && !barangayName.isEmpty()) {
+                    barangayName = barangayName.substring(0, 1).toUpperCase() +
+                            barangayName.substring(1);
                     if (!barangayList.contains(barangayName)) {
                         barangayInputLayout.setHelperText("Please fill in valid Barangay.");
                     }
@@ -205,10 +212,10 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     private void saveTutorInfo() {
         validateBeforeSave();
 
-        currentUser = firebaseAuth.getCurrentUser();
         // check if passed validation and has user
-
+        FirebaseUser currentUser = profileViewModel.getCurrentUser();
         if (!isValid) return;
+        if (currentUser == null) return;
 
         String currentUserUid = currentUser.getUid();
         String firstName = firstNameEditText.getText().toString().trim();
@@ -227,7 +234,32 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         tutorInfo.setAddress(barangay);
         tutorInfo.setCreatedDate(epoch);
 
-        if (currentUser != null) {
+        progressBar.setVisibility(View.VISIBLE);
+        profileViewModel.registerTutor(tutorInfo).observe(this,
+                new Observer<DataOrException<Boolean, Exception>>() {
+            @Override
+            public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
+                progressBar.setVisibility(View.GONE);
+                if (dataOrException.data != null) {
+                    if (dataOrException.data) {
+                        Toast.makeText(RegisterActivity.this, "Saved successfully",
+                                Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                }
+
+                if (dataOrException.exception != null) {
+                    Snackbar.make(findViewById(android.R.id.content),
+                            "[ERROR]: " + dataOrException.exception.getMessage(),
+                            Snackbar.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+
+        /*if (currentUser != null) {
             progressBar.setVisibility(View.VISIBLE);
             collectionReference.add(tutorInfo)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -262,13 +294,14 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                                 Snackbar.LENGTH_LONG).show();
                     }
                 });
-        }
+        }*/
     }
 
     private void validateBeforeSave() {
         String firstName = firstNameEditText.getText().toString().trim();
         String lastName = lastNameEditText.getText().toString().trim();
         String barangay = barangayEditText.getText().toString().trim();
+        barangay = barangay.substring(0, 1).toUpperCase() + barangay.substring(1);
 
         isValid = true;
 
