@@ -124,7 +124,7 @@
                 android:id="@+id/barangay_auto_textview"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
-                android:inputType="textAutoComplete"
+                android:inputType="textAutoComplete|textCapSentences"
                 android:hint="@string/barangay"
                 android:paddingStart="15sp"
                 android:paddingEnd="15sp"
