@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModelProvider;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.RelativeLayout;
 
 import com.firebase.ui.auth.AuthMethodPickerLayout;
 import com.firebase.ui.auth.AuthUI;
@@ -30,13 +29,9 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
     private List<AuthUI.IdpConfig> providers = new ArrayList<>();
     private ActivityResultLauncher<Intent> signInLauncher;
-    private AuthViewModel viewModel;
+    private AuthViewModel authViewModel;
     private FirebaseAuth firebaseAuth;
     private FirebaseAuth.AuthStateListener authStateListener;
-    /*private FirebaseUser currentUser;
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference collectionReference = db.collection(Common.TUTOR_INFO_REFERENCE);
-    private boolean hasRegisteredData = false;*/
 
     @Override
     protected void onStart() {
@@ -55,12 +50,34 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        RelativeLayout mainRelativeLayout = findViewById(R.id.main_relative_layout);
+        initAuthViewModel();
+        initFirebaseAuthUI();
 
-        viewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory
-                .getInstance(getApplication()))
-                .get(AuthViewModel.class);
+        firebaseAuth = FirebaseAuth.getInstance();
+        authStateListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                authViewModel.checkIfSignedIn().observe(MainActivity.this, isSignedIn -> {
+                    if (!isSignedIn)
+                        showLoginLayout();
+                    else
+                        authViewModel.checkIfRegistered().observe(MainActivity.this, dataOrException -> {
+                            if (dataOrException.data != null) {
+                                navigateTowards(dataOrException.data);
+                            }
 
+                            if (dataOrException.exception != null) {
+                                Snackbar.make(findViewById(android.R.id.content),
+                                        "[ERROR]: " + dataOrException.exception.getMessage(),
+                                        Snackbar.LENGTH_SHORT).show();
+                            }
+                        });
+                });
+            }
+        };
+    }
+
+    private void initFirebaseAuthUI() {
         signInLauncher = registerForActivityResult(
                 new FirebaseAuthUIActivityResultContract(),
                 new ActivityResultCallback<FirebaseAuthUIAuthenticationResult>() {
@@ -74,79 +91,12 @@ public class MainActivity extends AppCompatActivity {
         providers = Arrays.asList(
                 new AuthUI.IdpConfig.PhoneBuilder().setAllowedCountries(Collections.singletonList("ph")).build(),
                 new AuthUI.IdpConfig.GoogleBuilder().build());
+    }
 
-        firebaseAuth = FirebaseAuth.getInstance();
-
-        authStateListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                viewModel.checkIfSignedIn().observe(MainActivity.this, isSignedIn -> {
-                    if (!isSignedIn)
-                        showLoginLayout();
-                    else
-                        viewModel.checkIfRegistered().observe(MainActivity.this, dataOrException -> {
-                            if (dataOrException.data != null) {
-                                navigateTowards(dataOrException.data);
-                            }
-
-                            if (dataOrException.exception != null) {
-                                Snackbar.make(mainRelativeLayout, "[ERROR]: " + dataOrException.exception.getMessage(),
-                                        Snackbar.LENGTH_SHORT).show();
-                            }
-                        });
-                });
-            }
-        };
-
-
-        /*authStateListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-
-                currentUser = firebaseAuth.getCurrentUser();
-
-                if (currentUser != null) {
-                    // check if current user has registered info before
-                    collectionReference.whereEqualTo("uid", currentUser.getUid())
-                        .get()
-                        .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                            @Override
-                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                for (QueryDocumentSnapshot documentSnapshot: queryDocumentSnapshots) {
-                                    if (documentSnapshot.exists()) {
-                                        //if (currentUser.getUid().equals(document.getString("uid"))) {
-                                            // Store data to static tutor obj
-                                        Common.currentTutor = documentSnapshot.toObject(TutorInfo.class);
-                                        hasRegisteredData = true;
-                                        break;
-                                        //}
-                                    }
-                                }
-                                Intent intent;
-                                if (!hasRegisteredData) {
-                                    // New user
-                                    intent = new Intent(MainActivity.this, RegisterActivity.class);
-                                } else {
-                                    // Has registered data
-                                    intent = new Intent(MainActivity.this, HomeActivity.class);
-                                }
-                                startActivity(intent);
-                                finish();
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Snackbar.make(findViewById(android.R.id.content), "[ERROR]: "
-                                        + e.getMessage(), Snackbar.LENGTH_SHORT).show();
-                                hasRegisteredData = false;
-                            }
-                        });
-
-                } else {
-                    showLoginLayout();
-                }
-            }
-        };*/
+    private void initAuthViewModel() {
+        authViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory
+                .getInstance(getApplication()))
+                .get(AuthViewModel.class);
     }
 
     private void navigateTowards(Boolean data) {
@@ -181,10 +131,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void onSignInResult(FirebaseAuthUIAuthenticationResult result) {
         IdpResponse response = result.getIdpResponse();
-       /* if (result.getResultCode() == RESULT_OK) {
-            // Successfully signed in
-            //currentUser = firebaseAuth.getCurrentUser();
-        }*/
+
         if (result.getResultCode() != RESULT_OK) {
 
             // Sign in failed
