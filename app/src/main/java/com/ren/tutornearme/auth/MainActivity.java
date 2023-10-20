@@ -1,4 +1,4 @@
-package com.ren.tutornearme;
+package com.ren.tutornearme.auth;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -18,7 +18,10 @@ import com.firebase.ui.auth.IdpResponse;
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.ren.tutornearme.auth.AuthViewModel;
+import com.ren.tutornearme.HomeActivity;
+import com.ren.tutornearme.R;
+import com.ren.tutornearme.profile.RegisterActivity;
+import com.ren.tutornearme.util.InternetHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +55,19 @@ public class MainActivity extends AppCompatActivity {
 
         initAuthViewModel();
         initFirebaseAuthUI();
+        initNetworkAvailability();
+        initAuthListener();
+    }
 
+    private void initNetworkAvailability() {
+        if (!InternetHelper.isOnline(getApplication())) {
+            Snackbar.make(findViewById(android.R.id.content),
+                    "[ERROR]: No internet connection. Please check your network",
+                    Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
+    private void initAuthListener() {
         firebaseAuth = FirebaseAuth.getInstance();
         authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -62,15 +77,17 @@ public class MainActivity extends AppCompatActivity {
                         showLoginLayout();
                     else
                         authViewModel.checkIfRegistered().observe(MainActivity.this, dataOrException -> {
-                            if (dataOrException.data != null) {
-                                navigateTowards(dataOrException.data);
-                            }
-
                             if (dataOrException.exception != null) {
                                 Snackbar.make(findViewById(android.R.id.content),
                                         "[ERROR]: " + dataOrException.exception.getMessage(),
                                         Snackbar.LENGTH_SHORT).show();
+                                return;
                             }
+
+                            if (dataOrException.data != null) {
+                                navigateTowards(dataOrException.data);
+                            }
+
                         });
                 });
             }
@@ -138,16 +155,16 @@ public class MainActivity extends AppCompatActivity {
             if (response == null) {
                 // User pressed back button
                 Snackbar.make(findViewById(android.R.id.content), "[ERROR]: "
-                        + "Sign in cancelled", Snackbar.LENGTH_LONG).show();
+                        + "[INFO]: Sign in cancelled", Snackbar.LENGTH_LONG).show();
                 return;
             } else if (Objects.requireNonNull(response.getError()).getErrorCode() == ErrorCodes.NO_NETWORK) {
                 Snackbar.make(findViewById(android.R.id.content), "[ERROR]: "
-                        + "No internet connection", Snackbar.LENGTH_LONG).show();
+                        + "[ERROR]: No internet connection", Snackbar.LENGTH_LONG).show();
                 return;
             }
 
             Snackbar.make(findViewById(android.R.id.content), "[ERROR]: "
-                    + "Unknown Error", Snackbar.LENGTH_LONG).show();
+                    + "[ERROR]: Unknown Error", Snackbar.LENGTH_LONG).show();
             Log.e("SIGN_IN_ERROR", "Sign-in error: ", response.getError());
         }
     }
