@@ -1,22 +1,12 @@
 package com.ren.tutornearme;
 
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MapStyleOptions;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
-import androidx.annotation.NonNull;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -25,6 +15,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import com.ren.tutornearme.databinding.ActivityHomeBinding;
 import com.ren.tutornearme.util.Common;
+import com.ren.tutornearme.util.InternetHelper;
 
 public class HomeActivity extends AppCompatActivity{
 
@@ -35,11 +26,29 @@ public class HomeActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        initNetworkAvailability();
+        initLayoutBinding();
+        initNavigationDrawer();
+
+        Log.d("CURRENT_USER", "onCreate: " + Common.currentTutor.toString());
+    }
+
+    private void initNetworkAvailability() {
+        if (!InternetHelper.isOnline(getApplication())) {
+            Snackbar.make(findViewById(android.R.id.content),
+                    "No internet connection. Please check your network",
+                    Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
+    private void initLayoutBinding() {
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         setSupportActionBar(binding.appBarHome.toolbar);
+    }
 
+    private void initNavigationDrawer() {
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
         // Passing each menu ID as a set of Ids because each
@@ -51,8 +60,6 @@ public class HomeActivity extends AppCompatActivity{
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_home);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
-
-        Log.d("CURRENT_USER", "onCreate: " + Common.currentTutor.toString());
     }
 
     @Override
