@@ -11,6 +11,10 @@
     <string name="continue_text">Continue</string>
     <string name="barangay">Barangay</string>
     <string name="gender">Gender</string>
+    <string name="title_location_permission">Location Access Required</string>
+    <string name="text_location_permission">We need access to your location to use our services.</string>
+    <string name="ok">OK</string>
+
     <string name="i_d_rather_not_say">I\'d rather not say</string>
     <string name="title_activity_home">Home</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
