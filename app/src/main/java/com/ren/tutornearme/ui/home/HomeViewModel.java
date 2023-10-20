@@ -1,19 +1,13 @@
 package com.ren.tutornearme.ui.home;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 public class HomeViewModel extends ViewModel {
-
-    private final MutableLiveData<String> mText;
+    private final HomeRepository homeRepository;
 
     public HomeViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is home fragment");
+        this.homeRepository = new HomeRepository();
     }
 
-    public LiveData<String> getText() {
-        return mText;
-    }
+
 }
