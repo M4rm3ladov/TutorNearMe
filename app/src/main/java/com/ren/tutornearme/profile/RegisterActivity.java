@@ -1,4 +1,4 @@
-package com.ren.tutornearme;
+package com.ren.tutornearme.profile;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
@@ -21,11 +21,13 @@ import android.widget.Toast;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseUser;
+import com.ren.tutornearme.HomeActivity;
+import com.ren.tutornearme.R;
 import com.ren.tutornearme.data.AddressBank;
 import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.model.TutorInfo;
-import com.ren.tutornearme.profile.ProfileViewModel;
 import com.ren.tutornearme.util.InputValidatorHelper;
+import com.ren.tutornearme.util.InternetHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,11 +43,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     private boolean isValid = true;
     private List<String> barangayList;
     private final InputValidatorHelper inputValidatorHelper = new InputValidatorHelper();
-
-    /*private FirebaseAuth firebaseAuth;
-    private FirebaseUser currentUser;
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference collectionReference = db.collection(Common.TUTOR_INFO_REFERENCE);*/
     private ProfileViewModel profileViewModel;
 
     @Override
@@ -53,8 +50,30 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        //firebaseAuth = FirebaseAuth.getInstance();
+        initNetworkAvailability();
+        initBindViews();
+        initSetButtonListeners();
+        initAttachInputListeners();
+        initBarangayList();
+        initAuthViewModel();
+    }
 
+    private void initNetworkAvailability() {
+        if (!InternetHelper.isOnline(getApplication())) {
+            Snackbar.make(findViewById(android.R.id.content),
+                    "[ERROR]: No internet connection. Please check your network",
+                    Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
+    private void initSetButtonListeners() {
+        maleRadioButton.setOnClickListener(this);
+        femaleRadioButton.setOnClickListener(this);
+        privateGenderRadioButton.setOnClickListener(this);
+        registerButton.setOnClickListener(this);
+    }
+
+    private void initBindViews() {
         progressBar = findViewById(R.id.register_progress_bar);
 
         firstNameEditText = findViewById(R.id.first_name_edit_text);
@@ -72,18 +91,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         barangayInputLayout = findViewById(R.id.barangay_input_layout);
 
         registerButton = findViewById(R.id.register_button);
-
-        maleRadioButton.setOnClickListener(this);
-        femaleRadioButton.setOnClickListener(this);
-        privateGenderRadioButton.setOnClickListener(this);
-        registerButton.setOnClickListener(this);
-
-        // Populate barangay auto complete edit text
-        initBarangayList();
-        initAuthViewModel();
-
-        // Input validations
-        attachInputListeners();
     }
 
     private void initBarangayList() {
@@ -105,7 +112,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 .get(ProfileViewModel.class);
     }
 
-    private void attachInputListeners() {
+    private void initAttachInputListeners() {
         firstNameEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean isFocused) {
@@ -237,64 +244,26 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         progressBar.setVisibility(View.VISIBLE);
         profileViewModel.registerTutor(tutorInfo).observe(this,
                 new Observer<DataOrException<Boolean, Exception>>() {
-            @Override
-            public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
-                progressBar.setVisibility(View.GONE);
-                if (dataOrException.data != null) {
-                    if (dataOrException.data) {
-                        Toast.makeText(RegisterActivity.this, "Saved successfully",
-                                Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
-                }
-
-                if (dataOrException.exception != null) {
-                    Snackbar.make(findViewById(android.R.id.content),
-                            "[ERROR]: " + dataOrException.exception.getMessage(),
-                            Snackbar.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-
-        /*if (currentUser != null) {
-            progressBar.setVisibility(View.VISIBLE);
-            collectionReference.add(tutorInfo)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        documentReference.get()
-                            .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                @Override
-                                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                    progressBar.setVisibility(View.GONE);
-                                    Toast.makeText(RegisterActivity.this,
-                                            "Successfully saved information", Toast.LENGTH_SHORT).show();
+                    public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
+                        progressBar.setVisibility(View.GONE);
+                        if (dataOrException.data != null) {
+                            if (dataOrException.data) {
+                                Toast.makeText(RegisterActivity.this, "Saved successfully",
+                                        Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
+                                startActivity(intent);
+                                finish();
+                            }
+                        }
 
-                                    Common.currentTutor = documentSnapshot.toObject(TutorInfo.class);
-                                    Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
-                                    startActivity(intent);
-                                    finish();
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Snackbar.make(findViewById(android.R.id.content),
-                                            "[ERROR]: " + e.getMessage(), Snackbar.LENGTH_SHORT).show();
-                                }
-                            });
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Snackbar.make(findViewById(android.R.id.content), "[ERROR]: " + e.getMessage(),
-                                Snackbar.LENGTH_LONG).show();
+                        if (dataOrException.exception != null) {
+                            Snackbar.make(findViewById(android.R.id.content),
+                                    "[ERROR]: " + dataOrException.exception.getMessage(),
+                                    Snackbar.LENGTH_SHORT).show();
+                        }
                     }
                 });
-        }*/
     }
 
     private void validateBeforeSave() {
