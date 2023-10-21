@@ -187,29 +187,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 @Override
                 public void onActivityResult(Boolean result) {
                     if (result) {
-                        mMap.setMyLocationEnabled(true);
-                        mMap.getUiSettings().setMyLocationButtonEnabled(true);
-                        mMap.setOnMyLocationButtonClickListener(() -> {
-
-                            fusedLocationProviderClient.getLastLocation()
-                                    .addOnCompleteListener(task -> {
-
-                                        if (task.isSuccessful()) {
-                                            Location location = task.getResult();
-                                            LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-                                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, ZOOM_VAL));
-                                        } else {
-                                            if (task.getException() != null)
-                                                showSnackBar(mContainerView, String.format("[ERROR]: %s",
-                                                        task.getException().getMessage()));
-                                        }
-                                    })
-                                    .addOnFailureListener(e -> showSnackBar(mContainerView, String.format("[ERROR]: %s",
-                                            e.getMessage())));
-
-                            return true;
-                        });
-
+                        showLocationWithButton();
                     } else {
                         Snackbar.make(mContainerView,
                                 "[INFO]: Location permission was denied."
@@ -243,28 +221,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.newLatLng(zam));
 
         if (checkLocationPermission()) {
-            mMap.setMyLocationEnabled(true);
-            mMap.getUiSettings().setMyLocationButtonEnabled(true);
-            mMap.setOnMyLocationButtonClickListener(() -> {
-
-                fusedLocationProviderClient.getLastLocation()
-                        .addOnCompleteListener(task -> {
-
-                            if (task.isSuccessful()) {
-                                Location location = task.getResult();
-                                LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, ZOOM_VAL));
-                            } else {
-                                if (task.getException() != null)
-                                    showSnackBar(mContainerView, String.format("[ERROR]: %s",
-                                            task.getException().getMessage()));
-                            }
-                        })
-                        .addOnFailureListener(e -> showSnackBar(mContainerView, String.format("[ERROR]: %s",
-                                e.getMessage())));
-
-                return true;
-            });
+            showLocationWithButton();
         }
 
         View locationButton = ((View) mapFragment.requireView().findViewById(Integer.parseInt("1")).getParent())
@@ -275,5 +232,31 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
         params.setMargins(0, 0, 0, 0);
+    }
+
+    @SuppressLint("MissingPermission")
+    private void showLocationWithButton() {
+        mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        mMap.setOnMyLocationButtonClickListener(() -> {
+
+            fusedLocationProviderClient.getLastLocation()
+                    .addOnCompleteListener(task -> {
+
+                        if (task.isSuccessful()) {
+                            Location location = task.getResult();
+                            LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, ZOOM_VAL));
+                        } else {
+                            if (task.getException() != null)
+                                showSnackBar(mContainerView, String.format("[ERROR]: %s",
+                                        task.getException().getMessage()));
+                        }
+                    })
+                    .addOnFailureListener(e -> showSnackBar(mContainerView, String.format("[ERROR]: %s",
+                            e.getMessage())));
+
+            return true;
+        });
     }
 }
