@@ -3,11 +3,9 @@ package com.ren.tutornearme.profile;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.model.TutorInfo;
-import static com.ren.tutornearme.util.Common.currentTutor;
 
 import static com.ren.tutornearme.util.Common.TUTOR_INFO_REFERENCE;
 
@@ -40,8 +38,6 @@ public class ProfileRepository {
                             .addOnCompleteListener(documentSnapshot -> {
 
                                 if (documentSnapshot.isSuccessful()) {
-                                    DocumentSnapshot tutorData = documentSnapshot.getResult();
-                                    currentTutor = tutorData.toObject(TutorInfo.class);
                                     dataOrException.data = true;
                                 } else {
                                     dataOrException.exception = documentSnapshot.getException();

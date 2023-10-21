@@ -12,8 +12,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.ren.tutornearme.data.DataOrException;
-import com.ren.tutornearme.model.TutorInfo;
-import static com.ren.tutornearme.util.Common.currentTutor;
 import static com.ren.tutornearme.util.Common.TUTOR_INFO_REFERENCE;
 
 public class AuthRepository {
@@ -57,7 +55,6 @@ public class AuthRepository {
                                 if (documentSnapshot.exists()) {
                                     // Store data to static tutor obj
                                     if (currentUser.getUid().equals(documentSnapshot.getString("uid"))) {
-                                        currentTutor = documentSnapshot.toObject(TutorInfo.class);
                                         dataOrException.data = true;
                                         break;
                                     } else

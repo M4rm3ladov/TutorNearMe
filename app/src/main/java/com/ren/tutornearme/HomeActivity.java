@@ -30,7 +30,6 @@ public class HomeActivity extends AppCompatActivity{
         initLayoutBinding();
         initNavigationDrawer();
 
-        Log.d("CURRENT_USER", "onCreate: " + Common.currentTutor.toString());
     }
 
     private void initNetworkAvailability() {
