@@ -116,7 +116,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         //if (isGPS) {
         initLocationRequestBuilder();
-        initFusedLocationProvider();
         initMapBinding();
         //}
 
@@ -216,12 +215,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             Log.d("MAP_PARSE_ERROR", "onMapReady: " + e.getMessage());
         }
 
-        LatLng zam = new LatLng(ZAM_LAT, ZAM_LONG);
-        mMap.addMarker(new MarkerOptions().position(zam).title("Marker in Zamboanga"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(zam));
-
         if (checkLocationPermission()) {
             showLocationWithButton();
+        } else {
+            LatLng zam = new LatLng(ZAM_LAT, ZAM_LONG);
+            mMap.addMarker(new MarkerOptions().position(zam).title("Marker in Zamboanga"));
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(zam));
         }
 
         View locationButton = ((View) mapFragment.requireView().findViewById(Integer.parseInt("1")).getParent())
@@ -238,6 +237,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private void showLocationWithButton() {
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
+
+        initFusedLocationProvider();
         mMap.setOnMyLocationButtonClickListener(() -> {
 
             fusedLocationProviderClient.getLastLocation()
