@@ -100,8 +100,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 // Add barangay list to adapter
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(RegisterActivity.this,
                         android.R.layout.simple_dropdown_item_1line, barangayArrayList);
-                AutoCompleteTextView barangayTextView = (AutoCompleteTextView)
-                        findViewById(R.id.barangay_auto_textview);
+                AutoCompleteTextView barangayTextView = findViewById(R.id.barangay_auto_textview);
                 barangayTextView.setAdapter(adapter);
             }
         });
@@ -270,7 +269,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         String firstName = firstNameEditText.getText().toString().trim();
         String lastName = lastNameEditText.getText().toString().trim();
         String barangay = barangayEditText.getText().toString().trim();
-        barangay = barangay.substring(0, 1).toUpperCase() + barangay.substring(1);
+        if (!barangay.isEmpty())
+            barangay = barangay.substring(0, 1).toUpperCase() + barangay.substring(1);
 
         isValid = true;
 
