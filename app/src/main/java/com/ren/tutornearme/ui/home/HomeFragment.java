@@ -71,13 +71,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private boolean isGpsEnabled = false;
 
     @Override
-    public void onDestroy() {
-        if (fusedLocationProviderClient != null)
-            fusedLocationProviderClient.removeLocationUpdates(locationCallback);
-        super.onDestroy();
-    }
-
-    @Override
     public void onAttach(@NonNull Context context) {
         mContext = context;
         if (context instanceof Activity){
@@ -105,6 +98,19 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         initMapBinding();
 
         return root;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
+
+    @Override
+    public void onDestroy() {
+        if (fusedLocationProviderClient != null)
+            fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+        super.onDestroy();
     }
 
     @SuppressLint("MissingPermission")
@@ -165,50 +171,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                         isGpsEnabled = isGPSEnabled;
                     }
                 });
-
-        /*LocationSettingsRequest.Builder settingsBuilder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(locationRequest);
-        settingsBuilder.setNeedBle(true);
-
-        Task<LocationSettingsResponse> result =
-                LocationServices.getSettingsClient(mActivity).checkLocationSettings(settingsBuilder.build());
-
-        result.addOnCompleteListener(new OnCompleteListener<LocationSettingsResponse>() {
-            @Override
-            public void onComplete(@NonNull Task<LocationSettingsResponse> task) {
-                try {
-                    LocationSettingsResponse response = task.getResult(ApiException.class);
-                    // All location settings are satisfied. The client can initialize location
-                    // requests here.
-
-                } catch (ApiException exception) {
-                    switch (exception.getStatusCode()) {
-                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                            // Location settings are not satisfied. But could be fixed by showing the
-                            // user a dialog.
-                            try {
-                                // Cast to a resolvable exception.
-                                ResolvableApiException resolvable = (ResolvableApiException) exception;
-                                IntentSenderRequest intentSenderRequest = new IntentSenderRequest
-                                        .Builder(resolvable.getResolution()).build();
-                                launcher.launch(intentSenderRequest);
-                            } catch (ClassCastException e) {
-                                SnackBarHelper.showSnackBar(mContainerView,
-                                        "[ERROR]: Location could not be resolved. Go to settings to enable");
-                                // Ignore, should be an impossible error.
-                            }
-                            break;
-                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-
-                            // Location settings are not satisfied. However, we have no way to fix the
-                            // settings so we won't show the dialog.
-                            SnackBarHelper.showSnackBar(mContainerView,
-                                    "[ERROR]: Location could not be resolved. Go to settings to enable");
-                            break;
-                    }
-                }
-            }
-        });*/
     }
 
     private boolean checkLocationPermission() {
@@ -249,12 +211,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 }
             }
     );
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
-    }
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {

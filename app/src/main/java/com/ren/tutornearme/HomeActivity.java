@@ -1,7 +1,7 @@
 package com.ren.tutornearme;
 
+
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -13,8 +13,8 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.ren.tutornearme.databinding.ActivityHomeBinding;
-import com.ren.tutornearme.util.Common;
 import com.ren.tutornearme.util.InternetHelper;
 
 public class HomeActivity extends AppCompatActivity{
