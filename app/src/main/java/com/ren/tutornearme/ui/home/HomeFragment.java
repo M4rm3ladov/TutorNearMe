@@ -14,9 +14,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.IntentSenderRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -25,11 +28,16 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.Priority;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -38,9 +46,12 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.ren.tutornearme.R;
 import com.ren.tutornearme.databinding.FragmentHomeBinding;
+import com.ren.tutornearme.util.SnackBarHelper;
 
 import static com.ren.tutornearme.util.Common.ZAM_LAT;
 import static com.ren.tutornearme.util.Common.ZAM_LONG;
@@ -87,29 +98,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         super.onDetach();
     }
 
-    /*@Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == 1000) {
-                isGPS = true; // flag maintain before get location
-            }
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }*/
-
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         HomeViewModel homeViewModel =
                 new ViewModelProvider(this).get(HomeViewModel.class);
 
         mContainerView = container;
-
-        /*new GPSHelper(mContext).turnGPSOn(new GPSHelper.onGpsListener() {
-            @Override
-            public void gpsStatus(boolean isGPSEnable) {
-                // turn on GPS
-                isGPS = isGPSEnable;
-            }
-        });*/
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
@@ -148,6 +141,23 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     Snackbar.LENGTH_SHORT).show();
     }
 
+    private final ActivityResultLauncher<IntentSenderRequest> launcher = registerForActivityResult(
+            new ActivityResultContracts.StartIntentSenderForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Toast.makeText(mContext,
+                                "Location enabled!", Toast.LENGTH_LONG).show();
+                        // All required changes were successfully made
+                    } else {
+                        SnackBarHelper.showSnackBar(mContainerView,
+                                "[INFO]: Location access denied");
+                        // The user was asked to change settings, but chose not to
+                    }
+                }
+            });
+
     private void initLocationRequestBuilder() {
         locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, LOCATION_INTERVAL)
                 .setWaitForAccurateLocation(false)
@@ -155,6 +165,50 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 .setMinUpdateIntervalMillis(LOCATION_FASTEST_INTERVAL)
                 .setMaxUpdateDelayMillis(LOCATION_MAX_WAIT_TIME)
                 .build();
+
+        LocationSettingsRequest.Builder settingsBuilder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest);
+        settingsBuilder.setNeedBle(true);
+
+        Task<LocationSettingsResponse> result =
+                LocationServices.getSettingsClient(mActivity).checkLocationSettings(settingsBuilder.build());
+
+        result.addOnCompleteListener(new OnCompleteListener<LocationSettingsResponse>() {
+            @Override
+            public void onComplete(@NonNull Task<LocationSettingsResponse> task) {
+                try {
+                    LocationSettingsResponse response = task.getResult(ApiException.class);
+                    // All location settings are satisfied. The client can initialize location
+                    // requests here.
+
+                } catch (ApiException exception) {
+                    switch (exception.getStatusCode()) {
+                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                            // Location settings are not satisfied. But could be fixed by showing the
+                            // user a dialog.
+                            try {
+                                // Cast to a resolvable exception.
+                                ResolvableApiException resolvable = (ResolvableApiException) exception;
+                                IntentSenderRequest intentSenderRequest = new IntentSenderRequest
+                                        .Builder(resolvable.getResolution()).build();
+                                launcher.launch(intentSenderRequest);
+                            } catch (ClassCastException e) {
+                                SnackBarHelper.showSnackBar(mContainerView,
+                                        "[ERROR]: Location could not be resolved. Go to settings to enable");
+                                // Ignore, should be an impossible error.
+                            }
+                            break;
+                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+
+                            // Location settings are not satisfied. However, we have no way to fix the
+                            // settings so we won't show the dialog.
+                            SnackBarHelper.showSnackBar(mContainerView,
+                                    "[ERROR]: Location could not be resolved. Go to settings to enable");
+                            break;
+                    }
+                }
+            }
+        });
     }
 
     private boolean checkLocationPermission() {
