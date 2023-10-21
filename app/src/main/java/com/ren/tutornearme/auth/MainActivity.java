@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
                     else
                         authViewModel.checkIfRegistered().observe(MainActivity.this, dataOrException -> {
                             if (dataOrException.exception != null) {
+                                showLoginLayout();
                                 Snackbar.make(findViewById(android.R.id.content),
                                         "[ERROR]: " + dataOrException.exception.getMessage(),
                                         Snackbar.LENGTH_SHORT).show();
