@@ -28,16 +28,11 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.Priority;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -46,11 +41,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.ren.tutornearme.R;
 import com.ren.tutornearme.databinding.FragmentHomeBinding;
+import com.ren.tutornearme.util.GPSHelper;
 import com.ren.tutornearme.util.SnackBarHelper;
 
 import static com.ren.tutornearme.util.Common.ZAM_LAT;
@@ -74,7 +68,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private View mContainerView;
     private Context mContext;
     private FragmentActivity mActivity;
-    private boolean isGPS = false;
+    private boolean isGpsEnabled = false;
 
     @Override
     public void onDestroy() {
@@ -107,17 +101,14 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        //if (isGPS) {
         initLocationRequestBuilder();
         initMapBinding();
-        //}
 
         return root;
     }
 
     @SuppressLint("MissingPermission")
     private void initFusedLocationProvider() {
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(mContext);
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
@@ -126,8 +117,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 super.onLocationResult(locationResult);
             }
         };
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(mContext);
         fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
-
     }
 
     private void initMapBinding() {
@@ -141,12 +132,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     Snackbar.LENGTH_SHORT).show();
     }
 
-    private final ActivityResultLauncher<IntentSenderRequest> launcher = registerForActivityResult(
+    public final ActivityResultLauncher<IntentSenderRequest> launcher = registerForActivityResult(
             new ActivityResultContracts.StartIntentSenderForResult(),
             new ActivityResultCallback<ActivityResult>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == Activity.RESULT_OK) {
+                        isGpsEnabled = true;
                         Toast.makeText(mContext,
                                 "Location enabled!", Toast.LENGTH_LONG).show();
                         // All required changes were successfully made
@@ -166,7 +158,15 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 .setMaxUpdateDelayMillis(LOCATION_MAX_WAIT_TIME)
                 .build();
 
-        LocationSettingsRequest.Builder settingsBuilder = new LocationSettingsRequest.Builder()
+        new GPSHelper().turnOnGPS(locationRequest, mActivity.getApplication(),
+                mContainerView, this, new GPSHelper.OnGpsListener() {
+                    @Override
+                    public void gpsStatus(boolean isGPSEnabled) {
+                        isGpsEnabled = isGPSEnabled;
+                    }
+                });
+
+        /*LocationSettingsRequest.Builder settingsBuilder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(locationRequest);
         settingsBuilder.setNeedBle(true);
 
@@ -208,7 +208,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     }
                 }
             }
-        });
+        });*/
     }
 
     private boolean checkLocationPermission() {
@@ -249,7 +249,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 }
             }
     );
-
 
     @Override
     public void onDestroyView() {
