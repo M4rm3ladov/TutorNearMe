@@ -26,8 +26,11 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -42,7 +45,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.ren.tutornearme.R;
+import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.databinding.FragmentHomeBinding;
 import com.ren.tutornearme.util.GPSHelper;
 import com.ren.tutornearme.util.SnackBarHelper;
@@ -65,10 +72,25 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private static final float LOCATION_MIN_DISTANCE = 10f;
     private static final float ZOOM_VAL = 18f;
 
+    private GeoFire geoFire;
+
+    private HomeViewModel homeViewModel;
     private View mContainerView;
     private Context mContext;
     private FragmentActivity mActivity;
     private boolean isGpsEnabled = false;
+
+    private final ValueEventListener onlineValueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            homeViewModel.getCurrentUserRef().onDisconnect().removeValue();
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+            SnackBarHelper.showSnackBar(mContainerView, "[ERROR]: " + error.getMessage());
+        }
+    };
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -86,7 +108,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        HomeViewModel homeViewModel =
+        homeViewModel =
                 new ViewModelProvider(this).get(HomeViewModel.class);
 
         mContainerView = container;
@@ -101,6 +123,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     @Override
+    public void onResume() {
+        homeViewModel.getOnlineRef().addValueEventListener(onlineValueEventListener);
+        super.onResume();
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
@@ -110,16 +138,35 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     public void onDestroy() {
         if (fusedLocationProviderClient != null)
             fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+
+        homeViewModel.removeTutorLocation();
+        homeViewModel.getOnlineRef().removeEventListener(onlineValueEventListener);
         super.onDestroy();
     }
 
     @SuppressLint("MissingPermission")
     private void initFusedLocationProvider() {
+
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 LatLng newPosition = new LatLng(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude());
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newPosition, ZOOM_VAL));
+
+                homeViewModel.isTutorLocationSet(locationResult).observe(mActivity,
+                        new Observer<DataOrException<Boolean, Exception>>() {
+                            @Override
+                            public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
+                                if (dataOrException.exception != null)
+                                    SnackBarHelper.showSnackBar(mContainerView,
+                                            "[ERROR]: " + dataOrException.exception.getMessage());
+
+                                if (dataOrException.data)
+                                    Toast.makeText(mContext, "You're Online!", Toast.LENGTH_SHORT)
+                                            .show();
+                            }
+                        });
+
                 super.onLocationResult(locationResult);
             }
         };
