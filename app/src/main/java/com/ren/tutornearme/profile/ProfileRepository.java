@@ -14,7 +14,7 @@ import androidx.lifecycle.MutableLiveData;
 public class ProfileRepository {
     private final FirebaseAuth firebaseAuth;
     private final FirebaseDatabase db = FirebaseDatabase.getInstance();
-    private final DatabaseReference collectionReference = db.getReference(TUTOR_INFO_REFERENCE);
+    private final DatabaseReference tutorInfoRef = db.getReference(TUTOR_INFO_REFERENCE);
 
     public ProfileRepository() {
         firebaseAuth = FirebaseAuth.getInstance();
@@ -29,7 +29,8 @@ public class ProfileRepository {
 
         if (getCurrentUser() != null) {
             DataOrException<Boolean, Exception> dataOrException = new DataOrException<>();
-            collectionReference.child(getCurrentUser().getUid()).setValue(tutorInfo)
+
+            tutorInfoRef.child(getCurrentUser().getUid()).setValue(tutorInfo)
                 .addOnCompleteListener(documentReference -> {
                     if (documentReference.isSuccessful()) {
                         dataOrException.data = true;
