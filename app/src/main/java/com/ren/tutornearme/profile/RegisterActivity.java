@@ -50,7 +50,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        initNetworkAvailability();
         initBindViews();
         initSetButtonListeners();
         initAttachInputListeners();
@@ -58,12 +57,14 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         initAuthViewModel();
     }
 
-    private void initNetworkAvailability() {
+    @Override
+    protected void onResume() {
         if (!InternetHelper.isOnline(getApplication())) {
             Snackbar.make(findViewById(android.R.id.content),
                     "[ERROR]: No internet connection. Please check your network",
                     Snackbar.LENGTH_SHORT).show();
         }
+        super.onResume();
     }
 
     private void initSetButtonListeners() {
@@ -207,6 +208,12 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.register_button) {
+            if (!InternetHelper.isOnline(getApplication())) {
+                Snackbar.make(findViewById(android.R.id.content),
+                        "[ERROR]: No internet connection. Please check your network",
+                        Snackbar.LENGTH_SHORT).show();
+                return;
+            }
             saveTutorInfo();
         }
         if (view.getId() == R.id.male_radio_button || view.getId() == R.id.female_radio_button
@@ -238,7 +245,10 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         tutorInfo.setGender(gender);
         tutorInfo.setPhoneNumber(phoneNumber);
         tutorInfo.setAddress(barangay);
+        tutorInfo.setResume("");
+        tutorInfo.setValidId("");
         tutorInfo.setCreatedDate(epoch);
+        tutorInfo.setUpdatedDate(epoch);
 
         progressBar.setVisibility(View.VISIBLE);
         profileViewModel.registerTutor(tutorInfo).observe(this,
