@@ -46,7 +46,8 @@ dependencies {
     implementation("com.google.firebase:firebase-core:21.1.1")
     implementation("com.google.firebase:firebase-storage:20.2.1")
     implementation("com.firebaseui:firebase-ui-auth:8.0.2")
-    implementation("com.google.firebase:firebase-firestore:24.8.1")
+    implementation("com.google.firebase:firebase-database:20.3.0")
+    implementation("com.github.imperiumlabs:GeoFirestore-Android:v1.5.0")
 
     // like bloc and riverpod (observer pattern)
     implementation("io.reactivex.rxjava2:rxjava:2.2.21")
