@@ -13,13 +13,12 @@ import com.google.firebase.database.ValueEventListener;
 import com.ren.tutornearme.data.DataOrException;
 import static com.ren.tutornearme.util.Common.TUTOR_INFO_REFERENCE;
 
-import android.util.Log;
 
 public class AuthRepository {
     private final FirebaseAuth firebaseAuth;
     private FirebaseUser currentUser;
     private final FirebaseDatabase db = FirebaseDatabase.getInstance();
-    private final DatabaseReference collectionReference = db.getReference(TUTOR_INFO_REFERENCE);
+    private final DatabaseReference tutorInfoRef = db.getReference(TUTOR_INFO_REFERENCE);
 
     public AuthRepository() {
         firebaseAuth = FirebaseAuth.getInstance();
@@ -49,7 +48,7 @@ public class AuthRepository {
         if (currentUser != null) {
             // check if current user has registered info before
             DataOrException<Boolean, Exception> dataOrException = new DataOrException<>();
-            collectionReference.child(currentUser.getUid())
+            tutorInfoRef.child(currentUser.getUid())
                     .addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
