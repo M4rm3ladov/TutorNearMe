@@ -2,8 +2,8 @@ package com.ren.tutornearme.profile;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.model.TutorInfo;
 
@@ -13,8 +13,8 @@ import androidx.lifecycle.MutableLiveData;
 
 public class ProfileRepository {
     private final FirebaseAuth firebaseAuth;
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private final CollectionReference collectionReference = db.collection(TUTOR_INFO_REFERENCE);
+    private final FirebaseDatabase db = FirebaseDatabase.getInstance();
+    private final DatabaseReference collectionReference = db.getReference(TUTOR_INFO_REFERENCE);
 
     public ProfileRepository() {
         firebaseAuth = FirebaseAuth.getInstance();
@@ -26,24 +26,13 @@ public class ProfileRepository {
 
     public MutableLiveData<DataOrException<Boolean, Exception>> registerTutor(TutorInfo tutorInfo) {
         MutableLiveData<DataOrException<Boolean, Exception>> mutableLiveData = new MutableLiveData<>();
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
 
-        if (currentUser != null) {
+        if (getCurrentUser() != null) {
             DataOrException<Boolean, Exception> dataOrException = new DataOrException<>();
-            collectionReference.add(tutorInfo)
+            collectionReference.child(getCurrentUser().getUid()).setValue(tutorInfo)
                 .addOnCompleteListener(documentReference -> {
                     if (documentReference.isSuccessful()) {
-
-                        documentReference.getResult().get()
-                            .addOnCompleteListener(documentSnapshot -> {
-
-                                if (documentSnapshot.isSuccessful()) {
-                                    dataOrException.data = true;
-                                } else {
-                                    dataOrException.exception = documentSnapshot.getException();
-                                }
-                                mutableLiveData.postValue(dataOrException);
-                            });
+                        dataOrException.data = true;
                     } else {
                         dataOrException.exception = documentReference.getException();
                     }
