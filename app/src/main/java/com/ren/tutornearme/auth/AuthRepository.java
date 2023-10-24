@@ -3,32 +3,36 @@ package com.ren.tutornearme.auth;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.ren.tutornearme.data.DataOrException;
 import static com.ren.tutornearme.util.Common.TUTOR_INFO_REFERENCE;
+
+import android.util.Log;
 
 public class AuthRepository {
     private final FirebaseAuth firebaseAuth;
     private FirebaseUser currentUser;
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private final CollectionReference collectionReference = db.collection(TUTOR_INFO_REFERENCE);
+    private final FirebaseDatabase db = FirebaseDatabase.getInstance();
+    private final DatabaseReference collectionReference = db.getReference(TUTOR_INFO_REFERENCE);
 
     public AuthRepository() {
         firebaseAuth = FirebaseAuth.getInstance();
     }
 
+    private FirebaseUser getCurrentUser() {
+        return firebaseAuth.getCurrentUser();
+    }
 
     public MutableLiveData<Boolean> checkIfSignedIn() {
         MutableLiveData<Boolean> mutableLiveData = new MutableLiveData<>();
 
-        currentUser = firebaseAuth.getCurrentUser();
+        currentUser = getCurrentUser();
         if (currentUser != null) {
             mutableLiveData.postValue(true);
         } else {
@@ -40,34 +44,25 @@ public class AuthRepository {
 
     public MutableLiveData<DataOrException<Boolean, Exception>> checkIfRegistered() {
         MutableLiveData<DataOrException<Boolean, Exception>> mutableLiveData = new MutableLiveData<>();
-        currentUser = firebaseAuth.getCurrentUser();
+        currentUser = getCurrentUser();
 
         if (currentUser != null) {
             // check if current user has registered info before
             DataOrException<Boolean, Exception> dataOrException = new DataOrException<>();
-            collectionReference
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot documentSnapshot: task.getResult()) {
-                                if (documentSnapshot.exists()) {
-                                    // Store data to static tutor obj
-                                    if (currentUser.getUid().equals(documentSnapshot.getString("uid"))) {
-                                        dataOrException.data = true;
-                                        break;
-                                    } else
-                                        dataOrException.data = false;
-                                } else
-                                    dataOrException.data = false;
-                            }
-                        } else {
-                            dataOrException.exception = task.getException();
+            collectionReference.child(currentUser.getUid())
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            dataOrException.data = snapshot.exists();
+                            mutableLiveData.postValue(dataOrException);
                         }
-                        mutableLiveData.postValue(dataOrException);
-                    }
-                });
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            dataOrException.exception = error.toException();
+                            mutableLiveData.postValue(dataOrException);
+                        }
+                    });
         }
         return mutableLiveData;
     }
