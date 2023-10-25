@@ -15,6 +15,6 @@
         android:id="@+id/nav_profile"
         android:name="com.ren.tutornearme.ui.profile.ProfileFragment"
         android:label="@string/menu_profile"
-        tools:layout="@layout/fragment_gallery" />
+        tools:layout="@layout/fragment_profile" />
 
 </navigation>
