@@ -1,6 +1,8 @@
 package com.ren.tutornearme.model;
 
-public class TutorInfo {
+import java.io.Serializable;
+
+public class TutorInfo implements Serializable {
     private String uid;
     private String firstName;
     private String lastName;
