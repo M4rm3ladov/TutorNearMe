@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.location.LocationResult;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.ren.tutornearme.data.DataOrException;
 
@@ -14,8 +13,6 @@ public class HomeViewModel extends ViewModel {
     public HomeViewModel() {
         this.homeRepository = new HomeRepository();
     }
-
-    public FirebaseUser getCurrentUser() { return homeRepository.getCurrentUser(); }
 
     public void removeTutorLocation() {
         homeRepository.removeTutorLocation();
@@ -29,5 +26,4 @@ public class HomeViewModel extends ViewModel {
 
     public DatabaseReference getOnlineRef() { return homeRepository.getOnlineRef(); }
 
-    public DatabaseReference getTutorLocationRef() { return homeRepository.getTutorLocationRef(); }
 }

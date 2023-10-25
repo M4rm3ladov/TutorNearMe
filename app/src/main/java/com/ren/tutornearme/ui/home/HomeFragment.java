@@ -30,7 +30,6 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.firebase.geofire.GeoFire;
-import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -83,7 +82,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private final ValueEventListener onlineValueEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(@NonNull DataSnapshot snapshot) {
-            homeViewModel.getCurrentUserRef().onDisconnect().removeValue();
+            if (snapshot.exists())
+                homeViewModel.getCurrentUserRef().onDisconnect().removeValue();
         }
 
         @Override
@@ -248,6 +248,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 @SuppressLint("MissingPermission")
                 @Override
                 public void onActivityResult(Boolean result) {
+                    // if permission granted after prompt
                     if (result) {
                         showLocationWithButton();
                     } else {
@@ -270,7 +271,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         } catch (Resources.NotFoundException e) {
             Log.d("MAP_PARSE_ERROR", "onMapReady: " + e.getMessage());
         }
-
+        // if permission already granted
         if (checkLocationPermission()) {
             showLocationWithButton();
         } else {
