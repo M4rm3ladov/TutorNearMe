@@ -40,7 +40,7 @@
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".profile.RegisterActivity"
+            android:name=".register.RegisterActivity"
             android:exported="true"
             android:configChanges="orientation"
             android:screenOrientation="portrait"/>
