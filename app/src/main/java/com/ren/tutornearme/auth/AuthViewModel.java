@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.ren.tutornearme.data.DataOrException;
+import com.ren.tutornearme.model.TutorInfo;
 
 public class AuthViewModel extends ViewModel {
     private final AuthRepository authRepository;
@@ -16,7 +17,7 @@ public class AuthViewModel extends ViewModel {
         return authRepository.checkIfSignedIn();
     }
 
-    public LiveData<DataOrException<Boolean, Exception>> checkIfRegistered() {
+    public LiveData<DataOrException<TutorInfo, Exception>> checkIfRegistered() {
         return authRepository.checkIfRegistered();
     }
 

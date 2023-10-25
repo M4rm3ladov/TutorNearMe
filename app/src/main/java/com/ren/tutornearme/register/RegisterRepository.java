@@ -24,16 +24,16 @@ public class RegisterRepository {
         return firebaseAuth.getCurrentUser();
     }
 
-    public MutableLiveData<DataOrException<Boolean, Exception>> registerTutor(TutorInfo tutorInfo) {
-        MutableLiveData<DataOrException<Boolean, Exception>> mutableLiveData = new MutableLiveData<>();
+    public MutableLiveData<DataOrException<TutorInfo, Exception>> registerTutor(TutorInfo tutorInfo) {
+        MutableLiveData<DataOrException<TutorInfo, Exception>> mutableLiveData = new MutableLiveData<>();
 
         if (getCurrentUser() != null) {
-            DataOrException<Boolean, Exception> dataOrException = new DataOrException<>();
+            DataOrException<TutorInfo, Exception> dataOrException = new DataOrException<>();
 
             tutorInfoRef.child(getCurrentUser().getUid()).setValue(tutorInfo)
                 .addOnCompleteListener(documentReference -> {
                     if (documentReference.isSuccessful()) {
-                        dataOrException.data = true;
+                        dataOrException.data = tutorInfo;
                     } else {
                         dataOrException.exception = documentReference.getException();
                     }

@@ -1,5 +1,7 @@
 package com.ren.tutornearme.register;
 
+import static com.ren.tutornearme.util.Common.CURRENT_USER;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -252,24 +254,24 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
         progressBar.setVisibility(View.VISIBLE);
         profileViewModel.registerTutor(tutorInfo).observe(this,
-                new Observer<DataOrException<Boolean, Exception>>() {
+                new Observer<DataOrException<TutorInfo, Exception>>() {
                     @Override
-                    public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
+                    public void onChanged(DataOrException<TutorInfo, Exception> dataOrException) {
                         progressBar.setVisibility(View.GONE);
-                        if (dataOrException.data != null) {
-                            if (dataOrException.data) {
-                                Toast.makeText(RegisterActivity.this, "Saved successfully",
-                                        Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
-                                startActivity(intent);
-                                finish();
-                            }
-                        }
-
                         if (dataOrException.exception != null) {
                             Snackbar.make(findViewById(android.R.id.content),
                                     "[ERROR]: " + dataOrException.exception.getMessage(),
                                     Snackbar.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        if (dataOrException.data != null) {
+                            Toast.makeText(RegisterActivity.this, "Saved successfully",
+                                    Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
+                            intent.putExtra(CURRENT_USER, dataOrException.data);
+                            startActivity(intent);
+                            finish();
                         }
                     }
                 });

@@ -11,6 +11,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.ren.tutornearme.data.DataOrException;
+import com.ren.tutornearme.model.TutorInfo;
+
 import static com.ren.tutornearme.util.Common.TUTOR_INFO_REFERENCE;
 
 
@@ -41,18 +43,19 @@ public class AuthRepository {
         return mutableLiveData;
     }
 
-    public MutableLiveData<DataOrException<Boolean, Exception>> checkIfRegistered() {
-        MutableLiveData<DataOrException<Boolean, Exception>> mutableLiveData = new MutableLiveData<>();
+    public MutableLiveData<DataOrException<TutorInfo, Exception>> checkIfRegistered() {
+        MutableLiveData<DataOrException<TutorInfo, Exception>> mutableLiveData = new MutableLiveData<>();
         currentUser = getCurrentUser();
 
         if (currentUser != null) {
             // check if current user has registered info before
-            DataOrException<Boolean, Exception> dataOrException = new DataOrException<>();
+            DataOrException<TutorInfo, Exception> dataOrException = new DataOrException<>();
             tutorInfoRef.child(currentUser.getUid())
                     .addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            dataOrException.data = snapshot.exists();
+                            if (snapshot.exists())
+                                dataOrException.data = snapshot.getValue(TutorInfo.class);
                             mutableLiveData.postValue(dataOrException);
                         }
 

@@ -18,7 +18,7 @@ public class RegisterViewModel extends ViewModel {
         return profileRepository.getCurrentUser();
     }
 
-    public MutableLiveData<DataOrException<Boolean, Exception>> registerTutor(TutorInfo tutorInfo) {
+    public MutableLiveData<DataOrException<TutorInfo, Exception>> registerTutor(TutorInfo tutorInfo) {
         return profileRepository.registerTutor(tutorInfo);
     }
 }

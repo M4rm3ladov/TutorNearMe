@@ -1,5 +1,7 @@
 package com.ren.tutornearme.auth;
 
+import static com.ren.tutornearme.util.Common.CURRENT_USER;
+
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
@@ -20,7 +22,8 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.ren.tutornearme.HomeActivity;
 import com.ren.tutornearme.R;
-import com.ren.tutornearme.profile.RegisterActivity;
+import com.ren.tutornearme.model.TutorInfo;
+import com.ren.tutornearme.register.RegisterActivity;
 import com.ren.tutornearme.util.InternetHelper;
 
 import java.util.ArrayList;
@@ -85,10 +88,7 @@ public class MainActivity extends AppCompatActivity {
                                 return;
                             }
 
-                            if (dataOrException.data != null) {
-                                navigateTowards(dataOrException.data);
-                            }
-
+                            navigateTowards(dataOrException.data);
                         });
                 });
             }
@@ -117,14 +117,15 @@ public class MainActivity extends AppCompatActivity {
                 .get(AuthViewModel.class);
     }
 
-    private void navigateTowards(Boolean data) {
+    private void navigateTowards(TutorInfo tutorInfo) {
         Intent intent;
-        if (!data) {
+        if (tutorInfo == null)
             // New user
             intent = new Intent(MainActivity.this, RegisterActivity.class);
-        } else {
+        else {
             // Has registered data
             intent = new Intent(MainActivity.this, HomeActivity.class);
+            intent.putExtra(CURRENT_USER, tutorInfo);
         }
         startActivity(intent);
         finish();
