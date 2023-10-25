@@ -1,4 +1,4 @@
-package com.ren.tutornearme.profile;
+package com.ren.tutornearme.register;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
@@ -43,7 +43,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     private boolean isValid = true;
     private List<String> barangayList;
     private final InputValidatorHelper inputValidatorHelper = new InputValidatorHelper();
-    private ProfileViewModel profileViewModel;
+    private RegisterViewModel profileViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,7 +109,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     private void initAuthViewModel() {
         profileViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory
                 .getInstance(getApplication()))
-                .get(ProfileViewModel.class);
+                .get(RegisterViewModel.class);
     }
 
     private void initAttachInputListeners() {

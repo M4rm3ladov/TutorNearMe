@@ -1,4 +1,4 @@
-package com.ren.tutornearme.profile;
+package com.ren.tutornearme.register;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -7,11 +7,11 @@ import com.google.firebase.auth.FirebaseUser;
 import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.model.TutorInfo;
 
-public class ProfileViewModel extends ViewModel {
-    private final ProfileRepository profileRepository;
+public class RegisterViewModel extends ViewModel {
+    private final RegisterRepository profileRepository;
 
-    public ProfileViewModel() {
-        this.profileRepository = new ProfileRepository();
+    public RegisterViewModel() {
+        this.profileRepository = new RegisterRepository();
     }
 
     public FirebaseUser getCurrentUser() {

@@ -1,4 +1,4 @@
-package com.ren.tutornearme.profile;
+package com.ren.tutornearme.register;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -11,12 +11,12 @@ import static com.ren.tutornearme.util.Common.TUTOR_INFO_REFERENCE;
 
 import androidx.lifecycle.MutableLiveData;
 
-public class ProfileRepository {
+public class RegisterRepository {
     private final FirebaseAuth firebaseAuth;
     private final FirebaseDatabase db = FirebaseDatabase.getInstance();
     private final DatabaseReference tutorInfoRef = db.getReference(TUTOR_INFO_REFERENCE);
 
-    public ProfileRepository() {
+    public RegisterRepository() {
         firebaseAuth = FirebaseAuth.getInstance();
     }
 
