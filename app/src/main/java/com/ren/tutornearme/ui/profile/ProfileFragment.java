@@ -1,4 +1,4 @@
-package com.ren.tutornearme.ui.gallery;
+package com.ren.tutornearme.ui.profile;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,14 +10,14 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import com.ren.tutornearme.databinding.FragmentGalleryBinding;
 
-public class GalleryFragment extends Fragment {
+public class ProfileFragment extends Fragment {
 
 private FragmentGalleryBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
             ViewGroup container, Bundle savedInstanceState) {
-        GalleryViewModel galleryViewModel =
-                new ViewModelProvider(this).get(GalleryViewModel.class);
+        ProfileViewModel galleryViewModel =
+                new ViewModelProvider(this).get(ProfileViewModel.class);
 
         binding = FragmentGalleryBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
