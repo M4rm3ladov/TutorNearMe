@@ -2,15 +2,12 @@ package com.ren.tutornearme.auth;
 
 import static com.ren.tutornearme.util.Common.CURRENT_USER;
 
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.firebase.ui.auth.AuthMethodPickerLayout;
 import com.firebase.ui.auth.AuthUI;
@@ -19,7 +16,6 @@ import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract;
 import com.firebase.ui.auth.IdpResponse;
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.auth.FirebaseAuth;
 import com.ren.tutornearme.HomeActivity;
 import com.ren.tutornearme.R;
 import com.ren.tutornearme.model.TutorInfo;
@@ -30,27 +26,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     private List<AuthUI.IdpConfig> providers = new ArrayList<>();
     private ActivityResultLauncher<Intent> signInLauncher;
     private AuthViewModel authViewModel;
-    private FirebaseAuth firebaseAuth;
-    private FirebaseAuth.AuthStateListener authStateListener;
-
-/*    @Override
-    protected void onStart() {
-        super.onStart();
-        firebaseAuth.addAuthStateListener(authStateListener);
-    }
-
-    @Override
-    protected void onStop() {
-        if (firebaseAuth != null && authStateListener != null)
-            firebaseAuth.removeAuthStateListener(authStateListener);
-        super.onStop();
-    }*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initAuthListener() {
-        firebaseAuth = FirebaseAuth.getInstance();
 
         authViewModel.checkIfSignedIn().observe(MainActivity.this, isSignedIn -> {
             if (!isSignedIn)
@@ -85,42 +64,15 @@ public class MainActivity extends AppCompatActivity {
                                 Snackbar.LENGTH_SHORT).show();
                         return;
                     }
-
                     navigateTowards(dataOrException.data);
                 });
         });
-        /*authStateListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                authViewModel.checkIfSignedIn().observe(MainActivity.this, isSignedIn -> {
-                    if (!isSignedIn)
-                        showLoginLayout();
-                    else
-                        authViewModel.checkIfRegistered().observe(MainActivity.this, dataOrException -> {
-                            if (dataOrException.exception != null) {
-                                showLoginLayout();
-                                Snackbar.make(findViewById(android.R.id.content),
-                                        "[ERROR]: " + dataOrException.exception.getMessage(),
-                                        Snackbar.LENGTH_SHORT).show();
-                                return;
-                            }
-
-                            navigateTowards(dataOrException.data);
-                        });
-                });
-            }
-        };*/
     }
 
     private void initFirebaseAuthUI() {
         signInLauncher = registerForActivityResult(
                 new FirebaseAuthUIActivityResultContract(),
-                new ActivityResultCallback<FirebaseAuthUIAuthenticationResult>() {
-                    @Override
-                    public void onActivityResult(FirebaseAuthUIAuthenticationResult result) {
-                        onSignInResult(result);
-                    }
-                }
+                result -> onSignInResult(result)
         );
 
         providers = Arrays.asList(
@@ -169,21 +121,7 @@ public class MainActivity extends AppCompatActivity {
         IdpResponse response = result.getIdpResponse();
 
         if (result.getResultCode() == RESULT_OK) {
-
-                if (firebaseAuth.getCurrentUser() == null)
-                    showLoginLayout();
-                else
-                    authViewModel.checkIfRegistered().observe(MainActivity.this, dataOrException -> {
-                        if (dataOrException.exception != null) {
-                            showLoginLayout();
-                            Snackbar.make(findViewById(android.R.id.content),
-                                    "[ERROR]: " + dataOrException.exception.getMessage(),
-                                    Snackbar.LENGTH_SHORT).show();
-                            return;
-                        }
-
-                        navigateTowards(dataOrException.data);
-                    });
+            initAuthListener();
         } else {
             if (response == null) {
                 // User pressed back button
@@ -202,24 +140,6 @@ public class MainActivity extends AppCompatActivity {
 
             showLoginLayout();
         }
-        /*if (result.getResultCode() != RESULT_OK) {
-
-            // Sign in failed
-            if (response == null) {
-                // User pressed back button
-                Snackbar.make(findViewById(android.R.id.content), "[ERROR]: "
-                        + "[INFO]: Sign in cancelled", Snackbar.LENGTH_LONG).show();
-                this.finishAffinity();
-            } else if (Objects.requireNonNull(response.getError()).getErrorCode() == ErrorCodes.NO_NETWORK) {
-                Snackbar.make(findViewById(android.R.id.content), "[ERROR]: "
-                        + "[ERROR]: No internet connection", Snackbar.LENGTH_LONG).show();
-                return;
-            }
-
-            Snackbar.make(findViewById(android.R.id.content), "[ERROR]: "
-                    + "[ERROR]: Unknown Error", Snackbar.LENGTH_LONG).show();
-            Log.e("SIGN_IN_ERROR", "Sign-in error: ", response.getError());
-        }*/
     }
 
 }
