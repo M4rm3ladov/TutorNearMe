@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth firebaseAuth;
     private FirebaseAuth.AuthStateListener authStateListener;
 
-    @Override
+/*    @Override
     protected void onStart() {
         super.onStart();
         firebaseAuth.addAuthStateListener(authStateListener);
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         if (firebaseAuth != null && authStateListener != null)
             firebaseAuth.removeAuthStateListener(authStateListener);
         super.onStop();
-    }
+    }*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +72,24 @@ public class MainActivity extends AppCompatActivity {
 
     private void initAuthListener() {
         firebaseAuth = FirebaseAuth.getInstance();
-        authStateListener = new FirebaseAuth.AuthStateListener() {
+
+        authViewModel.checkIfSignedIn().observe(MainActivity.this, isSignedIn -> {
+            if (!isSignedIn)
+                showLoginLayout();
+            else
+                authViewModel.checkIfRegistered().observe(MainActivity.this, dataOrException -> {
+                    if (dataOrException.exception != null) {
+                        showLoginLayout();
+                        Snackbar.make(findViewById(android.R.id.content),
+                                "[ERROR]: " + dataOrException.exception.getMessage(),
+                                Snackbar.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    navigateTowards(dataOrException.data);
+                });
+        });
+        /*authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 authViewModel.checkIfSignedIn().observe(MainActivity.this, isSignedIn -> {
@@ -92,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
                         });
                 });
             }
-        };
+        };*/
     }
 
     private void initFirebaseAuthUI() {
@@ -151,14 +168,48 @@ public class MainActivity extends AppCompatActivity {
     private void onSignInResult(FirebaseAuthUIAuthenticationResult result) {
         IdpResponse response = result.getIdpResponse();
 
-        if (result.getResultCode() != RESULT_OK) {
+        if (result.getResultCode() == RESULT_OK) {
+
+                if (firebaseAuth.getCurrentUser() == null)
+                    showLoginLayout();
+                else
+                    authViewModel.checkIfRegistered().observe(MainActivity.this, dataOrException -> {
+                        if (dataOrException.exception != null) {
+                            showLoginLayout();
+                            Snackbar.make(findViewById(android.R.id.content),
+                                    "[ERROR]: " + dataOrException.exception.getMessage(),
+                                    Snackbar.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        navigateTowards(dataOrException.data);
+                    });
+        } else {
+            if (response == null) {
+                // User pressed back button
+                finishAffinity();
+                return;
+            }
+
+            if (response.getError() != null) {
+                if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK)
+                    Snackbar.make(findViewById(android.R.id.content), "[ERROR]: "
+                        + "[ERROR]: No internet connection", Snackbar.LENGTH_LONG).show();
+                else
+                    Snackbar.make(findViewById(android.R.id.content), "[ERROR]: "
+                            + "[ERROR]: Unknown Error", Snackbar.LENGTH_LONG).show();
+            }
+
+            showLoginLayout();
+        }
+        /*if (result.getResultCode() != RESULT_OK) {
 
             // Sign in failed
             if (response == null) {
                 // User pressed back button
                 Snackbar.make(findViewById(android.R.id.content), "[ERROR]: "
                         + "[INFO]: Sign in cancelled", Snackbar.LENGTH_LONG).show();
-                return;
+                this.finishAffinity();
             } else if (Objects.requireNonNull(response.getError()).getErrorCode() == ErrorCodes.NO_NETWORK) {
                 Snackbar.make(findViewById(android.R.id.content), "[ERROR]: "
                         + "[ERROR]: No internet connection", Snackbar.LENGTH_LONG).show();
@@ -168,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
             Snackbar.make(findViewById(android.R.id.content), "[ERROR]: "
                     + "[ERROR]: Unknown Error", Snackbar.LENGTH_LONG).show();
             Log.e("SIGN_IN_ERROR", "Sign-in error: ", response.getError());
-        }
+        }*/
     }
 
 }
