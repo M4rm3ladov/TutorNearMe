@@ -1,23 +1,299 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.profile.ProfileFragment" >
+    android:paddingStart="15dp"
+    android:paddingTop="20dp"
+    android:paddingEnd="15dp"
+    tools:context=".ui.profile.ProfileFragment">
 
-    <TextView
-        android:id="@+id/text_gallery"
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/imageView7"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
+        android:src="@drawable/ic_photo_camera"
+        app:layout_constraintBottom_toBottomOf="@+id/profile_img_textview"
+        app:layout_constraintEnd_toEndOf="@+id/profile_img_textview"
+        app:tint="@color/colorPrimary" />
+
+    <ImageView
+        android:id="@+id/profile_img_textview"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="4dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:srcCompat="@drawable/ic_profile" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/tutor_verified_CardView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        app:cardBackgroundColor="@color/colorPrimary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/profile_img_textview"
+        app:strokeWidth="0dp">
+
+        <TextView
+            android:id="@+id/tutor_verified_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/verified"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_marginEnd="6dp"
+            android:layout_marginStart="10dp"
+            app:drawableEndCompat="@drawable/ic_verified"
+            app:drawableTint="@color/white" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/materialCardView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="19dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardElevation="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tutor_verified_CardView">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp">
+
+            <TextView
+                android:id="@+id/profile_basic_info_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/basic_information"
+                android:textSize="18sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/profile_tutor_name_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="Renier Antonio "
+                android:textSize="16sp"
+                app:fontFamily="@font/roboto_bold"
+                app:layout_constraintBaseline_toBaselineOf="@+id/profile_name_textview"
+                app:layout_constraintStart_toEndOf="@+id/profile_name_textview"
+                app:layout_constraintTop_toTopOf="@+id/profile_name_textview" />
+
+            <TextView
+                android:id="@+id/profile_gender_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/gender_header"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/profile_name_textview" />
+
+            <TextView
+                android:id="@+id/profile_name_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/name_header"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/profile_basic_info_textview" />
+
+            <TextView
+                android:id="@+id/profile_tutor_gender_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="@string/male"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:fontFamily="@font/roboto_bold"
+                app:layout_constraintBaseline_toBaselineOf="@+id/profile_gender_textview"
+                app:layout_constraintStart_toEndOf="@+id/profile_gender_textview"
+                app:layout_constraintTop_toTopOf="@+id/profile_gender_textview" />
+
+            <TextView
+                android:id="@+id/profile_brgy_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/barangay_header"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/profile_gender_textview" />
+
+            <TextView
+                android:id="@+id/profile_tutor_brgy_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="1dp"
+                android:text="Talon - talon"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:fontFamily="@font/roboto_bold"
+                app:layout_constraintBaseline_toBaselineOf="@+id/profile_brgy_textview"
+                app:layout_constraintStart_toEndOf="@+id/profile_brgy_textview"
+                app:layout_constraintTop_toTopOf="@+id/profile_brgy_textview" />
+
+            <ImageView
+                android:id="@+id/imageView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/ic_edit"
+                app:layout_constraintBaseline_toBaselineOf="@+id/profile_basic_info_textview"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/colorPrimary" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/materialCardView3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/materialCardView2">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp">
+
+            <TextView
+                android:id="@+id/profile_upload_id_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/upload_valid_id"
+                android:textSize="18sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/profile_upload_id_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="16dp"
+                android:text="@string/upload_your_valid_id"
+                app:icon="@drawable/ic_drive_folder_upload"
+                app:iconGravity="textStart"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/profile_id_spinner" />
+
+            <TextView
+                android:id="@+id/profile_id_type_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/list_of_valid_ids"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/profile_upload_id_textview" />
+
+            <Spinner
+                android:id="@+id/profile_id_spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_marginStart="10dp"
+                android:entries="@array/valid_ids"
+                android:spinnerMode="dialog"
+                android:theme="@style/SpinnerTextViewItem"
+                app:layout_constraintBaseline_toBaselineOf="@+id/profile_id_type_textview"
+                app:layout_constraintStart_toEndOf="@+id/profile_id_type_textview"
+                app:layout_constraintTop_toTopOf="@+id/profile_id_type_textview" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.448"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/materialCardView3">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp">
+
+            <TextView
+                android:id="@+id/profile_upload_resume_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/upload_resume"
+                android:textSize="18sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/tell_us_something_about_your_education_experience_and_skills"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/profile_upload_resume_textview" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/profile_upload_resume_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginRight="16dp"
+                android:text="@string/upload_your_resume"
+                app:icon="@drawable/ic_drive_folder_upload"
+                app:iconGravity="textStart"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -29,4 +29,29 @@
     <string name="menu_sign_out">Sign Out</string>
     <string name="tutor_name">%1$s %2$s</string>
     <string name="title_activity_maps">MapsActivity</string>
+    <string name="verified">verified</string>
+    <string name="unverified">unverified</string>
+    <string name="upload_your_valid_id">Upload your valid ID</string>
+    <string name="list_of_valid_ids">List of Valid IDs:</string>
+    <string name="upload_resume">Upload Resume</string>
+    <string name="tell_us_something_about_your_education_experience_and_skills">Tell us something about your education, experience and skills</string>
+    <string name="upload_your_resume">Upload your resume</string>
+    <string name="gender_header">Gender:</string>
+    <string name="name_header">Name:</string>
+    <string name="basic_information">Basic Information</string>
+    <string name="upload_valid_id">Upload Valid ID</string>
+    <string name="barangay_header">Barangay:</string>
+
+    <string-array name="valid_ids">
+        <item>Student ID</item>
+        <item>Passport</item>
+        <item>SSS ID</item>
+        <item>Driver\'s License</item>
+        <item>UMID</item>
+        <item>PRC ID</item>
+        <item>HDMF</item>
+        <item>Postal ID</item>
+        <item>ePhilID</item>
+        <item>Philhealth Card</item>
+    </string-array>
 </resources>
