@@ -24,6 +24,10 @@ public class RegisterRepository {
         return firebaseAuth.getCurrentUser();
     }
 
+    public void signOut() {
+        firebaseAuth.signOut();
+    }
+
     public MutableLiveData<DataOrException<TutorInfo, Exception>> registerTutor(TutorInfo tutorInfo) {
         MutableLiveData<DataOrException<TutorInfo, Exception>> mutableLiveData = new MutableLiveData<>();
 
