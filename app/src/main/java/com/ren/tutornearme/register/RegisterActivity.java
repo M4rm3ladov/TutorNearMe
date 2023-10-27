@@ -1,14 +1,18 @@
 package com.ren.tutornearme.register;
 
+import static com.ren.tutornearme.util.Common.BARANGAY;
 import static com.ren.tutornearme.util.Common.CURRENT_USER;
+import static com.ren.tutornearme.util.Common.FIRST_NAME;
+import static com.ren.tutornearme.util.Common.GENDER;
+import static com.ren.tutornearme.util.Common.LAST_NAME;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -21,6 +25,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -34,6 +39,8 @@ import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.model.TutorInfo;
 import com.ren.tutornearme.util.InputValidatorHelper;
 import com.ren.tutornearme.util.InternetHelper;
+
+import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +57,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     private List<String> barangayList;
     private final InputValidatorHelper inputValidatorHelper = new InputValidatorHelper();
     private RegisterViewModel profileViewModel;
+    private Bundle bundle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,10 +65,34 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         setContentView(R.layout.activity_register);
 
         initBindViews();
+        initCheckSender();
         initSetButtonListeners();
         initAttachInputListeners();
         initBarangayList();
         initAuthViewModel();
+    }
+
+    private void initCheckSender() {
+        bundle = getIntent().getExtras();
+        if (bundle != null) {
+            firstNameEditText.setText(bundle.getString(FIRST_NAME));
+            lastNameEditText.setText(bundle.getString(LAST_NAME));
+            barangayEditText.setText(bundle.getString(BARANGAY));
+
+            Resources res = getResources();
+            String male = res.getString(R.string.male);
+            String female = res.getString(R.string.female);
+            String privateGender = res.getString(R.string.i_d_rather_not_say);
+
+            if ((male).equals(bundle.getString(GENDER))) genderRadioGroup.check(R.id.male_radio_button);
+            else if ((female).equals(bundle.getString(GENDER))) genderRadioGroup.check(R.id.female_radio_button);
+            else if ((privateGender).equals(bundle.getString(GENDER))) genderRadioGroup.check(R.id.private_gender_radio_button);
+
+            TextView registerMessage = findViewById(R.id.register_message_textview);
+            registerMessage.setText(R.string.update_basic_info_message);
+            registerButton.setText(R.string.save);
+
+        }
     }
 
     @Override
@@ -75,8 +107,11 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onBackPressed() {
-        navigateToSignIn();
-        super.onBackPressed();
+        if (bundle != null)
+            super.onBackPressed();
+        else
+            navigateToSignIn();
+
     }
 
     private void navigateToSignIn() {
@@ -97,18 +132,15 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            navigateToSignIn();
+            if (bundle != null)
+                finish();
+            else
+                navigateToSignIn();
         }
         return super.onOptionsItemSelected(item);
     }
 
     private void initBindViews() {
-        ActionBar actionBar = this.getSupportActionBar();
-
-        if (actionBar != null) {
-            actionBar.setTitle("Basic Information");
-        }
-
         progressBar = findViewById(R.id.register_progress_bar);
 
         firstNameEditText = findViewById(R.id.first_name_edit_text);
@@ -300,8 +332,15 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                         if (dataOrException.data != null) {
                             Toast.makeText(RegisterActivity.this, "Saved successfully",
                                     Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
-                            intent.putExtra(CURRENT_USER, dataOrException.data);
+
+                            Intent intent;
+                            if (bundle == null) {
+                                intent = new Intent(RegisterActivity.this, HomeActivity.class);
+                                bundle.putParcelable(CURRENT_USER, Parcels.wrap(tutorInfo));
+                                intent.putExtras(bundle);
+                            } else {
+                                intent = new Intent(RegisterActivity.this, MainActivity.class);
+                            }
                             startActivity(intent);
                             finish();
                         }
