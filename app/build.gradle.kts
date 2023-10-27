@@ -49,10 +49,6 @@ dependencies {
     implementation("com.google.firebase:firebase-database:20.3.0")
     implementation("com.firebase:geofire-android:3.2.0")
 
-    // like bloc and riverpod (observer pattern)
-    implementation("io.reactivex.rxjava2:rxjava:2.2.21")
-    implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
-
     // api access
     implementation("com.android.volley:volley:1.2.1")
 
@@ -67,6 +63,10 @@ dependencies {
     // google maps
     implementation("com.google.android.gms:play-services-maps:18.1.0")
     implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    // parceable models
+    implementation("org.parceler:parceler-api:1.1.12")
+    annotationProcessor("org.parceler:parceler:1.1.12")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
