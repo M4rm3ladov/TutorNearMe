@@ -17,6 +17,7 @@ import com.google.android.material.navigation.NavigationView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.GravityCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -29,6 +30,8 @@ import com.ren.tutornearme.auth.MainActivity;
 import com.ren.tutornearme.databinding.ActivityHomeBinding;
 import com.ren.tutornearme.model.TutorInfo;
 import com.ren.tutornearme.util.InternetHelper;
+
+import org.parceler.Parcels;
 
 public class HomeActivity extends AppCompatActivity{
 
@@ -43,11 +46,17 @@ public class HomeActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        tutorInfo = (TutorInfo) getIntent().getSerializableExtra(CURRENT_USER);
+        initSetTutorInfo();
         initNetworkAvailability();
         initLayoutBinding();
         initNavigationDrawer();
+    }
 
+    private void initSetTutorInfo() {
+        tutorInfo = Parcels.unwrap(getIntent().getParcelableExtra(CURRENT_USER));
+
+        SharedViewModel sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
+        sharedViewModel.setTutorInfo(tutorInfo);
     }
 
     private void initNetworkAvailability() {
@@ -64,10 +73,10 @@ public class HomeActivity extends AppCompatActivity{
 
         setSupportActionBar(binding.appBarHome.toolbar);
         drawer = binding.drawerLayout;
+        navigationView = binding.navView;
     }
 
     private void initNavigationDrawer() {
-        navigationView = binding.navView;
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
@@ -147,7 +156,9 @@ public class HomeActivity extends AppCompatActivity{
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START))
             drawer.closeDrawer(GravityCompat.START);
-        else
+        else if (navigationView.getMenu().findItem(R.id.nav_profile).isChecked())
             super.onBackPressed();
+        else if(navigationView.getMenu().findItem(R.id.nav_home).isChecked())
+            moveTaskToBack(true);
     }
 }
