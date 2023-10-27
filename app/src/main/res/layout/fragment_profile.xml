@@ -61,7 +61,7 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/materialCardView2"
+            android:id="@+id/profile_basic_info_cardview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="19dp"
@@ -92,7 +92,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
-                    android:text="Renier Antonio "
+                    android:text="@string/empty"
                     android:textSize="16sp"
                     app:fontFamily="@font/roboto_bold"
                     app:layout_constraintBaseline_toBaselineOf="@+id/profile_name_textview"
@@ -126,7 +126,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
-                    android:text="@string/male"
+                    android:text="@string/empty"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     app:fontFamily="@font/roboto_bold"
@@ -151,7 +151,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:layout_marginTop="1dp"
-                    android:text="Talon - talon"
+                    android:text="@string/empty"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     app:fontFamily="@font/roboto_bold"
@@ -181,7 +181,7 @@
             android:layout_marginTop="10dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/materialCardView2">
+            app:layout_constraintTop_toBottomOf="@+id/profile_basic_info_cardview">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
