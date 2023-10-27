@@ -53,13 +53,18 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="Custom.ActionBarTitle" parent="TextAppearance.Material3.ActionBar.Title">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
     <style name="Custom.ActionBar" parent="Widget.Material3.Light.ActionBar.Solid">
         <item name="background">@color/colorPrimary</item>
+        <item name="titleTextStyle">@style/Custom.ActionBarTitle</item>
     </style>
 
     <style name="Base.Theme.TutorNearMe.ActionBar" parent="Theme.Material3.Light">
         <item name="actionBarStyle">@style/Custom.ActionBar</item>
-        <item name="titleTextColor">@color/white</item>
+        <item name="title">Basic Information</item>
         <item name="navigationIcon">@drawable/ic_arrow_back</item>
 
         <item name="colorPrimary">@color/colorPrimary</item>
