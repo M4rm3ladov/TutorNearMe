@@ -41,6 +41,9 @@
     <string name="basic_information">Basic Information</string>
     <string name="upload_valid_id">Upload Valid ID</string>
     <string name="barangay_header">Barangay:</string>
+    <string name="empty"><![CDATA[<Empty>]]></string>
+    <string name="save">Save</string>
+    <string name="update_basic_info_message">Please make sure the information provided reflects on your valid ID.</string>
 
     <string-array name="valid_ids">
         <item>Student ID</item>
