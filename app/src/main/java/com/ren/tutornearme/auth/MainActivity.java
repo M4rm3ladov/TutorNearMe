@@ -22,6 +22,8 @@ import com.ren.tutornearme.model.TutorInfo;
 import com.ren.tutornearme.register.RegisterActivity;
 import com.ren.tutornearme.util.InternetHelper;
 
+import org.parceler.Parcels;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -94,10 +96,12 @@ public class MainActivity extends AppCompatActivity {
         else {
             // Has registered data
             intent = new Intent(MainActivity.this, HomeActivity.class);
-            intent.putExtra(CURRENT_USER, tutorInfo);
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(CURRENT_USER, Parcels.wrap(tutorInfo));
+            intent.putExtras(bundle);
         }
         startActivity(intent);
-        finish();
+        //finish();
     }
 
     private void showLoginLayout() {
