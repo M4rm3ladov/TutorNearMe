@@ -1,8 +1,9 @@
 package com.ren.tutornearme.model;
 
-import java.io.Serializable;
+import org.parceler.Parcel;
 
-public class TutorInfo implements Serializable {
+@Parcel
+public class TutorInfo {
     private String uid;
     private String firstName;
     private String lastName;
