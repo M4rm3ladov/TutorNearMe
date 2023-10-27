@@ -43,6 +43,7 @@
             android:name=".register.RegisterActivity"
             android:exported="true"
             android:configChanges="orientation"
+            android:theme="@style/Base.Theme.TutorNearMe.ActionBar"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".auth.MainActivity"
