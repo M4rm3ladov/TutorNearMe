@@ -8,17 +8,21 @@ import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.model.TutorInfo;
 
 public class RegisterViewModel extends ViewModel {
-    private final RegisterRepository profileRepository;
+    private final RegisterRepository registerRepository;
 
     public RegisterViewModel() {
-        this.profileRepository = new RegisterRepository();
+        this.registerRepository = new RegisterRepository();
     }
 
     public FirebaseUser getCurrentUser() {
-        return profileRepository.getCurrentUser();
+        return registerRepository.getCurrentUser();
+    }
+
+    public void signOut() {
+        registerRepository.signOut();
     }
 
     public MutableLiveData<DataOrException<TutorInfo, Exception>> registerTutor(TutorInfo tutorInfo) {
-        return profileRepository.registerTutor(tutorInfo);
+        return registerRepository.registerTutor(tutorInfo);
     }
 }
