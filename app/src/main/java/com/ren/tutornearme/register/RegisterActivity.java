@@ -2,6 +2,8 @@ package com.ren.tutornearme.register;
 
 import static com.ren.tutornearme.util.Common.CURRENT_USER;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -10,6 +12,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -25,6 +28,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseUser;
 import com.ren.tutornearme.HomeActivity;
 import com.ren.tutornearme.R;
+import com.ren.tutornearme.auth.MainActivity;
 import com.ren.tutornearme.data.AddressBank;
 import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.model.TutorInfo;
@@ -69,6 +73,20 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         super.onResume();
     }
 
+    @Override
+    public void onBackPressed() {
+        navigateToSignIn();
+        super.onBackPressed();
+    }
+
+    private void navigateToSignIn() {
+        profileViewModel.signOut();
+        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+    }
+
     private void initSetButtonListeners() {
         maleRadioButton.setOnClickListener(this);
         femaleRadioButton.setOnClickListener(this);
@@ -76,7 +94,21 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         registerButton.setOnClickListener(this);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            navigateToSignIn();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void initBindViews() {
+        ActionBar actionBar = this.getSupportActionBar();
+
+        if (actionBar != null) {
+            actionBar.setTitle("Basic Information");
+        }
+
         progressBar = findViewById(R.id.register_progress_bar);
 
         firstNameEditText = findViewById(R.id.first_name_edit_text);
