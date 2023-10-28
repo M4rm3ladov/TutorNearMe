@@ -5,6 +5,7 @@ import static com.ren.tutornearme.util.Common.CURRENT_USER;
 import static com.ren.tutornearme.util.Common.FIRST_NAME;
 import static com.ren.tutornearme.util.Common.GENDER;
 import static com.ren.tutornearme.util.Common.LAST_NAME;
+import static com.ren.tutornearme.util.Common.TUTOR_CREATED_DATE;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -62,7 +63,7 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register);
+        setContentView(R.layout.activity_basic_info);
 
         initBindViews();
         initCheckSender();
@@ -309,8 +310,12 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
         tutorInfo.setResume("");
         tutorInfo.setValidId("");
         tutorInfo.setAvatar("");
-        tutorInfo.setCreatedDate(epoch);
         tutorInfo.setUpdatedDate(epoch);
+        if(bundle != null)
+            tutorInfo.setCreatedDate(bundle.getLong(TUTOR_CREATED_DATE));
+        else
+            tutorInfo.setCreatedDate(epoch);
+
 
         progressBar.setVisibility(View.VISIBLE);
         basicInfoViewModel.saveTutorInfo(tutorInfo).observe(this,
