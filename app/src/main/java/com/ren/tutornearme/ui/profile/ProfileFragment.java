@@ -139,7 +139,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    private boolean checkFilePermission() {
+    /*private boolean checkFilePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             return true;
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -153,6 +153,18 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             return false;
         }
         return true;
+    }*/
+
+    private void checkFilePermissionForOldAPI() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ActivityCompat.checkSelfPermission(mActivity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            } else {
+                // requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                showImagePicker();
+            }
+        }
     }
 
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
@@ -204,7 +216,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
             showImagePicker();
         } else {
-            checkFilePermission();
+            checkFilePermissionForOldAPI();
         }
 
     }
