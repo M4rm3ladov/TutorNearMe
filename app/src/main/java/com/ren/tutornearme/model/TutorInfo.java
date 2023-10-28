@@ -2,7 +2,7 @@ package com.ren.tutornearme.model;
 
 import org.parceler.Parcel;
 
-@Parcel
+@Parcel(Parcel.Serialization.BEAN)
 public class TutorInfo {
     private String uid;
     private String firstName;
@@ -12,11 +12,16 @@ public class TutorInfo {
     private String address;
     private String resume;
     private String validId;
+    private String avatar;
     private long createdDate;
     private long updatedDate;
 
-    public TutorInfo() {}
-    public TutorInfo(String uid, String firstName, String lastName, String gender, String phoneNumber, String address, String resume, String validId, long createdDate, long updatedDate) {
+    public TutorInfo() {
+    }
+
+    public TutorInfo(String uid, String firstName, String lastName, String gender, String phoneNumber,
+                     String address, String resume, String validId, String avatar, long createdDate,
+                     long updatedDate) {
         this.uid = uid;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -25,6 +30,7 @@ public class TutorInfo {
         this.address = address;
         this.resume = resume;
         this.validId = validId;
+        this.avatar = avatar;
         this.createdDate = createdDate;
         this.updatedDate = updatedDate;
     }
@@ -93,6 +99,14 @@ public class TutorInfo {
         this.validId = validId;
     }
 
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
     public long getCreatedDate() {
         return createdDate;
     }
@@ -120,6 +134,7 @@ public class TutorInfo {
                 ", address='" + address + '\'' +
                 ", resume='" + resume + '\'' +
                 ", validId='" + validId + '\'' +
+                ", avatar='" + avatar + '\'' +
                 ", createdDate=" + createdDate +
                 ", updatedDate=" + updatedDate +
                 '}';
