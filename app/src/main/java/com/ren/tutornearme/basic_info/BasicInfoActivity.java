@@ -1,4 +1,4 @@
-package com.ren.tutornearme.register;
+package com.ren.tutornearme.basic_info;
 
 import static com.ren.tutornearme.util.Common.BARANGAY;
 import static com.ren.tutornearme.util.Common.CURRENT_USER;
@@ -45,18 +45,18 @@ import org.parceler.Parcels;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
+public class BasicInfoActivity extends AppCompatActivity implements View.OnClickListener {
     private EditText firstNameEditText, lastNameEditText;
     private AutoCompleteTextView barangayEditText;
     private RadioGroup genderRadioGroup;
-    private RadioButton maleRadioButton, femaleRadioButton, privateGenderRadioButton, checkedGenderRadioButton;
+    private RadioButton maleRadioButton, femaleRadioButton, privateGenderRadioButton;
     private TextInputLayout firstNameInputLayout, lastNameInputLayout, genderInputLayout, barangayInputLayout;
     private Button registerButton;
     private ProgressBar progressBar;
     private boolean isValid = true;
     private List<String> barangayList;
     private final InputValidatorHelper inputValidatorHelper = new InputValidatorHelper();
-    private RegisterViewModel profileViewModel;
+    private BasicInfoViewModel basicInfoViewModel;
     private Bundle bundle;
 
     @Override
@@ -111,12 +111,11 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             super.onBackPressed();
         else
             navigateToSignIn();
-
     }
 
     private void navigateToSignIn() {
-        profileViewModel.signOut();
-        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+        basicInfoViewModel.signOut();
+        Intent intent = new Intent(BasicInfoActivity.this, MainActivity.class);
         //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         finish();
@@ -165,7 +164,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void processFinished(ArrayList<String> barangayArrayList) {
                 // Add barangay list to adapter
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(RegisterActivity.this,
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(BasicInfoActivity.this,
                         android.R.layout.simple_dropdown_item_1line, barangayArrayList);
                 AutoCompleteTextView barangayTextView = findViewById(R.id.barangay_auto_textview);
                 barangayTextView.setAdapter(adapter);
@@ -173,9 +172,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         });
     }
     private void initAuthViewModel() {
-        profileViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory
+        basicInfoViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory
                 .getInstance(getApplication()))
-                .get(RegisterViewModel.class);
+                .get(BasicInfoViewModel.class);
     }
 
     private void initAttachInputListeners() {
@@ -262,13 +261,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
             }
         });
-
-        genderRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int id) {
-                checkedGenderRadioButton = findViewById(id);
-            }
-        });
     }
 
     @Override
@@ -292,9 +284,12 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         validateBeforeSave();
 
         // check if passed validation and has user
-        FirebaseUser currentUser = profileViewModel.getCurrentUser();
+        FirebaseUser currentUser = basicInfoViewModel.getCurrentUser();
         if (!isValid) return;
         if (currentUser == null) return;
+
+        int selectedId = genderRadioGroup.getCheckedRadioButtonId();
+        RadioButton checkedGenderRadioButton = findViewById(selectedId);
 
         String currentUserUid = currentUser.getUid();
         String firstName = firstNameEditText.getText().toString().trim();
@@ -313,11 +308,12 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         tutorInfo.setAddress(barangay);
         tutorInfo.setResume("");
         tutorInfo.setValidId("");
+        tutorInfo.setAvatar("");
         tutorInfo.setCreatedDate(epoch);
         tutorInfo.setUpdatedDate(epoch);
 
         progressBar.setVisibility(View.VISIBLE);
-        profileViewModel.registerTutor(tutorInfo).observe(this,
+        basicInfoViewModel.saveTutorInfo(tutorInfo).observe(this,
                 new Observer<DataOrException<TutorInfo, Exception>>() {
                     @Override
                     public void onChanged(DataOrException<TutorInfo, Exception> dataOrException) {
@@ -330,16 +326,16 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                         }
 
                         if (dataOrException.data != null) {
-                            Toast.makeText(RegisterActivity.this, "Saved successfully",
+                            Toast.makeText(BasicInfoActivity.this, "Saved successfully",
                                     Toast.LENGTH_SHORT).show();
 
                             Intent intent;
                             if (bundle == null) {
-                                intent = new Intent(RegisterActivity.this, HomeActivity.class);
+                                intent = new Intent(BasicInfoActivity.this, HomeActivity.class);
                                 bundle.putParcelable(CURRENT_USER, Parcels.wrap(tutorInfo));
                                 intent.putExtras(bundle);
                             } else {
-                                intent = new Intent(RegisterActivity.this, MainActivity.class);
+                                intent = new Intent(BasicInfoActivity.this, MainActivity.class);
                             }
                             startActivity(intent);
                             finish();

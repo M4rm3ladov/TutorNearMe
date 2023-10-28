@@ -1,4 +1,4 @@
-package com.ren.tutornearme.register;
+package com.ren.tutornearme.basic_info;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -11,12 +11,12 @@ import static com.ren.tutornearme.util.Common.TUTOR_INFO_REFERENCE;
 
 import androidx.lifecycle.MutableLiveData;
 
-public class RegisterRepository {
+public class BasicInfoRepository {
     private final FirebaseAuth firebaseAuth;
     private final FirebaseDatabase db = FirebaseDatabase.getInstance();
     private final DatabaseReference tutorInfoRef = db.getReference(TUTOR_INFO_REFERENCE);
 
-    public RegisterRepository() {
+    public BasicInfoRepository() {
         firebaseAuth = FirebaseAuth.getInstance();
     }
 
@@ -28,7 +28,7 @@ public class RegisterRepository {
         firebaseAuth.signOut();
     }
 
-    public MutableLiveData<DataOrException<TutorInfo, Exception>> registerTutor(TutorInfo tutorInfo) {
+    public MutableLiveData<DataOrException<TutorInfo, Exception>> saveTutorInfo(TutorInfo tutorInfo) {
         MutableLiveData<DataOrException<TutorInfo, Exception>> mutableLiveData = new MutableLiveData<>();
 
         if (getCurrentUser() != null) {
