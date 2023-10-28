@@ -44,6 +44,7 @@
     <string name="empty"><![CDATA[<Empty>]]></string>
     <string name="save">Save</string>
     <string name="update_basic_info_message">Please make sure the information provided reflects on your valid ID.</string>
+    <string name="birth_date">Birth Date</string>
 
     <string-array name="valid_ids">
         <item>Student ID</item>
