@@ -51,7 +51,7 @@ public class GPSHelper {
                                 IntentSenderRequest intentSenderRequest = new IntentSenderRequest
                                         .Builder(resolvable.getResolution()).build();
                                 if (activity.getClass().equals(HomeFragment.class))
-                                    ((HomeFragment)activity).launcher.launch(intentSenderRequest);
+                                    ((HomeFragment)activity).gpsResultLauncher.launch(intentSenderRequest);
 
                             } catch (ClassCastException e) {
                                 SnackBarHelper.showSnackBar(rootView,
