@@ -4,6 +4,7 @@ import static com.ren.tutornearme.util.Common.BARANGAY;
 import static com.ren.tutornearme.util.Common.FIRST_NAME;
 import static com.ren.tutornearme.util.Common.GENDER;
 import static com.ren.tutornearme.util.Common.LAST_NAME;
+import static com.ren.tutornearme.util.Common.TUTOR_CREATED_DATE;
 
 import android.Manifest;
 import android.app.Activity;
@@ -236,6 +237,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         bundle.putString(LAST_NAME, mTutorInfo.getLastName());
         bundle.putString(GENDER, mTutorInfo.getGender());
         bundle.putString(BARANGAY, mTutorInfo.getAddress());
+        bundle.putLong(TUTOR_CREATED_DATE, mTutorInfo.getCreatedDate());
 
         intent.putExtras(bundle);
         startActivity(intent);
