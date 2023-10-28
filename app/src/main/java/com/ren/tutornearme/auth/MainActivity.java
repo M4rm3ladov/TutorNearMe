@@ -19,7 +19,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.ren.tutornearme.HomeActivity;
 import com.ren.tutornearme.R;
 import com.ren.tutornearme.model.TutorInfo;
-import com.ren.tutornearme.register.RegisterActivity;
+import com.ren.tutornearme.basic_info.BasicInfoActivity;
 import com.ren.tutornearme.util.InternetHelper;
 
 import org.parceler.Parcels;
@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent;
         if (tutorInfo == null)
             // New user
-            intent = new Intent(MainActivity.this, RegisterActivity.class);
+            intent = new Intent(MainActivity.this, BasicInfoActivity.class);
         else {
             // Has registered data
             intent = new Intent(MainActivity.this, HomeActivity.class);
