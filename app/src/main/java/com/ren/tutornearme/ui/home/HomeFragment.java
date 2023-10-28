@@ -29,7 +29,6 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.firebase.geofire.GeoFire;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -70,8 +69,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private static final int LOCATION_FASTEST_INTERVAL = 3000;
     private static final float LOCATION_MIN_DISTANCE = 10f;
     private static final float ZOOM_VAL = 18f;
-
-    private GeoFire geoFire;
 
     private HomeViewModel homeViewModel;
     private View mContainerView;
@@ -185,7 +182,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     Snackbar.LENGTH_SHORT).show();
     }
 
-    public final ActivityResultLauncher<IntentSenderRequest> launcher = registerForActivityResult(
+    public final ActivityResultLauncher<IntentSenderRequest> gpsResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartIntentSenderForResult(),
             new ActivityResultCallback<ActivityResult>() {
                 @Override
