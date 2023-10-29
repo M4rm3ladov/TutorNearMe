@@ -3,14 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent"
+    android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="15dp"
+        android:paddingStart="16dp"
         android:paddingTop="20dp"
-        android:paddingEnd="15dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp"
         tools:context=".ui.profile.ProfileFragment">
 
         <com.google.android.material.imageview.ShapeableImageView
@@ -19,8 +21,8 @@
             android:layout_height="100dp"
             android:layout_marginTop="4dp"
             android:adjustViewBounds="true"
-            android:scaleType="centerCrop"
             android:padding="5dp"
+            android:scaleType="centerCrop"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
@@ -36,6 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="4dp"
             android:layout_marginBottom="4dp"
+            android:contentDescription="@string/tutor_avatar"
             android:src="@drawable/ic_photo_camera"
             app:layout_constraintBottom_toBottomOf="@+id/profile_img_imageview"
             app:layout_constraintEnd_toEndOf="@+id/profile_img_imageview"
@@ -174,6 +177,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="16dp"
+                    android:contentDescription="@string/edit_icon"
                     android:src="@drawable/ic_edit"
                     app:layout_constraintBaseline_toBaselineOf="@+id/profile_basic_info_textview"
                     app:layout_constraintEnd_toEndOf="parent"
