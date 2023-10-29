@@ -98,4 +98,15 @@
         <item name="cornerSize">25%</item>
     </style>
 
+    <style name="MySpinnerDatePicker" parent="android:Widget.Material.DatePicker">
+        <item name="android:datePickerMode">spinner</item>
+    </style>
+
+    <style name="MaterialCalendarTheme" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
+        <item name="android:datePickerStyle">@style/MySpinnerDatePicker</item>
+        <!-- just override the colors used in the default style -->
+        <item name="colorOnPrimary">@color/colorPrimary</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+    </style>
+
 </resources>
