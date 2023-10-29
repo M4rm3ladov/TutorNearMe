@@ -1,172 +1,175 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="16dp">
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:fillViewport="true">
 
-    <ProgressBar
-        android:id="@+id/register_progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        style="@android:style/Widget.ProgressBar.Large"
-        android:visibility="gone"/>
-
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:padding="16dp"
+        android:paddingTop="16dp">
 
-        <TextView
-            android:id="@+id/register_message_textview"
+        <ProgressBar
+            android:id="@+id/register_progress_bar"
+            style="@android:style/Widget.ProgressBar.Large"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="gone" />
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/account_creation_message"
-            android:textSize="22sp"
-            android:textColor="@color/black"/>
+            android:orientation="vertical">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/first_name_input_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="4dp"
-            android:layout_marginTop="20dp"
-            app:helperTextTextColor="@color/red"
-            app:helperTextEnabled="false">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/first_name_edit_text"
+            <TextView
+                android:id="@+id/register_message_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="text"
-                android:hint="@string/first_name"/>
+                android:text="@string/account_creation_message"
+                android:textColor="@color/black"
+                android:textSize="22sp" />
 
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/last_name_input_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="4dp"
-            android:layout_marginTop="20dp"
-            app:helperTextTextColor="@color/red"
-            app:helperTextEnabled="false">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/last_name_edit_text"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/first_name_input_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="text"
-                android:hint="@string/last_name"/>
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="4dp"
+                app:helperTextEnabled="false"
+                app:helperTextTextColor="@color/red">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/first_name_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/first_name"
+                    android:inputType="text" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/gender_input_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:helperTextTextColor="@color/red"
-            app:helperTextEnabled="false">
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_width="wrap_content"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/last_name_input_layout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_marginStart="10dp"
-                android:text="@string/gender"
-                android:textSize="17sp"
-                android:textColor="@color/gray"/>
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="4dp"
+                app:helperTextEnabled="false"
+                app:helperTextTextColor="@color/red">
 
-            <RadioGroup
-                android:id="@+id/gender_radio_group"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/last_name_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/last_name"
+                    android:inputType="text" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/gender_input_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:orientation="horizontal">
+                android:layout_marginStart="15dp"
+                app:helperTextEnabled="false"
+                app:helperTextTextColor="@color/red">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/gender"
+                    android:textColor="@color/gray"
+                    android:textSize="16sp" />
+
+                <RadioGroup
+                    android:id="@+id/gender_radio_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/male_radio_button"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
+                        android:layout_weight="1"
                         android:text="@string/male"
-                        android:textSize="16sp"
-                        android:layout_weight="1" />
+                        android:textSize="16sp" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/female_radio_button"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
+                        android:layout_weight="1"
                         android:text="@string/female"
-                        android:textSize="16sp"
-                        android:layout_weight="1"/>
+                        android:textSize="16sp" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/private_gender_radio_button"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
+                        android:layout_weight="1"
                         android:text="@string/i_d_rather_not_say"
-                        android:textSize="16sp"
-                        android:layout_weight="1"/>
+                        android:textSize="16sp" />
 
-            </RadioGroup>
+                </RadioGroup>
 
-        </com.google.android.material.textfield.TextInputLayout>
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/birth_date_input_layout"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/birth_date_input_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:helperTextEnabled="false"
+                app:helperTextTextColor="@color/red">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/birth_date_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/birth_date"
+                    android:inputType="none"
+                    android:drawableEnd="@drawable/ic_calendar"
+                    android:drawableTint="@color/colorPrimary"
+                    />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/barangay_input_layout"
+                android:layout_width="match_parent"
+                android:layout_height="83dp"
+                android:layout_marginTop="20dp"
+                app:helperTextEnabled="false"
+                app:helperTextTextColor="@color/red">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/barangay_auto_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:dropDownHeight="130dp"
+                    android:hint="@string/barangay"
+                    android:inputType="textAutoComplete|textCapSentences"
+                    android:paddingStart="15sp"
+                    android:paddingEnd="15sp"
+                    android:textSize="16sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/basic_info_save_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="4dp"
-            android:layout_marginTop="20dp"
-            app:helperTextTextColor="@color/red"
-            app:helperTextEnabled="false">
+            android:text="@string/continue_text"
+            android:layout_alignParentBottom="true"/>
 
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:text="@string/birth_date"
-                android:textSize="17sp"
-                android:textColor="@color/gray"/>
-
-            <DatePicker
-                android:id="@+id/birth_date_edit_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:calendarViewShown="false"
-                android:datePickerMode="spinner"
-                android:spinnersShown="true"/>
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/barangay_input_layout"
-            android:layout_width="match_parent"
-            android:layout_height="83dp"
-            android:layout_marginTop="10dp"
-            app:helperTextTextColor="@color/red"
-            app:helperTextEnabled="false">
-
-            <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                android:id="@+id/barangay_auto_textview"
-                android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:inputType="textAutoComplete|textCapSentences"
-                android:hint="@string/barangay"
-                android:paddingStart="15sp"
-                android:paddingEnd="15sp"
-                android:dropDownHeight="130dp"/>
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-    </LinearLayout>
-
-    <Button
-        android:id="@+id/register_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/continue_text"
-        android:layout_alignParentBottom="true"/>
-
-</RelativeLayout>
+    </RelativeLayout>
+</ScrollView>
