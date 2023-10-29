@@ -8,6 +8,7 @@ public class Common {
     public static final String LAST_NAME = "LastName";
     public static final String GENDER = "Gender";
     public static final String BARANGAY = "Barangay";
+    public static final String BIRTH_DATE = "BirthDate";
     public static final String TUTOR_CREATED_DATE = "TutorCreatedDate";
     public static final double ZAM_LONG = 122.079025;
     public static final double ZAM_LAT = 6.921442;
