@@ -1,6 +1,5 @@
 package com.ren.tutornearme.ui.home;
 
-import static com.ren.tutornearme.util.Common.TUTOR_INFO_REFERENCE;
 import static com.ren.tutornearme.util.Common.TUTOR_LOCATION_REFERENCE;
 
 import androidx.lifecycle.MutableLiveData;
@@ -20,7 +19,7 @@ public class HomeRepository {
     private final FirebaseAuth firebaseAuth;
     private final FirebaseUser currentUser;
     private final FirebaseDatabase db = FirebaseDatabase.getInstance();
-    private final DatabaseReference collectionReference = db.getReference(TUTOR_INFO_REFERENCE);
+    //private final DatabaseReference collectionReference = db.getReference(TUTOR_INFO_REFERENCE);
     private final DatabaseReference onlineRef = db.getReference().child(".info/connected");
     private final DatabaseReference tutorLocationRef = db.getReference(TUTOR_LOCATION_REFERENCE);
     private final DatabaseReference currentUserRef;
