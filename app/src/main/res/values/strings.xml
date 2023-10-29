@@ -45,6 +45,8 @@
     <string name="save">Save</string>
     <string name="update_basic_info_message">Please make sure the information provided reflects on your valid ID.</string>
     <string name="birth_date">Birth Date</string>
+    <string name="tutor_avatar">tutor avatar</string>
+    <string name="edit_icon">Edit icon</string>
 
     <string-array name="valid_ids">
         <item>Student ID</item>
