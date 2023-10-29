@@ -1,6 +1,7 @@
 package com.ren.tutornearme.ui.profile;
 
 import static com.ren.tutornearme.util.Common.BARANGAY;
+import static com.ren.tutornearme.util.Common.BIRTH_DATE;
 import static com.ren.tutornearme.util.Common.FIRST_NAME;
 import static com.ren.tutornearme.util.Common.GENDER;
 import static com.ren.tutornearme.util.Common.LAST_NAME;
@@ -237,6 +238,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         bundle.putString(LAST_NAME, mTutorInfo.getLastName());
         bundle.putString(GENDER, mTutorInfo.getGender());
         bundle.putString(BARANGAY, mTutorInfo.getAddress());
+        bundle.putLong(BIRTH_DATE, mTutorInfo.getBirthDate());
         bundle.putLong(TUTOR_CREATED_DATE, mTutorInfo.getCreatedDate());
 
         intent.putExtras(bundle);
