@@ -99,6 +99,8 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
 
             birthDateEditText.setText(dateTimeFormatter.format(new Date(bundle.getLong(BIRTH_DATE))));
 
+            calendar.setTimeInMillis(bundle.getLong(BIRTH_DATE));
+
             String male = res.getString(R.string.male);
             String female = res.getString(R.string.female);
             String privateGender = res.getString(R.string.i_d_rather_not_say);
@@ -302,7 +304,14 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
 
             @Override
             public void afterTextChanged(Editable editable) {
-
+                String birthDate = birthDateEditText.getText().toString();
+                if (!inputValidatorHelper.isNullOrEmpty(birthDate)) {
+                    try {
+                        calendar.setTime(dateTimeFormatter.parse(birthDate));
+                    } catch (ParseException e) {
+                        SnackBarHelper.showSnackBar(findViewById(android.R.id.content), e.getMessage());
+                    }
+                }
             }
         });
     }
@@ -329,7 +338,7 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void showDatePickerDialog() {
-        setDateIfEditTextHasValue();
+        //setDateIfEditTextHasValue();
 
         DatePickerDialog datePickerDialog = new DatePickerDialog(BasicInfoActivity.this,
                 R.style.MaterialCalendarTheme,
@@ -345,16 +354,9 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
         datePickerDialog.show();
     }
 
-    private void setDateIfEditTextHasValue() {
-        String birthDate = birthDateEditText.getText().toString();
-        if (!inputValidatorHelper.isNullOrEmpty(birthDate)) {
-            try {
-                calendar.setTime(dateTimeFormatter.parse(birthDate));
-            } catch (ParseException e) {
-                SnackBarHelper.showSnackBar(findViewById(android.R.id.content), e.getMessage());
-            }
-        }
-    }
+    /*private void setDateIfEditTextHasValue() {
+
+    }*/
 
     private void saveTutorInfo() {
         validateBeforeSave();
@@ -412,12 +414,14 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
                                     Toast.LENGTH_SHORT).show();
 
                             Intent intent;
-                            if (bundle == null) {
-                                intent = new Intent(BasicInfoActivity.this, HomeActivity.class);
+                            if (bundle != null) {
+                                // existing account
+                                intent = new Intent(BasicInfoActivity.this, MainActivity.class);
                                 bundle.putParcelable(CURRENT_USER, Parcels.wrap(tutorInfo));
                                 intent.putExtras(bundle);
                             } else {
-                                intent = new Intent(BasicInfoActivity.this, MainActivity.class);
+                                // creating new user account
+                                intent = new Intent(BasicInfoActivity.this, HomeActivity.class);
                             }
                             startActivity(intent);
                             finish();
