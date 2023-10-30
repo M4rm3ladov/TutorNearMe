@@ -129,13 +129,13 @@ public class HomeActivity extends AppCompatActivity{
 
     private void setNameAndPhoneNumber() {
         View headerView = navigationView.getHeaderView(0);
-        TextView tutorName = headerView.findViewById(R.id.name_textview);
-        TextView phoneNumber = headerView.findViewById(R.id.phone_number_textview);
+        TextView tutorName = headerView.findViewById(R.id.nav_name_textview);
+        TextView tutorPhone = headerView.findViewById(R.id.nav_phone_textview);
 
         String name = String.format(res.getString(R.string.tutor_name),
                 tutorInfo.getFirstName(), tutorInfo.getLastName());
         tutorName.setText(name);
-        phoneNumber.setText(tutorInfo.getPhoneNumber());
+        tutorPhone.setText(tutorInfo.getPhoneNumber());
     }
 
     @Override
