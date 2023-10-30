@@ -56,7 +56,8 @@
             android:exported="true"
             android:configChanges="orientation"
             android:theme="@style/Base.Theme.TutorNearMe.ActionBar"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan"/>
         <activity
             android:name=".auth.MainActivity"
             android:exported="true"
