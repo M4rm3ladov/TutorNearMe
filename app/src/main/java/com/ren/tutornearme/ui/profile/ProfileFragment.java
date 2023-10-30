@@ -42,6 +42,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.snackbar.Snackbar;
 import com.ren.tutornearme.BuildConfig;
 import com.ren.tutornearme.R;
@@ -131,8 +132,10 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
                 if (!tutorInfo.getAvatar().isEmpty())
                     Glide.with((Context) mActivity)
-                            .load(tutorInfo.getAvatar())
-                            .into(tutorAvatarImageView);
+                        .load(tutorInfo.getAvatar())
+                        .placeholder(R.mipmap.ic_logo)
+                        .apply(new RequestOptions().override(100, 100))
+                        .into(tutorAvatarImageView);
             }
         });
     }
@@ -248,6 +251,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                                 .show();
                         Glide.with((Context) mActivity)
                                 .load(selectedImageUri)
+                                .placeholder(R.mipmap.ic_logo)
+                                .apply(new RequestOptions().override(100, 100))
                                 .into(tutorAvatarImageView);
                         waitingDialog.dismiss();
                     }
