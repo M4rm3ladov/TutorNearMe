@@ -9,6 +9,7 @@ import static com.ren.tutornearme.util.Common.TUTOR_CREATED_DATE;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -25,6 +26,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -44,9 +46,12 @@ import com.google.android.material.snackbar.Snackbar;
 import com.ren.tutornearme.BuildConfig;
 import com.ren.tutornearme.R;
 import com.ren.tutornearme.SharedViewModel;
+import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.model.TutorInfo;
 import com.ren.tutornearme.basic_info.BasicInfoActivity;
 import com.ren.tutornearme.util.SnackBarHelper;
+
+import java.util.Map;
 
 public class ProfileFragment extends Fragment implements View.OnClickListener {
     private CardView basicInfoCardView;
@@ -89,7 +94,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     private void initViewModels() {
         profileViewModel =
-                new ViewModelProvider(this).get(ProfileViewModel.class);
+                new ViewModelProvider(mActivity).get(ProfileViewModel.class);
 
         sharedViewModel = new ViewModelProvider(mActivity).get(SharedViewModel.class);
     }
@@ -141,22 +146,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    /*private boolean checkFilePermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            return true;
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ActivityCompat.checkSelfPermission(mActivity,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            } else {
-                // requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-                showImagePicker();
-            }
-            return false;
-        }
-        return true;
-    }*/
-
     private void checkFilePermissionForOldAPI() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ActivityCompat.checkSelfPermission(mActivity,
@@ -196,31 +185,97 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                         Intent data = result.getData();
                         if (data == null) return;
 
-                        Uri selectedImageUri = data.getData();
-                        if (selectedImageUri != null){
-                            try {
-                                Glide.with((Context) mActivity)
-                                        .load(selectedImageUri)
-                                        .into(tutorAvatarImageView);
-                            }catch (Exception e){
-                                SnackBarHelper.showSnackBar(mView, e.getMessage());
-                            }
-                        }
+                        uploadAvatarImage(data);
                     }
                 }
             });
 
-    private void promptFilePermission() {
-        // for android 11 and above
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
-            Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
-            startActivity(new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri));
+    private void uploadAvatarImage(Intent data) {
+        Uri selectedImageUri = data.getData();
 
-            showImagePicker();
-        } else {
-            checkFilePermissionForOldAPI();
+        AlertDialog waitingDialog = new AlertDialog.Builder(mActivity)
+                .setCancelable(false)
+                .setMessage("Uploading..")
+                .create();
+
+        if (selectedImageUri != null){
+            waitingDialog.show();
+            try {
+                profileViewModel.uploadAvatar(selectedImageUri).observe(this,
+                        new Observer<DataOrException<Map<String, Object>, Exception>>() {
+                            @Override
+                            public void onChanged(DataOrException<Map<String, Object>,
+                                    Exception> mapDataOrException) {
+                                    if (mapDataOrException.exception != null) {
+                                        SnackBarHelper.showSnackBar(mView, mapDataOrException.exception.getMessage());
+                                        waitingDialog.dismiss();
+                                        return;
+                                    }
+
+                                    if (mapDataOrException.data != null) {
+                                        if (mapDataOrException.data.get("progress") != null) {
+                                            double progress = Math.round((double) mapDataOrException.data.get("progress"));
+                                            waitingDialog.setMessage(new StringBuilder("Uploading: ")
+                                                            .append(progress)
+                                                            .append("%"));
+                                        }
+
+                                        if (mapDataOrException.data.get("isComplete") != null) {
+                                            updateTutorAvatar(selectedImageUri, waitingDialog);
+                                        }
+                                    }
+                            }
+                        });
+
+            }catch (Exception e){
+                SnackBarHelper.showSnackBar(mView, e.getMessage());
+            }
         }
+    }
 
+    private void updateTutorAvatar(Uri selectedImageUri, AlertDialog waitingDialog) {
+        profileViewModel.updateAvatar().observe(this, new Observer<DataOrException<Boolean, Exception>>() {
+            @Override
+            public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
+                if (dataOrException.exception != null) {
+                    SnackBarHelper.showSnackBar(mView, dataOrException.exception.getMessage());
+                    return;
+                }
+
+                if (dataOrException.data != null) {
+                    if (dataOrException.data) {
+                        Toast.makeText(mActivity, "Image saved successfully!", Toast.LENGTH_SHORT)
+                                .show();
+                        Glide.with((Context) mActivity)
+                                .load(selectedImageUri)
+                                .into(tutorAvatarImageView);
+                        waitingDialog.dismiss();
+                    }
+
+                }
+            }
+        });
+    }
+
+    private void promptFilePermission() {
+        new AlertDialog.Builder(getActivity())
+                .setTitle("Upload Image")
+                .setMessage("Please make to upload image of you shows your face clearly and without " +
+                        "wearing any accessories on.")
+                .setPositiveButton("Ok",
+                (dialogInterface, i)-> {
+                    // for android 11 and above
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
+                        Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
+                        startActivity(new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri));
+
+                        showImagePicker();
+                    } else {
+                        checkFilePermissionForOldAPI();
+                    }
+                })
+                .setCancelable(false)
+                .show();
     }
 
     private void showImagePicker() {
