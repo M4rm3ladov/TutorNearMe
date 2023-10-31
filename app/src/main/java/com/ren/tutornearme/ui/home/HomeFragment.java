@@ -194,7 +194,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                         // All required changes were successfully made
                     } else {
                         SnackBarHelper.showSnackBar(mContainerView,
-                                "[INFO]: Location access denied");
+                                "Location access denied");
                         // The user was asked to change settings, but chose not to
                     }
                 }
@@ -250,7 +250,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                         showLocationWithButton();
                     } else {
                         Snackbar.make(mContainerView,
-                                "[INFO]: Location permission was denied."
+                                "Location permission was denied."
                                 , Snackbar.LENGTH_SHORT).show();
                     }
                 }
