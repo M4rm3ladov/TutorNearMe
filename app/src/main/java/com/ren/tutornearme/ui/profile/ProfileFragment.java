@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +45,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.snackbar.Snackbar;
+import com.hbisoft.pickit.PickiT;
+import com.hbisoft.pickit.PickiTCallbacks;
 import com.ren.tutornearme.BuildConfig;
 import com.ren.tutornearme.R;
 import com.ren.tutornearme.SharedViewModel;
@@ -52,19 +55,38 @@ import com.ren.tutornearme.model.TutorInfo;
 import com.ren.tutornearme.basic_info.BasicInfoActivity;
 import com.ren.tutornearme.util.SnackBarHelper;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 
-public class ProfileFragment extends Fragment implements View.OnClickListener {
+public class ProfileFragment extends Fragment implements View.OnClickListener, PickiTCallbacks {
     private CardView basicInfoCardView;
     private Button uploadResumeButton, uploadValidIDButton;
-    private TextView tutorName, tutorGender, tutorBarangay;
+    private TextView tutorName, tutorGender, tutorBarangay, tutorBirthDate, tutorResume, tutorID;
     private ImageView tutorAvatarImageView;
-    protected TutorInfo mTutorInfo;
+    private Spinner validIdTypeSpinner;
+    private AlertDialog waitingDialog;
+
     private Resources res;
+
     private ProfileViewModel profileViewModel;
     private SharedViewModel sharedViewModel;
+    protected TutorInfo mTutorInfo;
+
     private FragmentActivity mActivity;
     private View mView;
+
+    private PickiT pickiT;
+    private enum PickiTFlag { PDF, IMG }
+    private PickiTFlag pickiTFlag;
+    private String imageFlag;
+    public static final String AVATAR_IMG = "avatar";
+    public static final String ID_IMG = "validId";
+    
+    private final SimpleDateFormat dateTimeFormatter =
+            new SimpleDateFormat( "MMM-dd-yyyy" , Locale.ENGLISH);
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -78,6 +100,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initViewModels();
+        pickiT = new PickiT(mActivity, this, mActivity);
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -93,6 +116,18 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         return view;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        pickiT.deleteTemporaryFile(mActivity);
+    }
+
+    @Override
+    public void onDetach() {
+        pickiT.deleteTemporaryFile(mActivity);
+        super.onDetach();
+    }
+
     private void initViewModels() {
         profileViewModel =
                 new ViewModelProvider(mActivity).get(ProfileViewModel.class);
@@ -105,6 +140,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         uploadValidIDButton.setOnClickListener(this);
         uploadResumeButton.setOnClickListener(this);
         tutorAvatarImageView.setOnClickListener(this);
+        tutorResume.setOnClickListener(this);
+        tutorID.setOnClickListener(this);
     }
 
     private void initBindViews(View view) {
@@ -114,10 +151,14 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         tutorAvatarImageView = view.findViewById(R.id.profile_img_imageview);
         uploadValidIDButton = view.findViewById(R.id.profile_upload_id_button);
         uploadResumeButton = view.findViewById(R.id.profile_upload_resume_button);
+        validIdTypeSpinner = view.findViewById(R.id.profile_id_type_spinner);
 
         tutorName = view.findViewById(R.id.profile_tutor_name_textview);
         tutorGender = view.findViewById(R.id.profile_tutor_gender_textview);
         tutorBarangay = view.findViewById(R.id.profile_tutor_brgy_textview);
+        tutorBirthDate = view.findViewById(R.id.profile_tutor_birth_textview);
+        tutorResume = view.findViewById(R.id.profile_tutor_resume_textview);
+        tutorID = view.findViewById(R.id.profile_tutor_id_textview);
     }
 
     private void initPopulateBasicInfo() {
@@ -129,6 +170,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                 tutorName.setText(name);
                 tutorGender.setText(tutorInfo.getGender());
                 tutorBarangay.setText(tutorInfo.getAddress());
+                tutorBirthDate.setText(dateTimeFormatter.format(new Date(tutorInfo.getBirthDate())));
 
                 if (!tutorInfo.getAvatar().isEmpty())
                     Glide.with((Context) mActivity)
@@ -136,6 +178,13 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                         .placeholder(R.mipmap.ic_logo)
                         .apply(new RequestOptions().override(100, 100))
                         .into(tutorAvatarImageView);
+
+                if (profileViewModel.getValidIdPath().getValue() != null) {
+                    tutorID.setText(profileViewModel.getValidIdPath().getValue());
+                }
+
+
+
             }
         });
     }
@@ -145,19 +194,28 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         if (view.getId() == R.id.profile_basic_info_cardview) {
             navigateToBasicInfo();
         } else if (view.getId() == R.id.profile_img_imageview) {
+            imageFlag = AVATAR_IMG;
             promptFilePermission();
+        } else if (view.getId() == R.id.profile_upload_id_button) {
+            if (profileViewModel.getValidIdUri().getValue() != null)
+                updateTutorValidId();
+        } else if (view.getId() == R.id.profile_upload_resume_button) {
+
+        } else if (view.getId() == R.id.profile_tutor_id_textview) {
+            imageFlag = ID_IMG;
+            promptFilePermission();
+        } else if (view.getId() == R.id.profile_tutor_resume_textview) {
+            showPDFPicker();
         }
     }
 
     private void checkFilePermissionForOldAPI() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ActivityCompat.checkSelfPermission(mActivity,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            } else {
-                // requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-                showImagePicker();
-            }
+        if (ActivityCompat.checkSelfPermission(mActivity,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        } else {
+            // requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            showImagePicker();
         }
     }
 
@@ -178,7 +236,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                 }
             });
 
-    public final ActivityResultLauncher<Intent> imgUploadResultLauncher = registerForActivityResult(
+    private final ActivityResultLauncher<Intent> imgUploadResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
 
@@ -188,23 +246,92 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                         Intent data = result.getData();
                         if (data == null) return;
 
-                        uploadAvatarImage(data);
+                        Uri uri = data.getData();
+                        if (imageFlag.equals(AVATAR_IMG))
+                            uploadAvatarImage(uri);
+
+                        else if (imageFlag.equals(ID_IMG)) {
+                            pickiTFlag = PickiTFlag.IMG;
+                            pickiT.getPath(uri, Build.VERSION.SDK_INT);
+
+                            profileViewModel.setValidIdUri(uri);
+                            uploadValidId();
+                        }
                     }
                 }
             });
+    private final ActivityResultLauncher<Intent> pdfUploadResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
 
-    private void uploadAvatarImage(Intent data) {
-        Uri selectedImageUri = data.getData();
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK){
+                        Intent data = result.getData();
+                        if (data == null) return;
 
-        AlertDialog waitingDialog = new AlertDialog.Builder(mActivity)
+                        pickiTFlag = PickiTFlag.PDF;
+                        pickiT.getPath(data.getData(), Build.VERSION.SDK_INT);
+                    }
+                }
+            });
+    private void createWaitingDialog() {
+        waitingDialog = new AlertDialog.Builder(mActivity)
                 .setCancelable(false)
                 .setMessage("Uploading..")
                 .create();
+    }
 
-        if (selectedImageUri != null){
+    private void uploadValidId() {
+
+        createWaitingDialog();
+        
+        Uri selectedImageUri = profileViewModel.getValidIdUri().getValue();
+        if (selectedImageUri != null) {
             waitingDialog.show();
             try {
-                profileViewModel.uploadAvatar(selectedImageUri).observe(this,
+                profileViewModel.uploadAvatarOrValidId(selectedImageUri, imageFlag).observe(this,
+                        new Observer<DataOrException<Map<String, Object>, Exception>>() {
+                            @Override
+                            public void onChanged(DataOrException<Map<String, Object>,
+                                    Exception> mapDataOrException) {
+                                if (mapDataOrException.exception != null) {
+                                    SnackBarHelper.showSnackBar(mView, mapDataOrException.exception.getMessage());
+                                    waitingDialog.dismiss();
+                                    return;
+                                }
+
+                                if (mapDataOrException.data != null) {
+                                    if (mapDataOrException.data.get("progress") != null) {
+                                        double progress = Math.round((double) mapDataOrException.data.get("progress"));
+                                        waitingDialog.setMessage(new StringBuilder("Uploading: ")
+                                                .append(progress)
+                                                .append("%"));
+                                    }
+
+                                    if (mapDataOrException.data.get("isComplete") != null) {
+                                        Snackbar.make(mView, "[INFO]: Image is now ready to be uploaded",
+                                                Snackbar.LENGTH_SHORT).show();
+                                        waitingDialog.dismiss();
+                                    }
+                                }
+                            }
+                        });
+
+            }catch (Exception e){
+                SnackBarHelper.showSnackBar(mView, e.getMessage());
+            }
+        }
+    }
+
+    private void uploadAvatarImage(Uri selectedImageUri) {
+
+        createWaitingDialog();
+
+        if (selectedImageUri != null) {
+            waitingDialog.show();
+            try {
+                profileViewModel.uploadAvatarOrValidId(selectedImageUri, imageFlag).observe(this,
                         new Observer<DataOrException<Map<String, Object>, Exception>>() {
                             @Override
                             public void onChanged(DataOrException<Map<String, Object>,
@@ -236,8 +363,31 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+    private void updateTutorValidId() {
+        String selectedIdType = validIdTypeSpinner.getSelectedItem().toString();
+        profileViewModel.updateAvatarOrValidId(ID_IMG, selectedIdType).observe(this,
+                new Observer<DataOrException<Boolean, Exception>>() {
+            @Override
+            public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
+                if (dataOrException.exception != null) {
+                    SnackBarHelper.showSnackBar(mView, dataOrException.exception.getMessage());
+                    return;
+                }
+
+                if (dataOrException.data != null) {
+                    if (dataOrException.data) {
+                        Toast.makeText(mActivity, "Image saved successfully!", Toast.LENGTH_SHORT)
+                                .show();
+                    }
+
+                }
+            }
+        });
+    }
+
     private void updateTutorAvatar(Uri selectedImageUri, AlertDialog waitingDialog) {
-        profileViewModel.updateAvatar().observe(this, new Observer<DataOrException<Boolean, Exception>>() {
+        profileViewModel.updateAvatarOrValidId(AVATAR_IMG, null).observe(this,
+                new Observer<DataOrException<Boolean, Exception>>() {
             @Override
             public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
                 if (dataOrException.exception != null) {
@@ -251,7 +401,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                                 .show();
                         Glide.with((Context) mActivity)
                                 .load(selectedImageUri)
-                                .placeholder(R.mipmap.ic_logo)
+                                .placeholder(R.mipmap.ic_logo_round)
                                 .apply(new RequestOptions().override(100, 100))
                                 .into(tutorAvatarImageView);
                         waitingDialog.dismiss();
@@ -263,10 +413,16 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     }
 
     private void promptFilePermission() {
+        String message = "";
+        if (AVATAR_IMG.equals(imageFlag))
+            message = "Please make to upload image of you shows your face clearly and without " +
+                    "wearing any accessories on.";
+        else if (ID_IMG.equals(imageFlag))
+            message = "Please submit a clear and original copy of you valid ID.";
+
         new AlertDialog.Builder(getActivity())
                 .setTitle("Upload Image")
-                .setMessage("Please make to upload image of you shows your face clearly and without " +
-                        "wearing any accessories on.")
+                .setMessage(message)
                 .setPositiveButton("Ok",
                 (dialogInterface, i)-> {
                     // for android 11 and above
@@ -279,13 +435,19 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                         checkFilePermissionForOldAPI();
                     }
                 })
-                .setCancelable(false)
                 .show();
     }
 
     private void showImagePicker() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         imgUploadResultLauncher.launch(intent);
+    }
+
+    private void showPDFPicker() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("application/pdf");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        pdfUploadResultLauncher.launch(intent);
     }
 
     private void navigateToBasicInfo() {
@@ -303,5 +465,41 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
         intent.putExtras(bundle);
         startActivity(intent);
+    }
+
+    @Override
+    public void PickiTonUriReturned() {
+
+    }
+
+    @Override
+    public void PickiTonStartListener() {
+
+    }
+
+    @Override
+    public void PickiTonProgressUpdate(int progress) {
+
+    }
+
+    @Override
+    public void PickiTonCompleteListener(String path, boolean wasDriveFile, boolean wasUnknownProvider, boolean wasSuccessful, String Reason) {
+        if (wasSuccessful) {
+            if (pickiTFlag == PickiTFlag.IMG) {
+                tutorID.setVisibility(View.VISIBLE);
+                profileViewModel.setValidIdPath(path);
+                tutorID.setText(path);
+            } else if (pickiTFlag == PickiTFlag.PDF) {
+                tutorResume.setVisibility(View.VISIBLE);
+                tutorResume.setText(path);
+            }
+        } else
+            SnackBarHelper.showSnackBar(mView, Reason);
+
+    }
+
+    @Override
+    public void PickiTonMultipleCompleteListener(ArrayList<String> paths, boolean wasSuccessful, String Reason) {
+
     }
 }
