@@ -52,6 +52,12 @@ public class HomeActivity extends AppCompatActivity{
         initNavigationDrawer();
     }
 
+    @Override
+    protected void onResume() {
+        initNetworkAvailability();
+        super.onResume();
+    }
+
     private void initSetTutorInfo() {
         tutorInfo = Parcels.unwrap(getIntent().getParcelableExtra(CURRENT_USER));
 
