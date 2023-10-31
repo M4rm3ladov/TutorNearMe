@@ -2,6 +2,9 @@ package com.ren.tutornearme.model;
 
 import org.parceler.Parcel;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Parcel(Parcel.Serialization.BEAN)
 public class TutorInfo {
     private String uid;
@@ -141,6 +144,18 @@ public class TutorInfo {
 
     public void setUpdatedDate(long updatedDate) {
         this.updatedDate = updatedDate;
+    }
+
+    public Map<String, Object> toMap() {
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("firstName", firstName);
+        result.put("lastName", lastName);
+        result.put("gender", gender);
+        result.put("birthDate", birthDate);
+        result.put("address", address);
+        result.put("updatedDate", updatedDate);
+
+        return result;
     }
 
     @Override
