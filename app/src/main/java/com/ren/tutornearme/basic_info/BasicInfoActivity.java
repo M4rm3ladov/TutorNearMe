@@ -388,6 +388,7 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
         tutorInfo.setBirthDate(birthDate);
         tutorInfo.setResume("");
         tutorInfo.setValidId("");
+        tutorInfo.setValidIdType("");
         tutorInfo.setAvatar("");
         tutorInfo.setUpdatedDate(createdDate);
         if(bundle != null)

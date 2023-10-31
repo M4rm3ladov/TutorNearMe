@@ -13,6 +13,7 @@ public class TutorInfo {
     private long birthDate;
     private String resume;
     private String validId;
+    private String validIdType;
     private String avatar;
     private long createdDate;
     private long updatedDate;
@@ -21,8 +22,8 @@ public class TutorInfo {
     }
 
     public TutorInfo(String uid, String firstName, String lastName, String gender, String phoneNumber,
-                     String address, long birthDate, String resume, String validId, String avatar,
-                     long createdDate, long updatedDate) {
+                     String address, long birthDate, String resume, String validId, String validIdType,
+                     String avatar, long createdDate, long updatedDate) {
         this.uid = uid;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -32,6 +33,7 @@ public class TutorInfo {
         this.birthDate = birthDate;
         this.resume = resume;
         this.validId = validId;
+        this.validIdType = validIdType;
         this.avatar = avatar;
         this.createdDate = createdDate;
         this.updatedDate = updatedDate;
@@ -109,6 +111,14 @@ public class TutorInfo {
         this.validId = validId;
     }
 
+    public String getValidIdType() {
+        return validIdType;
+    }
+
+    public void setValidIdType(String validIdType) {
+        this.validIdType = validIdType;
+    }
+
     public String getAvatar() {
         return avatar;
     }
@@ -145,6 +155,7 @@ public class TutorInfo {
                 ", birthDate=" + birthDate +
                 ", resume='" + resume + '\'' +
                 ", validId='" + validId + '\'' +
+                ", validIdType='" + validIdType + '\'' +
                 ", avatar='" + avatar + '\'' +
                 ", createdDate=" + createdDate +
                 ", updatedDate=" + updatedDate +
