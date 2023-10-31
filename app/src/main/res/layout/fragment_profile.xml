@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingStart="16dp"
-        android:paddingTop="20dp"
+        android:paddingTop="10dp"
         android:paddingEnd="16dp"
         android:paddingBottom="16dp"
         tools:context=".ui.profile.ProfileFragment">
@@ -64,6 +64,7 @@
                 android:layout_marginTop="4dp"
                 android:layout_marginEnd="6dp"
                 android:layout_marginBottom="4dp"
+                android:drawablePadding="2dip"
                 android:gravity="center"
                 android:text="@string/verified"
                 android:textColor="@color/white"
@@ -77,7 +78,7 @@
             android:id="@+id/profile_basic_info_cardview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="19dp"
+            android:layout_marginTop="10dp"
             app:cardBackgroundColor="@color/white"
             app:cardElevation="1dp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -128,7 +129,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="10dp"
                     android:text="@string/name_header"
                     android:textSize="16sp"
                     app:layout_constraintStart_toStartOf="parent"
@@ -156,7 +157,7 @@
                     android:text="@string/barangay_header"
                     android:textSize="16sp"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/profile_gender_textview" />
+                    app:layout_constraintTop_toBottomOf="@+id/profile_birth_textview" />
 
                 <TextView
                     android:id="@+id/profile_tutor_brgy_textview"
@@ -183,6 +184,30 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:tint="@color/colorPrimary" />
+
+                <TextView
+                    android:id="@+id/profile_birth_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/birth_date_header"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/profile_gender_textview" />
+
+                <TextView
+                    android:id="@+id/profile_tutor_birth_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:text="@string/empty"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:fontFamily="@font/roboto_bold"
+                    app:layout_constraintBaseline_toBaselineOf="@+id/profile_birth_textview"
+                    app:layout_constraintStart_toEndOf="@+id/profile_birth_textview"
+                    app:layout_constraintTop_toTopOf="@+id/profile_birth_textview" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -218,14 +243,36 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="16dp"
-                    android:layout_marginTop="5dp"
+                    android:layout_marginTop="10dp"
                     android:layout_marginRight="16dp"
                     android:text="@string/upload_your_valid_id"
                     app:icon="@drawable/ic_drive_folder_upload"
                     app:iconGravity="textStart"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/profile_id_spinner" />
+                    app:layout_constraintTop_toBottomOf="@+id/profile_tutor_id_textview" />
+
+                <TextView
+                    android:id="@+id/profile_tutor_id_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/rectangle"
+                    android:drawablePadding="5dip"
+                    android:gravity="center_vertical"
+                    android:paddingStart="5dp"
+                    android:paddingTop="5dp"
+                    android:paddingEnd="10dp"
+                    android:paddingBottom="5dp"
+                    android:text="@string/choose_a_file_to_upload"
+                    app:drawableStartCompat="@drawable/ic_image"
+                    app:drawableTint="@color/red"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/profile_id_type_spinner" />
 
                 <TextView
                     android:id="@+id/profile_id_type_textview"
@@ -239,7 +286,7 @@
                     app:layout_constraintTop_toBottomOf="@+id/profile_upload_id_textview" />
 
                 <Spinner
-                    android:id="@+id/profile_id_spinner"
+                    android:id="@+id/profile_id_type_spinner"
                     android:layout_width="wrap_content"
                     android:layout_height="48dp"
                     android:layout_marginStart="10dp"
@@ -297,11 +344,32 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="16dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="10dp"
                     android:layout_marginRight="16dp"
                     android:text="@string/upload_your_resume"
                     app:icon="@drawable/ic_drive_folder_upload"
                     app:iconGravity="textStart"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/profile_tutor_resume_textview" />
+
+                <TextView
+                    android:id="@+id/profile_tutor_resume_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/rectangle"
+                    android:drawablePadding="5dip"
+                    android:gravity="center_vertical"
+                    android:paddingStart="5dp"
+                    android:paddingTop="5dp"
+                    android:paddingEnd="10dp"
+                    android:paddingBottom="5dp"
+                    android:text="@string/choose_a_file_to_upload"
+                    app:drawableStartCompat="@drawable/ic_pdf"
+                    app:drawableTint="@color/red"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/textView" />
