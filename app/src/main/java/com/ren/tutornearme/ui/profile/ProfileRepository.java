@@ -38,8 +38,8 @@ public class ProfileRepository {
         firebaseAuth = FirebaseAuth.getInstance();
         storageRef = FirebaseStorage.getInstance().getReference();
         avatarRef = storageRef.child("avatars/" + firebaseAuth.getUid());
-        resumeRef = storageRef.child("validIDs/" + firebaseAuth.getUid());
-        validIDRef = storageRef.child("CVs/" + firebaseAuth.getUid());
+        resumeRef = storageRef.child( "CVs/" + firebaseAuth.getUid());
+        validIDRef = storageRef.child( "validIDs/" + firebaseAuth.getUid());
     }
 
     private FirebaseUser getCurrentUser() {
@@ -112,7 +112,7 @@ public class ProfileRepository {
                                 updateData.put("validId", uri.toString());
                                 updateData.put("validIdType", validIdType);
                             }
-
+                            // update the file
                             tutorInfoRef.child(getCurrentUser().getUid())
                                     .updateChildren(updateData)
                                     .addOnFailureListener(new OnFailureListener() {
@@ -129,6 +129,61 @@ public class ProfileRepository {
                                         }
                                     });
                         }
+                    });
+        }
+        return mutableLiveData;
+    }
+
+    public MutableLiveData<DataOrException<Map<String,Object>, Exception>> uploadResume(Uri pdfUri) {
+        MutableLiveData<DataOrException<Map<String, Object>, Exception>> mutableLiveData = new MutableLiveData<>();
+
+        if (getCurrentUser() != null) {
+            DataOrException<Map<String, Object>, Exception> dataOrException = new DataOrException<>();
+            dataOrException.data = new HashMap<>();
+
+            resumeRef.putFile(pdfUri)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            dataOrException.data.put("isComplete", true);
+                            mutableLiveData.postValue(dataOrException);
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        dataOrException.exception = e;
+                        mutableLiveData.postValue(dataOrException);
+                    }).addOnProgressListener(snapshot -> {
+                        double progress =
+                                (100.0 * snapshot.getBytesTransferred() / snapshot.getTotalByteCount());
+                        dataOrException.data.put("progress", progress);
+                        mutableLiveData.postValue(dataOrException);
+                    });
+        }
+        return mutableLiveData;
+    }
+
+    public MutableLiveData<DataOrException<Boolean, Exception>> updateResume() {
+        MutableLiveData<DataOrException<Boolean, Exception>> mutableLiveData = new MutableLiveData<>();
+
+        if (getCurrentUser() != null) {
+            DataOrException<Boolean, Exception> dataOrException = new DataOrException<>();
+
+            resumeRef.getDownloadUrl()
+                    .addOnSuccessListener(uri -> {
+
+                        Map<String, Object> updateData = new HashMap<>();
+                        updateData.put("resume", uri.toString());
+                        // update the file
+                        tutorInfoRef.child(getCurrentUser().getUid())
+                                .updateChildren(updateData)
+                                .addOnFailureListener(e -> {
+
+                                    dataOrException.exception = e;
+                                    mutableLiveData.postValue(dataOrException);
+                                }).addOnSuccessListener(unused -> {
+
+                                    dataOrException.data = true;
+                                    mutableLiveData.postValue(dataOrException);
+                                });
                     });
         }
         return mutableLiveData;

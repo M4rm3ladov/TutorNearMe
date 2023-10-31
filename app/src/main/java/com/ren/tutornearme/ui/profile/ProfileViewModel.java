@@ -15,7 +15,8 @@ public class ProfileViewModel extends ViewModel {
     private final ProfileRepository profileRepository;
     private final MutableLiveData<Uri> validIdUri = new MutableLiveData<>();
     private final MutableLiveData<String> validIdPath = new MutableLiveData<>();
-    private MutableLiveData<Uri> resume;
+    private final MutableLiveData<Uri> resumeUri = new MutableLiveData<>();
+    private final MutableLiveData<String> resumePath = new MutableLiveData<>();
 
     public ProfileViewModel() {
         this.profileRepository = new ProfileRepository();
@@ -29,6 +30,15 @@ public class ProfileViewModel extends ViewModel {
     public LiveData<DataOrException<Boolean, Exception>> updateAvatarOrValidId(String imageFlag, String validIdType) {
         return profileRepository.updateAvatarOrValidId(imageFlag, validIdType);
     }
+
+    public LiveData<DataOrException<Map<String, Object>, Exception>> uploadResume(Uri pdfUri) {
+        return profileRepository.uploadResume(pdfUri);
+    }
+
+    public LiveData<DataOrException<Boolean, Exception>> updateResume() {
+        return profileRepository.updateResume();
+    }
+
 
     public MutableLiveData<String> getValidIdPath() {
         return validIdPath;
@@ -44,5 +54,22 @@ public class ProfileViewModel extends ViewModel {
 
     public MutableLiveData<Uri> getValidIdUri() {
         return validIdUri;
+    }
+
+
+    public MutableLiveData<String> getResumePath() {
+        return resumePath;
+    }
+
+    public void setResumePath(String path) {
+        resumePath.setValue(path);
+    }
+
+    public void setResumeUri(Uri uri) {
+        resumeUri.setValue(uri);
+    }
+
+    public MutableLiveData<Uri> getResumeUri() {
+        return resumeUri;
     }
 }
