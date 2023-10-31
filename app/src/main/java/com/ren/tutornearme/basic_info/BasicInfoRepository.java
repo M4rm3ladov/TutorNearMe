@@ -1,15 +1,23 @@
 package com.ren.tutornearme.basic_info;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.model.TutorInfo;
 
 import static com.ren.tutornearme.util.Common.TUTOR_INFO_REFERENCE;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
+
+import java.util.Map;
 
 public class BasicInfoRepository {
     private final FirebaseAuth firebaseAuth;
@@ -43,6 +51,47 @@ public class BasicInfoRepository {
                     }
                     mutableLiveData.postValue(dataOrException);
                 });
+        }
+        return mutableLiveData;
+    }
+
+    public MutableLiveData<DataOrException<TutorInfo, Exception>> updateTutorInfo
+            (Map<String, Object> tutorInfo) {
+
+        MutableLiveData<DataOrException<TutorInfo, Exception>> mutableLiveData = new MutableLiveData<>();
+
+        if (getCurrentUser() != null) {
+            DataOrException<TutorInfo, Exception> dataOrException = new DataOrException<>();
+
+            tutorInfoRef.child(getCurrentUser().getUid())
+                    .updateChildren(tutorInfo)
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            dataOrException.exception = e;
+                            mutableLiveData.postValue(dataOrException);
+                        }
+                    })
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            tutorInfoRef.child(getCurrentUser().getUid())
+                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            if (snapshot.exists())
+                                                dataOrException.data = snapshot.getValue(TutorInfo.class);
+                                            mutableLiveData.postValue(dataOrException);
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            dataOrException.exception = error.toException();
+                                            mutableLiveData.postValue(dataOrException);
+                                        }
+                                    });
+                        }
+                    });
         }
         return mutableLiveData;
     }

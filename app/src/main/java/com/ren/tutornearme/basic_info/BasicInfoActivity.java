@@ -6,7 +6,6 @@ import static com.ren.tutornearme.util.Common.CURRENT_USER;
 import static com.ren.tutornearme.util.Common.FIRST_NAME;
 import static com.ren.tutornearme.util.Common.GENDER;
 import static com.ren.tutornearme.util.Common.LAST_NAME;
-import static com.ren.tutornearme.util.Common.TUTOR_CREATED_DATE;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -54,6 +53,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class BasicInfoActivity extends AppCompatActivity implements View.OnClickListener {
     private EditText firstNameEditText, lastNameEditText, birthDateEditText;
@@ -375,34 +375,65 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
         String gender = checkedGenderRadioButton.getText().toString();
         String phoneNumber = currentUser.getPhoneNumber();
         String barangay = barangayEditText.getText().toString().trim();
-        long createdDate = System.currentTimeMillis();
+        long currentDate = System.currentTimeMillis();
         long birthDate = calendar.getTimeInMillis();
 
+        progressBar.setVisibility(View.VISIBLE);
+
         TutorInfo tutorInfo = new TutorInfo();
-        tutorInfo.setUid(currentUserUid);
         tutorInfo.setFirstName(firstName);
         tutorInfo.setLastName(lastName);
         tutorInfo.setGender(gender);
-        tutorInfo.setPhoneNumber(phoneNumber);
         tutorInfo.setAddress(barangay);
         tutorInfo.setBirthDate(birthDate);
+        tutorInfo.setUpdatedDate(currentDate);
+
+        // existing account
+        if (bundle != null) {
+            Map<String, Object> postValues =  tutorInfo.toMap();
+            basicInfoViewModel.updateTutorInfo(postValues).observe(this, new Observer<DataOrException<TutorInfo, Exception>>() {
+                @Override
+                public void onChanged(DataOrException<TutorInfo, Exception> dataOrException) {
+
+                    progressBar.setVisibility(View.GONE);
+
+                    if (dataOrException.exception != null) {
+                        Snackbar.make(findViewById(android.R.id.content),
+                                "[ERROR]: " + dataOrException.exception.getMessage(),
+                                Snackbar.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    if (dataOrException.data != null) {
+                        Toast.makeText(BasicInfoActivity.this, "Updated successfully",
+                                Toast.LENGTH_SHORT).show();
+
+                        Intent intent = new Intent(BasicInfoActivity.this, MainActivity.class);
+                        bundle.putParcelable(CURRENT_USER, Parcels.wrap(tutorInfo));
+                        intent.putExtras(bundle);
+                        startActivity(intent);
+                        finish();
+                    }
+                }
+            });
+            return;
+        }
+
+        // creating new user account
+        tutorInfo.setUid(currentUserUid);
+        tutorInfo.setPhoneNumber(phoneNumber);
         tutorInfo.setResume("");
         tutorInfo.setValidId("");
         tutorInfo.setValidIdType("");
         tutorInfo.setAvatar("");
-        tutorInfo.setUpdatedDate(createdDate);
-        if(bundle != null)
-            tutorInfo.setCreatedDate(bundle.getLong(TUTOR_CREATED_DATE));
-        else
-            tutorInfo.setCreatedDate(createdDate);
+        tutorInfo.setCreatedDate(currentDate);
 
-
-        progressBar.setVisibility(View.VISIBLE);
         basicInfoViewModel.saveTutorInfo(tutorInfo).observe(this,
                 new Observer<DataOrException<TutorInfo, Exception>>() {
                     @Override
                     public void onChanged(DataOrException<TutorInfo, Exception> dataOrException) {
                         progressBar.setVisibility(View.GONE);
+
                         if (dataOrException.exception != null) {
                             Snackbar.make(findViewById(android.R.id.content),
                                     "[ERROR]: " + dataOrException.exception.getMessage(),
@@ -414,16 +445,7 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
                             Toast.makeText(BasicInfoActivity.this, "Saved successfully",
                                     Toast.LENGTH_SHORT).show();
 
-                            Intent intent;
-                            if (bundle != null) {
-                                // existing account
-                                intent = new Intent(BasicInfoActivity.this, MainActivity.class);
-                                bundle.putParcelable(CURRENT_USER, Parcels.wrap(tutorInfo));
-                                intent.putExtras(bundle);
-                            } else {
-                                // creating new user account
-                                intent = new Intent(BasicInfoActivity.this, HomeActivity.class);
-                            }
+                            Intent intent = new Intent(BasicInfoActivity.this, HomeActivity.class);
                             startActivity(intent);
                             finish();
                         }

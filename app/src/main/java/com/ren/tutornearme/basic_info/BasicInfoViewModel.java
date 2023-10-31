@@ -7,6 +7,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.model.TutorInfo;
 
+import java.util.Map;
+
 public class BasicInfoViewModel extends ViewModel {
     private final BasicInfoRepository basicInfoRepository;
 
@@ -24,5 +26,10 @@ public class BasicInfoViewModel extends ViewModel {
 
     public MutableLiveData<DataOrException<TutorInfo, Exception>> saveTutorInfo(TutorInfo tutorInfo) {
         return basicInfoRepository.saveTutorInfo(tutorInfo);
+    }
+
+    public MutableLiveData<DataOrException<TutorInfo, Exception>> updateTutorInfo
+            (Map<String, Object> tutorInfo) {
+        return basicInfoRepository.updateTutorInfo(tutorInfo);
     }
 }
