@@ -68,6 +68,9 @@ dependencies {
     implementation("org.parceler:parceler-api:1.1.12")
     annotationProcessor("org.parceler:parceler:1.1.12")
 
+    // uri to string
+    implementation("com.github.HBiSoft:PickiT:2.0.5")
+
     // glide image
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:glide:4.16.0")
