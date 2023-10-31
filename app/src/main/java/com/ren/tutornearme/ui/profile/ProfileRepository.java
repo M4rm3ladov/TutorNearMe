@@ -28,27 +28,37 @@ import java.util.Map;
 public class ProfileRepository {
     private final FirebaseAuth firebaseAuth;
     private final FirebaseDatabase db = FirebaseDatabase.getInstance();
-    private final StorageReference storageRef;
-    private final StorageReference avatarRef;
+    private final StorageReference storageRef, avatarRef, resumeRef, validIDRef;
+    private StorageReference imageFlagRef;
     private final DatabaseReference tutorInfoRef = db.getReference(TUTOR_INFO_REFERENCE);
+    public static final String AVATAR_IMG = "avatar";
+    public static final String ID_IMG = "validId";
 
     public ProfileRepository() {
         firebaseAuth = FirebaseAuth.getInstance();
         storageRef = FirebaseStorage.getInstance().getReference();
         avatarRef = storageRef.child("avatars/" + firebaseAuth.getUid());
+        resumeRef = storageRef.child("validIDs/" + firebaseAuth.getUid());
+        validIDRef = storageRef.child("CVs/" + firebaseAuth.getUid());
     }
 
     private FirebaseUser getCurrentUser() {
         return firebaseAuth.getCurrentUser();
     }
 
-    public MutableLiveData<DataOrException<Map<String,Object>, Exception>> uploadAvatar(Uri imageUri) {
+    public MutableLiveData<DataOrException<Map<String,Object>, Exception>> uploadAvatarOrValidId(Uri imageUri, String imageFlag) {
         MutableLiveData<DataOrException<Map<String, Object>, Exception>> mutableLiveData = new MutableLiveData<>();
 
         if (getCurrentUser() != null) {
             DataOrException<Map<String, Object>, Exception> dataOrException = new DataOrException<>();
             dataOrException.data = new HashMap<>();
-            avatarRef.putFile(imageUri)
+
+            if (imageFlag.equals(AVATAR_IMG))
+                imageFlagRef = avatarRef;
+            else if (imageFlag.equals(ID_IMG))
+                imageFlagRef = validIDRef;
+
+            imageFlagRef.putFile(imageUri)
                     .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
@@ -78,18 +88,30 @@ public class ProfileRepository {
         return mutableLiveData;
     }
 
-    public MutableLiveData<DataOrException<Boolean, Exception>> updateAvatar() {
+    public MutableLiveData<DataOrException<Boolean, Exception>> updateAvatarOrValidId
+            (String imageFlag, String validIdType) {
         MutableLiveData<DataOrException<Boolean, Exception>> mutableLiveData = new MutableLiveData<>();
 
         if (getCurrentUser() != null) {
             DataOrException<Boolean, Exception> dataOrException = new DataOrException<>();
 
-            avatarRef.getDownloadUrl()
+            if (imageFlag.equals(AVATAR_IMG))
+                imageFlagRef = avatarRef;
+            else if (imageFlag.equals(ID_IMG))
+                imageFlagRef = validIDRef;
+
+            imageFlagRef.getDownloadUrl()
                     .addOnSuccessListener(new OnSuccessListener<Uri>() {
                         @Override
                         public void onSuccess(Uri uri) {
                             Map<String, Object> updateData = new HashMap<>();
-                            updateData.put("avatar", uri.toString());
+
+                            if (imageFlag.equals(AVATAR_IMG))
+                                updateData.put("avatar", uri.toString());
+                            else if (imageFlag.equals(ID_IMG)) {
+                                updateData.put("validId", uri.toString());
+                                updateData.put("validIdType", validIdType);
+                            }
 
                             tutorInfoRef.child(getCurrentUser().getUid())
                                     .updateChildren(updateData)
