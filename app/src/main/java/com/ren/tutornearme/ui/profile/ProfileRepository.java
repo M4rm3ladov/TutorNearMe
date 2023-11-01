@@ -36,6 +36,7 @@ public class ProfileRepository {
 
     public ProfileRepository() {
         firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseStorage.getInstance().setMaxUploadRetryTimeMillis(20000);
         storageRef = FirebaseStorage.getInstance().getReference();
         avatarRef = storageRef.child("avatars/" + firebaseAuth.getUid());
         resumeRef = storageRef.child( "CVs/" + firebaseAuth.getUid());
