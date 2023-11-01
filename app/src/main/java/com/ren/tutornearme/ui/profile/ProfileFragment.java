@@ -68,7 +68,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
     private CardView basicInfoCardView;
     private Button uploadResumeButton, uploadValidIDButton;
     private TextView tutorName, tutorGender, tutorBarangay, tutorBirthDate, tutorResume, tutorID;
-    private ImageView tutorAvatarImageView, previewIdImageView;
+    private ImageView tutorAvatarImageView, previewIdImageView, previewResumeImageView;
     private Spinner validIdTypeSpinner;
     private AlertDialog waitingDialog;
 
@@ -88,6 +88,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
 
     private static final String AVATAR_IMG = "avatar";
     private static final String ID_IMG = "validId";
+
     
     private final SimpleDateFormat dateTimeFormatter =
             new SimpleDateFormat( "MMM-dd-yyyy" , Locale.ENGLISH);
@@ -147,6 +148,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         tutorResume.setOnClickListener(this);
         tutorID.setOnClickListener(this);
         previewIdImageView.setOnClickListener(this);
+        previewResumeImageView.setOnClickListener(this);
     }
 
     private void initBindViews(View view) {
@@ -158,6 +160,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         uploadResumeButton = view.findViewById(R.id.profile_upload_resume_button);
         validIdTypeSpinner = view.findViewById(R.id.profile_id_type_spinner);
         previewIdImageView = view.findViewById(R.id.profile_id_preview);
+        previewResumeImageView = view.findViewById(R.id.profile_resume_preview);
 
         tutorName = view.findViewById(R.id.profile_tutor_name_textview);
         tutorGender = view.findViewById(R.id.profile_tutor_gender_textview);
@@ -165,6 +168,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         tutorBirthDate = view.findViewById(R.id.profile_tutor_birth_textview);
         tutorResume = view.findViewById(R.id.profile_tutor_resume_textview);
         tutorID = view.findViewById(R.id.profile_tutor_id_textview);
+
     }
 
     private void initPopulateBasicInfo() {
@@ -213,13 +217,30 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
             showPDFPicker();
         } else if (view.getId() == R.id.profile_upload_id_button) {
             if(!checkHasInternetConnection()) return;
+            uploadValidId();
             updateIdOrShowSnackbar();
         } else if (view.getId() == R.id.profile_upload_resume_button) {
             if(!checkHasInternetConnection()) return;
+            uploadResume();
             updateResumeOrShowSnackbar();
         } else if (view.getId() == R.id.profile_id_preview) {
             if(!checkHasInternetConnection()) return;
             showIdPreviewOrSnackbar();
+        } else if (view.getId() == R.id.profile_resume_preview) {
+            if(!checkHasInternetConnection()) return;
+            showResumePreview();
+        }
+    }
+
+    private void showResumePreview() {
+        if (profileViewModel.getResumePath().getValue() == null)
+            Snackbar.make(mView, "Please choose a file to preview.",
+                    Snackbar.LENGTH_SHORT).show();
+        else {
+            Uri pdfUri = profileViewModel.getResumeUri().getValue();
+            Intent intent = new Intent(Intent.ACTION_VIEW, pdfUri);
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(intent);
         }
     }
 
@@ -316,7 +337,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
                             pickiT.getPath(uri, Build.VERSION.SDK_INT);
 
                             profileViewModel.setValidIdUri(uri);
-                            uploadValidId();
                         }
                     }
                 }
@@ -337,7 +357,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
                         pickiT.getPath(selectedResumeUri, Build.VERSION.SDK_INT);
 
                         profileViewModel.setResumeUri(selectedResumeUri);
-                        uploadResume();
                     }
                 }
             });
@@ -486,6 +505,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
                     if (dataOrException.data) {
                         Toast.makeText(mActivity, "Valid ID submitted for verification.", Toast.LENGTH_SHORT)
                                 .show();
+                        profileViewModel.setValidIdPath(null);
+                        profileViewModel.setValidIdUri(null);
+                        tutorID.setText(res.getString(R.string.choose_a_file_to_upload));
                     }
 
                 }
@@ -507,6 +529,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
                     if (dataOrException.data) {
                         Toast.makeText(mActivity, "Resume submitted for verification.", Toast.LENGTH_SHORT)
                                 .show();
+                        profileViewModel.setResumePath(null);
+                        profileViewModel.setResumeUri(null);
+                        tutorResume.setText(res.getString(R.string.choose_a_file_to_upload));
                     }
 
                 }
