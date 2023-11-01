@@ -49,6 +49,7 @@
     <string name="edit_icon">Edit icon</string>
     <string name="birth_date_header">Birth Date:</string>
     <string name="choose_a_file_to_upload">Choose a file to upload</string>
+    <string name="preview">preview</string>
 
     <string-array name="valid_ids">
         <item>Student ID</item>
