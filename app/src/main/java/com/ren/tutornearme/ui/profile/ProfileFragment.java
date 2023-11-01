@@ -55,9 +55,11 @@ import com.ren.tutornearme.model.TutorInfo;
 import com.ren.tutornearme.basic_info.BasicInfoActivity;
 import com.ren.tutornearme.util.InternetHelper;
 import com.ren.tutornearme.util.SnackBarHelper;
+import com.stfalcon.imageviewer.StfalconImageViewer;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
@@ -66,7 +68,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
     private CardView basicInfoCardView;
     private Button uploadResumeButton, uploadValidIDButton;
     private TextView tutorName, tutorGender, tutorBarangay, tutorBirthDate, tutorResume, tutorID;
-    private ImageView tutorAvatarImageView;
+    private ImageView tutorAvatarImageView, previewIdImageView;
     private Spinner validIdTypeSpinner;
     private AlertDialog waitingDialog;
 
@@ -83,8 +85,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
     private enum PickiTFlag { PDF, IMG }
     private PickiTFlag pickiTFlag;
     private String imageFlag;
-    public static final String AVATAR_IMG = "avatar";
-    public static final String ID_IMG = "validId";
+
+    private static final String AVATAR_IMG = "avatar";
+    private static final String ID_IMG = "validId";
     
     private final SimpleDateFormat dateTimeFormatter =
             new SimpleDateFormat( "MMM-dd-yyyy" , Locale.ENGLISH);
@@ -143,6 +146,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         tutorAvatarImageView.setOnClickListener(this);
         tutorResume.setOnClickListener(this);
         tutorID.setOnClickListener(this);
+        previewIdImageView.setOnClickListener(this);
     }
 
     private void initBindViews(View view) {
@@ -153,6 +157,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         uploadValidIDButton = view.findViewById(R.id.profile_upload_id_button);
         uploadResumeButton = view.findViewById(R.id.profile_upload_resume_button);
         validIdTypeSpinner = view.findViewById(R.id.profile_id_type_spinner);
+        previewIdImageView = view.findViewById(R.id.profile_id_preview);
 
         tutorName = view.findViewById(R.id.profile_tutor_name_textview);
         tutorGender = view.findViewById(R.id.profile_tutor_gender_textview);
@@ -208,20 +213,50 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
             showPDFPicker();
         } else if (view.getId() == R.id.profile_upload_id_button) {
             if(!checkHasInternetConnection()) return;
-
-            if (profileViewModel.getValidIdUri().getValue() != null)
-                updateTutorValidId();
-            else
-                Snackbar.make(mView, "Please choose a file before uploading.",
-                        Snackbar.LENGTH_SHORT).show();
+            updateIdOrShowSnackbar();
         } else if (view.getId() == R.id.profile_upload_resume_button) {
             if(!checkHasInternetConnection()) return;
+            updateResumeOrShowSnackbar();
+        } else if (view.getId() == R.id.profile_id_preview) {
+            if(!checkHasInternetConnection()) return;
+            showIdPreviewOrSnackbar();
+        }
+    }
 
-            if (profileViewModel.getResumeUri().getValue() != null)
-                updateTutorResume();
-            else
-                Snackbar.make(mView, "Please choose a file before uploading.",
+    private void updateResumeOrShowSnackbar() {
+        if (profileViewModel.getResumeUri().getValue() != null)
+            updateTutorResume();
+        else
+            Snackbar.make(mView, "Please choose a file before uploading.",
                     Snackbar.LENGTH_SHORT).show();
+    }
+
+    private void updateIdOrShowSnackbar() {
+        if (profileViewModel.getValidIdUri().getValue() != null)
+            updateTutorValidId();
+        else
+            Snackbar.make(mView, "Please choose a file before uploading.",
+                    Snackbar.LENGTH_SHORT).show();
+    }
+
+    private void showIdPreviewOrSnackbar() {
+        if (profileViewModel.getValidIdUri().getValue() == null)
+            Snackbar.make(mView, "Please choose a file to preview.",
+                    Snackbar.LENGTH_SHORT).show();
+        else {
+            Uri currentIdUri = profileViewModel.getValidIdUri().getValue();
+            new StfalconImageViewer.Builder<>
+                    (mActivity, Arrays.asList(currentIdUri), (imageView, image) -> {
+                        Glide.with((Context) mActivity)
+                                .load(image)
+                                .placeholder(R.mipmap.ic_logo)
+                                .into(imageView);
+
+                    })
+                    .withHiddenStatusBar(false)
+                    .allowZooming(true)
+                    .allowSwipeToDismiss(true)
+                    .show();
         }
     }
 
