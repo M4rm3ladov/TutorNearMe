@@ -408,11 +408,7 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
                         Toast.makeText(BasicInfoActivity.this, "Updated successfully",
                                 Toast.LENGTH_SHORT).show();
 
-                        Intent intent = new Intent(BasicInfoActivity.this, MainActivity.class);
-                        bundle.putParcelable(CURRENT_USER, Parcels.wrap(tutorInfo));
-                        intent.putExtras(bundle);
-                        startActivity(intent);
-                        finish();
+                        navigateToHome(dataOrException.data, bundle);
                     }
                 }
             });
@@ -445,12 +441,18 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
                             Toast.makeText(BasicInfoActivity.this, "Saved successfully",
                                     Toast.LENGTH_SHORT).show();
 
-                            Intent intent = new Intent(BasicInfoActivity.this, HomeActivity.class);
-                            startActivity(intent);
-                            finish();
+                            navigateToHome(dataOrException.data, new Bundle());
                         }
                     }
                 });
+    }
+
+    private void navigateToHome(TutorInfo tutorInfo, Bundle bundle) {
+        Intent intent = new Intent(BasicInfoActivity.this, HomeActivity.class);
+        bundle.putParcelable(CURRENT_USER, Parcels.wrap(tutorInfo));
+        intent.putExtras(bundle);
+        startActivity(intent);
+        finish();
     }
 
     private void validateBeforeSave() {

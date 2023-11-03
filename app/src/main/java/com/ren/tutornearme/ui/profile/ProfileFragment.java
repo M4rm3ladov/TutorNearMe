@@ -5,7 +5,6 @@ import static com.ren.tutornearme.util.Common.BIRTH_DATE;
 import static com.ren.tutornearme.util.Common.FIRST_NAME;
 import static com.ren.tutornearme.util.Common.GENDER;
 import static com.ren.tutornearme.util.Common.LAST_NAME;
-import static com.ren.tutornearme.util.Common.TUTOR_CREATED_DATE;
 
 import android.Manifest;
 import android.app.Activity;
@@ -218,11 +217,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         } else if (view.getId() == R.id.profile_upload_id_button) {
             if(!checkHasInternetConnection()) return;
             uploadValidId();
-            updateIdOrShowSnackbar();
         } else if (view.getId() == R.id.profile_upload_resume_button) {
             if(!checkHasInternetConnection()) return;
             uploadResume();
-            updateResumeOrShowSnackbar();
         } else if (view.getId() == R.id.profile_id_preview) {
             if(!checkHasInternetConnection()) return;
             showIdPreviewOrSnackbar();
@@ -242,22 +239,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
             intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(intent);
         }
-    }
-
-    private void updateResumeOrShowSnackbar() {
-        if (profileViewModel.getResumeUri().getValue() != null)
-            updateTutorResume();
-        else
-            Snackbar.make(mView, "Please choose a file before uploading.",
-                    Snackbar.LENGTH_SHORT).show();
-    }
-
-    private void updateIdOrShowSnackbar() {
-        if (profileViewModel.getValidIdUri().getValue() != null)
-            updateTutorValidId();
-        else
-            Snackbar.make(mView, "Please choose a file before uploading.",
-                    Snackbar.LENGTH_SHORT).show();
     }
 
     private void showIdPreviewOrSnackbar() {
@@ -368,6 +349,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
     }
 
     private void uploadValidId() {
+        if (profileViewModel.getValidIdUri().getValue() == null) {
+            Snackbar.make(mView, "Please choose a file before uploading.",
+                    Snackbar.LENGTH_SHORT).show();
+            return;
+        }
 
         createWaitingDialog();
         
@@ -396,9 +382,10 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
                                     }
 
                                     if (mapDataOrException.data.get("isComplete") != null) {
-                                        Snackbar.make(mView, "Image is now ready to be uploaded",
-                                                Snackbar.LENGTH_SHORT).show();
+                                        /*Snackbar.make(mView, "Image is now ready to be uploaded",
+                                                Snackbar.LENGTH_SHORT).show();*/
                                         waitingDialog.dismiss();
+                                        updateTutorValidId();
                                     }
                                 }
                             }
@@ -411,7 +398,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
     }
 
     private void uploadResume() {
-
+        if (profileViewModel.getResumeUri().getValue() == null) {
+            Snackbar.make(mView, "Please choose a file before uploading.",
+                    Snackbar.LENGTH_SHORT).show();
+            return;
+        }
         createWaitingDialog();
 
         Uri selectedPdfUri = profileViewModel.getResumeUri().getValue();
@@ -438,9 +429,10 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
                             }
 
                             if (mapDataOrException.data.get("isComplete") != null) {
-                                Snackbar.make(mView, "File is now ready to be uploaded",
-                                        Snackbar.LENGTH_SHORT).show();
+                                /*Snackbar.make(mView, "File is now ready to be uploaded",
+                                        Snackbar.LENGTH_SHORT).show();*/
                                 waitingDialog.dismiss();
+                                updateTutorResume();
                             }
                         }
                     }
@@ -615,7 +607,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         bundle.putString(GENDER, mTutorInfo.getGender());
         bundle.putString(BARANGAY, mTutorInfo.getAddress());
         bundle.putLong(BIRTH_DATE, mTutorInfo.getBirthDate());
-        bundle.putLong(TUTOR_CREATED_DATE, mTutorInfo.getCreatedDate());
 
         intent.putExtras(bundle);
         startActivity(intent);
