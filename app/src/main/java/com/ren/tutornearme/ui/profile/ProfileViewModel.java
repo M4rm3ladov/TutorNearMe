@@ -13,6 +13,7 @@ import java.util.Map;
 public class ProfileViewModel extends ViewModel {
 
     private final ProfileRepository profileRepository;
+    private final MutableLiveData<String> avatarPath = new MutableLiveData<>();
     private final MutableLiveData<Uri> validIdUri = new MutableLiveData<>();
     private final MutableLiveData<String> validIdPath = new MutableLiveData<>();
     private final MutableLiveData<Uri> resumeUri = new MutableLiveData<>();
@@ -40,6 +41,16 @@ public class ProfileViewModel extends ViewModel {
     }
 
 
+    public MutableLiveData<String> getAvatarPath() {
+        return avatarPath;
+    }
+
+    public void setAvatarPath(String path) {
+        avatarPath.setValue(path);
+    }
+
+    // valid id path and uri
+
     public MutableLiveData<String> getValidIdPath() {
         return validIdPath;
     }
@@ -56,6 +67,7 @@ public class ProfileViewModel extends ViewModel {
         return validIdUri;
     }
 
+    // resume path and uri
 
     public MutableLiveData<String> getResumePath() {
         return resumePath;
