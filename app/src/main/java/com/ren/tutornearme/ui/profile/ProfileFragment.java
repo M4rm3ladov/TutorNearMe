@@ -181,9 +181,15 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
                 tutorBarangay.setText(tutorInfo.getAddress());
                 tutorBirthDate.setText(dateTimeFormatter.format(new Date(tutorInfo.getBirthDate())));
 
+                String avatarPath = "";
                 if (!tutorInfo.getAvatar().isEmpty())
+                    avatarPath = tutorInfo.getAvatar();
+                if (profileViewModel.getAvatarPath().getValue() != null)
+                    avatarPath = profileViewModel.getAvatarPath().getValue();
+
+                if (!avatarPath.isEmpty())
                     Glide.with((Context) mActivity)
-                        .load(tutorInfo.getAvatar())
+                        .load(avatarPath)
                         .placeholder(R.mipmap.ic_logo)
                         .apply(new RequestOptions().override(100, 100))
                         .into(tutorAvatarImageView);
@@ -551,6 +557,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
                                 .apply(new RequestOptions().override(100, 100))
                                 .into(tutorAvatarImageView);
                         waitingDialog.dismiss();
+
+                        profileViewModel.setAvatarPath(selectedImageUri.toString());
                     }
 
                 }

@@ -28,7 +28,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearanceOverlay="@style/circleImageView"
-            app:srcCompat="@drawable/book_dark"
+            app:srcCompat="@mipmap/ic_logo_round"
             app:strokeColor="@color/colorPrimary"
             app:strokeWidth="2dp" />
 
