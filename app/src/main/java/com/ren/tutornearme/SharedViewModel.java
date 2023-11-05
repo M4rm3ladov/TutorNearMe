@@ -17,7 +17,7 @@ public class SharedViewModel extends ViewModel {
         tutorInfoLiveData = new MutableLiveData<>();
     }
 
-    public MutableLiveData<DataOrException<TutorInfo, Exception>> getTutorInfoFromFirebase() {
+    public LiveData<DataOrException<TutorInfo, Exception>> getTutorInfoFromFirebase() {
         return sharedRepository.getTutorInfo();
     }
 
