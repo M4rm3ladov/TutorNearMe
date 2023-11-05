@@ -21,4 +21,8 @@ public class AuthViewModel extends ViewModel {
         return authRepository.checkIfRegistered();
     }
 
+    public LiveData<DataOrException<String, Exception>> getInstanceToken() {
+        return authRepository.getInstanceToken();
+    }
+
 }

@@ -48,6 +48,7 @@ dependencies {
     implementation("com.firebaseui:firebase-ui-auth:8.0.2")
     implementation("com.google.firebase:firebase-database:20.3.0")
     implementation("com.firebase:geofire-android:3.2.0")
+    implementation("com.google.firebase:firebase-messaging:23.3.1")
 
     // api access
     implementation("com.android.volley:volley:1.2.1")

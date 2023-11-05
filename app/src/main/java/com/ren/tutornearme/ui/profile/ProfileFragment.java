@@ -214,10 +214,10 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
             navigateToBasicInfo();
         } else if (view.getId() == R.id.profile_img_imageview) {
             imageFlag = AVATAR_IMG;
-            promptFilePermission();
+            promptImageFilePermission();
         } else if (view.getId() == R.id.profile_tutor_id_textview) {
             imageFlag = ID_IMG;
-            promptFilePermission();
+            promptImageFilePermission();
         } else if (view.getId() == R.id.profile_tutor_resume_textview) {
             showPDFPicker();
         } else if (view.getId() == R.id.profile_upload_id_button) {
@@ -566,7 +566,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         });
     }
 
-    private void promptFilePermission() {
+    private void promptImageFilePermission() {
         String message = "";
         if (AVATAR_IMG.equals(imageFlag))
             message = "Please make to upload image of you shows your face clearly and without " +

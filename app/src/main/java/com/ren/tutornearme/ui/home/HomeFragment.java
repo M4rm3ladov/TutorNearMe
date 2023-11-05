@@ -4,11 +4,13 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -195,7 +197,18 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     } else {
                         SnackBarHelper.showSnackBar(mContainerView,
                                 "Location access denied");
-                        // The user was asked to change settings, but chose not to
+
+                        new AlertDialog.Builder(mContext)
+                                .setTitle(R.string.title_location_service_permission)
+                                .setMessage(R.string.text_location_service_permission)
+                                .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
+                                    //Prompt the user once explanation has been shown
+                                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                    startActivity(intent);
+                                })
+                                .setNegativeButton(R.string.cancel, null)
+                                .create()
+                                .show();
                     }
                 }
             });
@@ -227,19 +240,19 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                         .setMessage(R.string.text_location_permission)
                         .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
                             //Prompt the user once explanation has been shown
-                            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+                            locationRequestLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
                         })
                         .create()
                         .show();
             } // No explanation needed, we can request the permission.
-            else requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+            else locationRequestLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
 
             return false;
         }
         return true;
     }
 
-    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
+    private final ActivityResultLauncher<String> locationRequestLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(),
             new ActivityResultCallback<Boolean>() {
                 @SuppressLint("MissingPermission")
@@ -252,10 +265,23 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                         Snackbar.make(mContainerView,
                                 "Location permission was denied."
                                 , Snackbar.LENGTH_SHORT).show();
+
+                        new AlertDialog.Builder(mContext)
+                                .setTitle(R.string.title_location_permission)
+                                .setMessage(R.string.text_location_permission)
+                                .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
+                                    //Prompt the user once explanation has been shown
+                                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                    startActivity(intent);
+                                })
+                                .setNegativeButton(R.string.cancel, null)
+                                .create()
+                                .show();
                     }
                 }
             }
     );
+
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
