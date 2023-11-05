@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.firebase.ui.auth.AuthMethodPickerLayout;
 import com.firebase.ui.auth.AuthUI;
@@ -20,6 +21,7 @@ import com.ren.tutornearme.HomeActivity;
 import com.ren.tutornearme.R;
 import com.ren.tutornearme.model.TutorInfo;
 import com.ren.tutornearme.basic_info.BasicInfoActivity;
+import com.ren.tutornearme.util.FirebaseMessagingHelper;
 import com.ren.tutornearme.util.InternetHelper;
 
 import org.parceler.Parcels;
@@ -55,6 +57,21 @@ public class MainActivity extends AppCompatActivity {
     private void initAuthListener() {
 
         authViewModel.checkIfSignedIn().observe(MainActivity.this, isSignedIn -> {
+
+            authViewModel.getInstanceToken().observe(MainActivity.this, dataOrException -> {
+                if (dataOrException.exception != null) {
+                    Snackbar.make(findViewById(android.R.id.content),
+                            "[ERROR]: " + dataOrException.exception.getMessage(),
+                            Snackbar.LENGTH_SHORT).show();
+                }
+
+                if (dataOrException.data != null) {
+                    Log.d("TOKENNN", dataOrException.data);
+                    new FirebaseMessagingHelper()
+                            .updateNotificationToken(this.getApplication(), dataOrException.data);
+                }
+            });
+
             if (!isSignedIn)
                 showLoginLayout();
             else
