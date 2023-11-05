@@ -3,6 +3,9 @@ package com.ren.tutornearme.auth;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -10,6 +13,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.model.TutorInfo;
 
@@ -63,6 +67,35 @@ public class AuthRepository {
                         public void onCancelled(@NonNull DatabaseError error) {
                             dataOrException.exception = error.toException();
                             mutableLiveData.postValue(dataOrException);
+                        }
+                    });
+        }
+        return mutableLiveData;
+    }
+
+    public MutableLiveData<DataOrException<String, Exception>> getInstanceToken() {
+        MutableLiveData<DataOrException<String, Exception>> mutableLiveData = new MutableLiveData<>();
+        currentUser = getCurrentUser();
+
+        if (currentUser != null) {
+            DataOrException<String, Exception> dataOrException = new DataOrException<>();
+            FirebaseMessaging
+                    .getInstance()
+                    .getToken()
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            dataOrException.exception = e;
+                            mutableLiveData.postValue(dataOrException);
+                        }
+                    })
+                    .addOnCompleteListener(new OnCompleteListener<String>() {
+                        @Override
+                        public void onComplete(@NonNull Task<String> task) {
+                            if (task.isSuccessful()) {
+                                dataOrException.data = task.getResult();
+                                mutableLiveData.postValue(dataOrException);
+                            }
                         }
                     });
         }
