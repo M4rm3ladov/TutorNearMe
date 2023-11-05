@@ -1,6 +1,6 @@
 package com.ren.tutornearme.basic_info;
 
-import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.firebase.auth.FirebaseUser;
@@ -24,11 +24,11 @@ public class BasicInfoViewModel extends ViewModel {
         basicInfoRepository.signOut();
     }
 
-    public MutableLiveData<DataOrException<TutorInfo, Exception>> saveTutorInfo(TutorInfo tutorInfo) {
+    public LiveData<DataOrException<TutorInfo, Exception>> saveTutorInfo(TutorInfo tutorInfo) {
         return basicInfoRepository.saveTutorInfo(tutorInfo);
     }
 
-    public MutableLiveData<DataOrException<TutorInfo, Exception>> updateTutorInfo
+    public LiveData<DataOrException<TutorInfo, Exception>> updateTutorInfo
             (Map<String, Object> tutorInfo) {
         return basicInfoRepository.updateTutorInfo(tutorInfo);
     }
