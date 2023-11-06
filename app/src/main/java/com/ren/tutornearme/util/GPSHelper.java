@@ -1,11 +1,16 @@
 package com.ren.tutornearme.util;
 
+import static com.ren.tutornearme.util.Common.LOCATION_FASTEST_INTERVAL;
+import static com.ren.tutornearme.util.Common.LOCATION_INTERVAL;
+import static com.ren.tutornearme.util.Common.LOCATION_MAX_WAIT_TIME;
+import static com.ren.tutornearme.util.Common.LOCATION_MIN_DISTANCE;
+
+import android.app.Activity;
 import android.app.Application;
 import android.view.View;
 
 import androidx.activity.result.IntentSenderRequest;
 import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -14,14 +19,24 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.location.Priority;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.ren.tutornearme.ui.home.HomeFragment;
+import com.ren.tutornearme.PermissionsActivity;
 
 public class GPSHelper {
 
     public  void turnOnGPS(LocationRequest locationRequest, Application application,
-                                 View rootView, Fragment activity, OnGpsListener onGpsListener) {
+                           View rootView, Activity activity, OnGpsListener onGpsListener) {
+        if (locationRequest == null)
+            locationRequest = new LocationRequest.Builder(
+                Priority.PRIORITY_HIGH_ACCURACY, LOCATION_INTERVAL)
+                .setWaitForAccurateLocation(false)
+                .setMinUpdateDistanceMeters(LOCATION_MIN_DISTANCE)
+                .setMinUpdateIntervalMillis(LOCATION_FASTEST_INTERVAL)
+                .setMaxUpdateDelayMillis(LOCATION_MAX_WAIT_TIME)
+                .build();
+
         LocationSettingsRequest.Builder settingsBuilder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(locationRequest);
         settingsBuilder.setNeedBle(true);
@@ -50,8 +65,10 @@ public class GPSHelper {
                                 ResolvableApiException resolvable = (ResolvableApiException) exception;
                                 IntentSenderRequest intentSenderRequest = new IntentSenderRequest
                                         .Builder(resolvable.getResolution()).build();
-                                if (activity.getClass().equals(HomeFragment.class))
-                                    ((HomeFragment)activity).gpsResultLauncher.launch(intentSenderRequest);
+                                if (activity.getClass().equals(PermissionsActivity.class))
+                                    ((PermissionsActivity)activity).gpsPermissionRequestLauncher.launch(intentSenderRequest);
+                                /*else if (activity.getClass().equals(HomeFragment.class))
+                                    ((HomeFragment)activity).gpsResultLauncher.launch(intentSenderRequest);*/
 
                             } catch (ClassCastException e) {
                                 SnackBarHelper.showSnackBar(rootView,
