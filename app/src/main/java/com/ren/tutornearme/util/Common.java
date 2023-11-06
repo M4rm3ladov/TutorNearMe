@@ -3,7 +3,7 @@ package com.ren.tutornearme.util;
 public class Common {
     public static final String TUTOR_INFO_REFERENCE = "TutorInfo";
     public static final String TUTOR_LOCATION_REFERENCE = "TutorLocation";
-    public static final String TOKEN_REFERENCE = "Token";
+    public static final String TOKEN_REFERENCE = "MessagingToken";
     public static final String NOTIFICATION_TITLE = "title";
     public static final String NOTIFICATION_BODY = "body";
     public static final String CURRENT_USER = "user";
