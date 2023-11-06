@@ -12,6 +12,12 @@ public class Common {
     public static final String GENDER = "Gender";
     public static final String BARANGAY = "Barangay";
     public static final String BIRTH_DATE = "BirthDate";
+
+
+    public static final int LOCATION_INTERVAL = 5000;
+    public static final int LOCATION_MAX_WAIT_TIME = 10000;
+    public static final int LOCATION_FASTEST_INTERVAL = 3000;
+    public static final float LOCATION_MIN_DISTANCE = 10f;
     public static final double ZAM_LONG = 122.079025;
     public static final double ZAM_LAT = 6.921442;
 }
