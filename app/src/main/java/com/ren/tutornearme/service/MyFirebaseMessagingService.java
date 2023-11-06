@@ -16,7 +16,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
-        new FirebaseMessagingHelper().updateNotificationToken(this, token);
+        new FirebaseMessagingHelper().updateNotificationToken(this, token, null);
     }
 
     @Override
