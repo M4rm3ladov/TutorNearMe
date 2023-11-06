@@ -16,6 +16,9 @@
         Please turn on your location service.</string>
     <string name="title_location_permission">Location Access Required</string>
     <string name="text_location_permission">We need access to your location to use our services.</string>
+    <string name="text_location_permission_settings">We need access to your location to use our services.
+        Please Turn on location services in
+        <font fgcolor='#287ABB'><u>Settings > Apps > Tutor Near Me > App permissions</u></font></string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
 

@@ -1,6 +1,6 @@
 package com.ren.tutornearme.util;
 
-import static com.ren.tutornearme.util.Common.TUTOR_INFO_REFERENCE;
+import static com.ren.tutornearme.util.Common.TOKEN_REFERENCE;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -26,7 +26,7 @@ import com.ren.tutornearme.model.MessagingToken;
 public class FirebaseMessagingHelper {
     private final FirebaseAuth firebaseAuth;
     private final FirebaseDatabase db = FirebaseDatabase.getInstance();
-    private final DatabaseReference tokenRef = db.getReference(TUTOR_INFO_REFERENCE);
+    private final DatabaseReference tokenRef = db.getReference(TOKEN_REFERENCE);
 
     public FirebaseMessagingHelper() {
         firebaseAuth = FirebaseAuth.getInstance();
