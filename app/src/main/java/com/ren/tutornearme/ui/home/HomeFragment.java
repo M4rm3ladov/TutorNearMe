@@ -1,16 +1,12 @@
 package com.ren.tutornearme.ui.home;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,14 +14,7 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.IntentSenderRequest;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
@@ -51,9 +40,12 @@ import com.google.firebase.database.ValueEventListener;
 import com.ren.tutornearme.R;
 import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.databinding.FragmentHomeBinding;
-import com.ren.tutornearme.util.GPSHelper;
 import com.ren.tutornearme.util.SnackBarHelper;
 
+import static com.ren.tutornearme.util.Common.LOCATION_FASTEST_INTERVAL;
+import static com.ren.tutornearme.util.Common.LOCATION_INTERVAL;
+import static com.ren.tutornearme.util.Common.LOCATION_MAX_WAIT_TIME;
+import static com.ren.tutornearme.util.Common.LOCATION_MIN_DISTANCE;
 import static com.ren.tutornearme.util.Common.ZAM_LAT;
 import static com.ren.tutornearme.util.Common.ZAM_LONG;
 import static com.ren.tutornearme.util.SnackBarHelper.showSnackBar;
@@ -66,17 +58,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private FragmentHomeBinding binding;
     private SupportMapFragment mapFragment;
 
-    private static final int LOCATION_INTERVAL = 5000;
-    private static final int LOCATION_MAX_WAIT_TIME = 10000;
-    private static final int LOCATION_FASTEST_INTERVAL = 3000;
-    private static final float LOCATION_MIN_DISTANCE = 10f;
     private static final float ZOOM_VAL = 18f;
 
     private HomeViewModel homeViewModel;
     private View mContainerView;
     private Context mContext;
     private FragmentActivity mActivity;
-    private boolean isGpsEnabled = false;
 
     private final ValueEventListener onlineValueEventListener = new ValueEventListener() {
         @Override
@@ -184,35 +171,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     Snackbar.LENGTH_SHORT).show();
     }
 
-    public final ActivityResultLauncher<IntentSenderRequest> gpsResultLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartIntentSenderForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        isGpsEnabled = true;
-                        Toast.makeText(mContext,
-                                "Location enabled!", Toast.LENGTH_LONG).show();
-                        // All required changes were successfully made
-                    } else {
-                        SnackBarHelper.showSnackBar(mContainerView,
-                                "Location access denied");
-
-                        new AlertDialog.Builder(mContext)
-                                .setTitle(R.string.title_location_service_permission)
-                                .setMessage(R.string.text_location_service_permission)
-                                .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
-                                    //Prompt the user once explanation has been shown
-                                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                    startActivity(intent);
-                                })
-                                .setNegativeButton(R.string.cancel, null)
-                                .create()
-                                .show();
-                    }
-                }
-            });
-
     private void initLocationRequestBuilder() {
         locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, LOCATION_INTERVAL)
                 .setWaitForAccurateLocation(false)
@@ -220,68 +178,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 .setMinUpdateIntervalMillis(LOCATION_FASTEST_INTERVAL)
                 .setMaxUpdateDelayMillis(LOCATION_MAX_WAIT_TIME)
                 .build();
-
-        new GPSHelper().turnOnGPS(locationRequest, mActivity.getApplication(),
-                mContainerView, this, new GPSHelper.OnGpsListener() {
-                    @Override
-                    public void gpsStatus(boolean isGPSEnabled) {
-                        isGpsEnabled = isGPSEnabled;
-                    }
-                });
     }
-
-    private boolean checkLocationPermission() {
-        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            if (ActivityCompat.shouldShowRequestPermissionRationale(mActivity, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                new AlertDialog.Builder(mContext)
-                        .setTitle(R.string.title_location_permission)
-                        .setMessage(R.string.text_location_permission)
-                        .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
-                            //Prompt the user once explanation has been shown
-                            locationRequestLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
-                        })
-                        .create()
-                        .show();
-            } // No explanation needed, we can request the permission.
-            else locationRequestLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
-
-            return false;
-        }
-        return true;
-    }
-
-    private final ActivityResultLauncher<String> locationRequestLauncher = registerForActivityResult(
-            new ActivityResultContracts.RequestPermission(),
-            new ActivityResultCallback<Boolean>() {
-                @SuppressLint("MissingPermission")
-                @Override
-                public void onActivityResult(Boolean result) {
-                    // if permission granted after prompt
-                    if (result) {
-                        showLocationWithButton();
-                    } else {
-                        Snackbar.make(mContainerView,
-                                "Location permission was denied."
-                                , Snackbar.LENGTH_SHORT).show();
-
-                        new AlertDialog.Builder(mContext)
-                                .setTitle(R.string.title_location_permission)
-                                .setMessage(R.string.text_location_permission)
-                                .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
-                                    //Prompt the user once explanation has been shown
-                                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                    startActivity(intent);
-                                })
-                                .setNegativeButton(R.string.cancel, null)
-                                .create()
-                                .show();
-                    }
-                }
-            }
-    );
-
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
@@ -295,13 +192,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             Log.d("MAP_PARSE_ERROR", "onMapReady: " + e.getMessage());
         }
         // if permission already granted
-        if (checkLocationPermission()) {
-            showLocationWithButton();
-        } else {
-            LatLng zam = new LatLng(ZAM_LAT, ZAM_LONG);
-            mMap.addMarker(new MarkerOptions().position(zam).title("Marker in Zamboanga"));
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(zam));
-        }
+
+        showLocationWithButton();
 
         View locationButton = ((View) mapFragment.requireView().findViewById(Integer.parseInt("1")).getParent())
                 .findViewById(Integer.parseInt("2"));
@@ -329,6 +221,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                             LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
                             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, ZOOM_VAL));
                         } else {
+                            LatLng zam = new LatLng(ZAM_LAT, ZAM_LONG);
+                            mMap.addMarker(new MarkerOptions().position(zam).title("Marker in Zamboanga"));
+                            mMap.moveCamera(CameraUpdateFactory.newLatLng(zam));
+
                             if (task.getException() != null)
                                 showSnackBar(mContainerView, String.format("[ERROR]: %s",
                                         task.getException().getMessage()));
