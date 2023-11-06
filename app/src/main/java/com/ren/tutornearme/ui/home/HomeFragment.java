@@ -3,6 +3,7 @@ package com.ren.tutornearme.ui.home;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
@@ -14,7 +15,12 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.IntentSenderRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
@@ -38,8 +44,11 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.ren.tutornearme.R;
+import com.ren.tutornearme.auth.MainActivity;
 import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.databinding.FragmentHomeBinding;
+import com.ren.tutornearme.util.GPSHelper;
+import com.ren.tutornearme.util.LocationHelper;
 import com.ren.tutornearme.util.SnackBarHelper;
 
 import static com.ren.tutornearme.util.Common.LOCATION_FASTEST_INTERVAL;
@@ -48,6 +57,8 @@ import static com.ren.tutornearme.util.Common.LOCATION_MAX_WAIT_TIME;
 import static com.ren.tutornearme.util.Common.LOCATION_MIN_DISTANCE;
 import static com.ren.tutornearme.util.Common.ZAM_LAT;
 import static com.ren.tutornearme.util.Common.ZAM_LONG;
+import static com.ren.tutornearme.util.PermissionsHelper.isGPSPermissionGranted;
+import static com.ren.tutornearme.util.PermissionsHelper.isLocationPermissionGranted;
 import static com.ren.tutornearme.util.SnackBarHelper.showSnackBar;
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
@@ -90,6 +101,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onDetach() {
         mContext = null;
+        mActivity = null;
         super.onDetach();
     }
 
@@ -97,8 +109,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         homeViewModel =
                 new ViewModelProvider(this).get(HomeViewModel.class);
 
-        mContainerView = container;
+        /*mContainerView = container;*/
 
+        mContainerView = mActivity.findViewById(android.R.id.content);
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
@@ -171,6 +184,51 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     Snackbar.LENGTH_SHORT).show();
     }
 
+    public final ActivityResultLauncher<IntentSenderRequest> gpsPermissionRequestLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartIntentSenderForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK)
+                    // All required changes were successfully made
+                    startActivity(new Intent(mActivity, MainActivity.class));
+                else
+                    mActivity.finishAffinity();
+            });
+
+    public final ActivityResultLauncher<String> locationPermissionRequestLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(),
+            result -> {
+                // if permission granted after prompt
+                if (result) {
+                    if (isGPSPermissionGranted(mContext))
+                        startActivity(new Intent(mContext, MainActivity.class));
+                    else
+                        initGPSHelper();
+                }
+                else
+                    new AlertDialog.Builder(mContext)
+                            .setTitle(R.string.title_location_permission)
+                            .setMessage(R.string.text_location_permission_settings)
+                            .setPositiveButton(R.string.ok, (dialogInterface, i) -> mActivity.finishAffinity())
+                            .setNegativeButton(R.string.cancel, (dialogInterface, i) -> mActivity.finishAffinity())
+                            .setCancelable(false)
+                            .create()
+                            .show();
+            }
+    );
+
+    private boolean isGPSAndLocationPermissionGranted() {
+        if (!isLocationPermissionGranted(mContext)) {
+            showSnackBar(mContainerView, "[ERROR]: Location access is turned off. ");
+            initLocationHelper();
+            return false;
+        } else if (!isGPSPermissionGranted(mContext)) {
+            showSnackBar(mContainerView, "[ERROR]: Location services is turned off. ");
+            initGPSHelper();
+            return false;
+        }
+        return true;
+    }
+
     private void initLocationRequestBuilder() {
         locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, LOCATION_INTERVAL)
                 .setWaitForAccurateLocation(false)
@@ -178,6 +236,15 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 .setMinUpdateIntervalMillis(LOCATION_FASTEST_INTERVAL)
                 .setMaxUpdateDelayMillis(LOCATION_MAX_WAIT_TIME)
                 .build();
+    }
+
+    private void initGPSHelper() {
+        GPSHelper.showGPSPermissionRationale(locationRequest, mActivity.getApplication(),
+                mContainerView, (AppCompatActivity) mActivity, this);
+    }
+
+    private void initLocationHelper() {
+        LocationHelper.showLocationPermissionRationale(mContext, this);
     }
 
     @Override
@@ -191,9 +258,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         } catch (Resources.NotFoundException e) {
             Log.d("MAP_PARSE_ERROR", "onMapReady: " + e.getMessage());
         }
-        // if permission already granted
 
-        showLocationWithButton();
+        showDefaultLocation();
+        // if permission already granted
+        if(isGPSAndLocationPermissionGranted()) {
+            showLocationWithButton();
+        }
 
         View locationButton = ((View) mapFragment.requireView().findViewById(Integer.parseInt("1")).getParent())
                 .findViewById(Integer.parseInt("2"));
@@ -216,15 +286,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             fusedLocationProviderClient.getLastLocation()
                     .addOnCompleteListener(task -> {
 
-                        if (task.isSuccessful()) {
+                        if (task.isSuccessful() && task.getResult() != null) {
                             Location location = task.getResult();
                             LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
                             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, ZOOM_VAL));
-                        } else {
-                            LatLng zam = new LatLng(ZAM_LAT, ZAM_LONG);
-                            mMap.addMarker(new MarkerOptions().position(zam).title("Marker in Zamboanga"));
-                            mMap.moveCamera(CameraUpdateFactory.newLatLng(zam));
 
+                        } else {
+                            showDefaultLocation();
                             if (task.getException() != null)
                                 showSnackBar(mContainerView, String.format("[ERROR]: %s",
                                         task.getException().getMessage()));
@@ -235,5 +303,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
             return true;
         });
+    }
+
+    private void showDefaultLocation() {
+        LatLng userLatLng = new LatLng(ZAM_LAT, ZAM_LONG);
+        mMap.addMarker(new MarkerOptions().position(userLatLng).title("Marker in Zamboanga"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(userLatLng));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, ZOOM_VAL));
     }
 }
