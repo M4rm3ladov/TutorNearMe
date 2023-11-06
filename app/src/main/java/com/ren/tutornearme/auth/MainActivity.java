@@ -68,7 +68,8 @@ public class MainActivity extends AppCompatActivity {
                 if (dataOrException.data != null) {
                     Log.d("TOKENNN", dataOrException.data);
                     new FirebaseMessagingHelper()
-                            .updateNotificationToken(this.getApplication(), dataOrException.data);
+                            .updateNotificationToken(this.getApplication(),
+                                    dataOrException.data, findViewById(android.R.id.content));
                 }
             });
 
