@@ -5,12 +5,13 @@ import static com.ren.tutornearme.util.Common.LOCATION_INTERVAL;
 import static com.ren.tutornearme.util.Common.LOCATION_MAX_WAIT_TIME;
 import static com.ren.tutornearme.util.Common.LOCATION_MIN_DISTANCE;
 
-import android.app.Activity;
 import android.app.Application;
 import android.view.View;
 
 import androidx.activity.result.IntentSenderRequest;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -23,11 +24,12 @@ import com.google.android.gms.location.Priority;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.ren.tutornearme.PermissionsActivity;
+import com.ren.tutornearme.ui.home.HomeFragment;
 
 public class GPSHelper {
 
-    public  void turnOnGPS(LocationRequest locationRequest, Application application,
-                           View rootView, Activity activity, OnGpsListener onGpsListener) {
+    public static void showGPSPermissionRationale(LocationRequest locationRequest, Application application,
+                                                  View rootView, AppCompatActivity activity, Fragment fragment) {
         if (locationRequest == null)
             locationRequest = new LocationRequest.Builder(
                 Priority.PRIORITY_HIGH_ACCURACY, LOCATION_INTERVAL)
@@ -49,9 +51,6 @@ public class GPSHelper {
             public void onComplete(@NonNull Task<LocationSettingsResponse> task) {
                 try {
                     LocationSettingsResponse response = task.getResult(ApiException.class);
-                    if (onGpsListener != null) {
-                        onGpsListener.gpsStatus(true);
-                    }
                     // All location settings are satisfied. The client can initialize location
                     // requests here.
 
@@ -65,10 +64,17 @@ public class GPSHelper {
                                 ResolvableApiException resolvable = (ResolvableApiException) exception;
                                 IntentSenderRequest intentSenderRequest = new IntentSenderRequest
                                         .Builder(resolvable.getResolution()).build();
-                                if (activity.getClass().equals(PermissionsActivity.class))
-                                    ((PermissionsActivity)activity).gpsPermissionRequestLauncher.launch(intentSenderRequest);
-                                /*else if (activity.getClass().equals(HomeFragment.class))
-                                    ((HomeFragment)activity).gpsResultLauncher.launch(intentSenderRequest);*/
+
+                                if (activity != null) {
+                                    if (activity.getClass().equals(PermissionsActivity.class))
+                                        ((PermissionsActivity) activity).gpsPermissionRequestLauncher.launch(intentSenderRequest);
+                                }
+
+                                if (fragment != null) {
+                                    ((HomeFragment) fragment).gpsPermissionRequestLauncher.launch(intentSenderRequest);
+                                }
+                                //if (fragmentActivity.getClass().equals(HomeFragment.class))
+
 
                             } catch (ClassCastException e) {
                                 SnackBarHelper.showSnackBar(rootView,
@@ -87,9 +93,6 @@ public class GPSHelper {
                 }
             }
         });
-    }
-    public interface OnGpsListener {
-        void gpsStatus(boolean isGPSEnabled);
     }
 }
 
