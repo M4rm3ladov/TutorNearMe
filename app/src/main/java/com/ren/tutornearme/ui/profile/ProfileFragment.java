@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -64,9 +65,9 @@ import java.util.Locale;
 import java.util.Map;
 
 public class ProfileFragment extends Fragment implements View.OnClickListener, PickiTCallbacks {
-    private CardView basicInfoCardView;
+    private CardView basicInfoCardView, tutorVerifiedCardView;
     private Button uploadResumeButton, uploadValidIDButton;
-    private TextView tutorName, tutorGender, tutorBarangay, tutorBirthDate, tutorResume, tutorID;
+    private TextView tutorName, tutorGender, tutorBarangay, tutorBirthDate, tutorResume, tutorID, tutorIsVerified;
     private ImageView tutorAvatarImageView, previewIdImageView, previewResumeImageView;
     private Spinner validIdTypeSpinner;
     private AlertDialog waitingDialog;
@@ -154,6 +155,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         res = getResources();
 
         basicInfoCardView = view.findViewById(R.id.profile_basic_info_cardview);
+        tutorVerifiedCardView = view.findViewById(R.id.tutor_verified_CardView);
         tutorAvatarImageView = view.findViewById(R.id.profile_img_imageview);
         uploadValidIDButton = view.findViewById(R.id.profile_upload_id_button);
         uploadResumeButton = view.findViewById(R.id.profile_upload_resume_button);
@@ -167,10 +169,24 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         tutorBirthDate = view.findViewById(R.id.profile_tutor_birth_textview);
         tutorResume = view.findViewById(R.id.profile_tutor_resume_textview);
         tutorID = view.findViewById(R.id.profile_tutor_id_textview);
-
+        tutorIsVerified = view.findViewById(R.id.tutor_verified_textview);
     }
 
     private void initPopulateBasicInfo() {
+        sharedViewModel.isTutorVerified().observe(mActivity, new Observer<DataOrException<Boolean, Exception>>() {
+            @Override
+            public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
+                if (dataOrException.exception != null)
+                    SnackBarHelper.showSnackBar(mView, dataOrException.exception.getMessage());
+
+                if (dataOrException.data != null) {
+                    boolean isVerified = dataOrException.data;
+                    tutorIsVerified.setText(isVerified ? "verified" : "unverified");
+                    tutorVerifiedCardView.setCardBackgroundColor(isVerified ?
+                            Color.parseColor("#009688") : Color.parseColor("#F44336"));
+                }
+            }
+        });
         sharedViewModel.getTutorInfoLiveData().observe(mActivity, new Observer<TutorInfo>() {
             @Override
             public void onChanged(TutorInfo tutorInfo) {
@@ -180,6 +196,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
                 tutorGender.setText(tutorInfo.getGender());
                 tutorBarangay.setText(tutorInfo.getAddress());
                 tutorBirthDate.setText(dateTimeFormatter.format(new Date(tutorInfo.getBirthDate())));
+
 
                 String avatarPath = "";
                 if (!tutorInfo.getAvatar().isEmpty())

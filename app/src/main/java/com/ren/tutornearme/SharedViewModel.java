@@ -21,6 +21,10 @@ public class SharedViewModel extends ViewModel {
         return sharedRepository.getTutorInfo();
     }
 
+    public LiveData<DataOrException<Boolean, Exception>> isTutorVerified() {
+        return sharedRepository.checkIfTutorVerified();
+    }
+
     public void setTutorInfo(TutorInfo tutorInfo) {
         tutorInfoLiveData.setValue(tutorInfo);
         this.tutorInfo = tutorInfo;
