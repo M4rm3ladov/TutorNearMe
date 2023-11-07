@@ -377,6 +377,7 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
         String barangay = barangayEditText.getText().toString().trim();
         long currentDate = System.currentTimeMillis();
         long birthDate = calendar.getTimeInMillis();
+        boolean isVerified = false;
 
         progressBar.setVisibility(View.VISIBLE);
 
@@ -422,6 +423,7 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
         tutorInfo.setValidId("");
         tutorInfo.setValidIdType("");
         tutorInfo.setAvatar("");
+        tutorInfo.setVerified(isVerified);
         tutorInfo.setCreatedDate(currentDate);
 
         basicInfoViewModel.saveTutorInfo(tutorInfo).observe(this,
