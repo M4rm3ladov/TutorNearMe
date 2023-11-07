@@ -29,6 +29,13 @@
         <item name="android:textColor">@color/colorPrimaryDark</item>
     </style>
 
+    <style name="AppSubTitle" parent="FirebaseUI">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="fontFamily">@font/roboto</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
     <style name="LoginTheme" parent="FirebaseUI">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
