@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -36,7 +37,7 @@ public class FirebaseMessagingHelper {
         return firebaseAuth.getCurrentUser();
     }
 
-    public void updateNotificationToken(Context context, String token) {
+    public void updateNotificationToken(Context context, String token, View view) {
         if (getCurrentUser() != null) {
             MessagingToken messagingToken = new MessagingToken(token);
 
@@ -45,7 +46,10 @@ public class FirebaseMessagingHelper {
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
+                            if (view != null)
+                                SnackBarHelper.showSnackBar(view, e.getMessage());
+                            else
+                                Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     })
                     .addOnCompleteListener(task -> {});
