@@ -19,7 +19,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.IntentSenderRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -205,14 +204,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                         initGPSHelper();
                 }
                 else
-                    new AlertDialog.Builder(mContext)
-                            .setTitle(R.string.title_location_permission)
-                            .setMessage(R.string.text_location_permission_settings)
-                            .setPositiveButton(R.string.ok, (dialogInterface, i) -> mActivity.finishAffinity())
-                            .setNegativeButton(R.string.cancel, (dialogInterface, i) -> mActivity.finishAffinity())
-                            .setCancelable(false)
-                            .create()
-                            .show();
+                    startActivity(new Intent(mContext, MainActivity.class));
             }
     );
 

@@ -167,7 +167,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         tutorBirthDate = view.findViewById(R.id.profile_tutor_birth_textview);
         tutorResume = view.findViewById(R.id.profile_tutor_resume_textview);
         tutorID = view.findViewById(R.id.profile_tutor_id_textview);
-
     }
 
     private void initPopulateBasicInfo() {

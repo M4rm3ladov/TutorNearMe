@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Tutor Near Me</string>
+    <string name="app_banner_subtitle">TUTOR APP</string>
     <string name="account_creation_message">Let\'s start creating your account</string>
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
@@ -11,18 +12,21 @@
     <string name="continue_text">Continue</string>
     <string name="barangay">Barangay</string>
     <string name="gender">Gender</string>
+    <string name="verified">verified</string>
+    <string name="unverified">unverified</string>
+    <string name="i_d_rather_not_say">I\'d rather not say</string>
+
     <string name="title_location_service_permission">Location Service Required</string>
     <string name="text_location_service_permission">We need access to your location to work properly.
         Please turn on your location service.</string>
+    <string name="title_notification_permission">Notification Access</string>
+    <string name="text_notification_service_permission">We need access to your notification to send you updates.</string>
     <string name="title_location_permission">Location Access Required</string>
     <string name="text_location_permission">We need access to your location to use our services.</string>
-    <string name="text_location_permission_settings">We need access to your location to use our services.
-        Please Turn on location services in
-        <font fgcolor='#287ABB'><u>Settings > Apps > Tutor Near Me > App permissions</u></font></string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
 
-    <string name="i_d_rather_not_say">I\'d rather not say</string>
     <string name="title_activity_home">Home</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -32,31 +36,29 @@
     <string name="action_settings">Settings</string>
 
     <string name="menu_home">Home</string>
-    <string name="menu_profile">Profile</string>
+    <string name="menu_profile">Profile Verification</string>
     <string name="menu_sign_out">Sign Out</string>
     <string name="tutor_name">%1$s %2$s</string>
+
     <string name="title_activity_maps">MapsActivity</string>
-    <string name="verified">verified</string>
-    <string name="unverified">unverified</string>
     <string name="upload_your_valid_id">Upload your valid ID</string>
     <string name="list_of_valid_ids">List of Valid IDs:</string>
     <string name="upload_resume">Upload Resume</string>
     <string name="tell_us_something_about_your_education_experience_and_skills">Tell us something about your education, experience and skills</string>
     <string name="upload_your_resume">Upload your resume</string>
+    <string name="empty"><![CDATA[<Empty>]]></string>
+    <string name="update_basic_info_message">Please make sure the information is correct and matches your ID.</string>
+    <string name="edit_icon">Edit icon</string>
+    <string name="choose_a_file_to_upload">Choose a file to upload</string>
+    <string name="preview">preview</string>
+    <string name="upload_valid_id">Upload Valid ID</string>
+    <string name="barangay_header">Barangay:</string>
+    <string name="birth_date">Birth Date</string>
+    <string name="tutor_avatar">tutor avatar</string>
+    <string name="birth_date_header">Birth Date:</string>
     <string name="gender_header">Gender:</string>
     <string name="name_header">Name:</string>
     <string name="basic_information">Basic Information</string>
-    <string name="upload_valid_id">Upload Valid ID</string>
-    <string name="barangay_header">Barangay:</string>
-    <string name="empty"><![CDATA[<Empty>]]></string>
-    <string name="save">Save</string>
-    <string name="update_basic_info_message">Please make sure the information is correct and matches your ID.</string>
-    <string name="birth_date">Birth Date</string>
-    <string name="tutor_avatar">tutor avatar</string>
-    <string name="edit_icon">Edit icon</string>
-    <string name="birth_date_header">Birth Date:</string>
-    <string name="choose_a_file_to_upload">Choose a file to upload</string>
-    <string name="preview">preview</string>
 
     <string-array name="valid_ids">
         <item>Student ID</item>

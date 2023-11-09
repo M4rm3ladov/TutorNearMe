@@ -35,11 +35,37 @@ public class SharedRepository {
             DataOrException<TutorInfo, Exception> dataOrException = new DataOrException<>();
 
             tutorInfoRef.child(getCurrentUser().getUid())
-                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                    .addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.exists())
                                 dataOrException.data = snapshot.getValue(TutorInfo.class);
+                            mutableLiveData.postValue(dataOrException);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            dataOrException.exception = error.toException();
+                            mutableLiveData.postValue(dataOrException);
+                        }
+                    });
+        }
+        return mutableLiveData;
+    }
+
+    public MutableLiveData<DataOrException<Boolean, Exception>> checkIfTutorVerified() {
+        MutableLiveData<DataOrException<Boolean, Exception>> mutableLiveData = new MutableLiveData<>();
+
+        if (getCurrentUser() != null) {
+            DataOrException<Boolean, Exception> dataOrException = new DataOrException<>();
+
+            tutorInfoRef.child(getCurrentUser().getUid()).child("isVerified")
+                    .addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                            if (snapshot.exists())
+                                dataOrException.data = snapshot.getValue(Boolean.class);
                             mutableLiveData.postValue(dataOrException);
                         }
 

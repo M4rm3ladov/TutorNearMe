@@ -48,19 +48,19 @@
         <activity
             android:name=".HomeActivity"
             android:configChanges="orientation"
-            android:exported="true"
+            android:exported="false"
             android:screenOrientation="portrait" />
         <activity
             android:name=".basic_info.BasicInfoActivity"
             android:configChanges="orientation"
-            android:exported="true"
+            android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/Base.Theme.TutorNearMe.ActionBar"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".auth.MainActivity"
             android:configChanges="orientation"
-            android:exported="true"
+            android:exported="false"
             android:screenOrientation="portrait">
         </activity>
 
@@ -78,7 +78,7 @@
 
         <service
             android:name=".service.MyFirebaseMessagingService"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
