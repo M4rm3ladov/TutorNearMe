@@ -5,18 +5,24 @@ import static com.ren.tutornearme.util.Common.CURRENT_USER;
 
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -27,13 +33,18 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.ren.tutornearme.auth.MainActivity;
+import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.databinding.ActivityHomeBinding;
 import com.ren.tutornearme.model.TutorInfo;
 import com.ren.tutornearme.util.InternetHelper;
+import com.ren.tutornearme.util.SnackBarHelper;
 
 import org.parceler.Parcels;
 
 public class HomeActivity extends AppCompatActivity{
+    private CardView tutorVerifiedCardView;
+    private TextView tutorIsVerified;
+    private ShapeableImageView tutorProfileAvatar;
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityHomeBinding binding;
@@ -41,6 +52,7 @@ public class HomeActivity extends AppCompatActivity{
     private DrawerLayout drawer;
     private Resources res;
     private TutorInfo tutorInfo;
+    private SharedViewModel sharedViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +61,6 @@ public class HomeActivity extends AppCompatActivity{
         initSetTutorInfo();
         initNetworkAvailability();
         initLayoutBinding();
-        initNavigationDrawer();
     }
 
     @Override
@@ -61,7 +72,7 @@ public class HomeActivity extends AppCompatActivity{
     private void initSetTutorInfo() {
         tutorInfo = Parcels.unwrap(getIntent().getParcelableExtra(CURRENT_USER));
 
-        SharedViewModel sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
+        sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
         sharedViewModel.setTutorInfo(tutorInfo);
     }
 
@@ -80,9 +91,10 @@ public class HomeActivity extends AppCompatActivity{
         setSupportActionBar(binding.appBarHome.toolbar);
         drawer = binding.drawerLayout;
         navigationView = binding.navView;
-    }
+        tutorVerifiedCardView = navigationView.getHeaderView(0).findViewById(R.id.tutor_verified_CardView);
+        tutorIsVerified = navigationView.getHeaderView(0).findViewById(R.id.tutor_verified_textview);
+        tutorProfileAvatar = navigationView.getHeaderView(0).findViewById(R.id.tutor_profile_imageview);
 
-    private void initNavigationDrawer() {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
@@ -96,6 +108,36 @@ public class HomeActivity extends AppCompatActivity{
         res = getResources();
         setSignOutBuilder();
         setNameAndPhoneNumber();
+        setVerifiedListener();
+    }
+
+    private void setVerifiedListener() {
+        sharedViewModel.isTutorVerified().observe(this, new Observer<DataOrException<Boolean, Exception>>() {
+            @Override
+            public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
+                if (dataOrException.exception != null)
+                    SnackBarHelper.showSnackBar(findViewById(android.R.id.content),
+                            dataOrException.exception.getMessage());
+
+                if (dataOrException.data != null) {
+                    boolean isVerified = dataOrException.data;
+                    tutorIsVerified.setText(isVerified ? "verified" : "unverified");
+                    tutorVerifiedCardView.setCardBackgroundColor(isVerified ?
+                            Color.parseColor("#009688") : Color.parseColor("#F44336"));
+
+                    if (!isVerified) return;
+
+                    navigationView.getMenu().findItem(R.id.nav_profile).setVisible(false);
+                    if (!tutorInfo.getAvatar().isEmpty()) {
+                        Glide.with(HomeActivity.this)
+                                .load(tutorInfo.getAvatar())
+                                .placeholder(R.mipmap.ic_logo)
+                                .apply(new RequestOptions().override(100, 100))
+                                .into(tutorProfileAvatar);
+                    }
+                }
+            }
+        });
     }
 
     private void setSignOutBuilder() {
