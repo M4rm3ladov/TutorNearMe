@@ -21,7 +21,7 @@ public class SharedViewModel extends ViewModel {
         return sharedRepository.getTutorInfo();
     }
 
-    public LiveData<DataOrException<Boolean, Exception>> isTutorVerified() {
+    public LiveData<DataOrException<String, Exception>> isTutorVerified() {
         return sharedRepository.checkIfTutorVerified();
     }
 

@@ -6,6 +6,7 @@ import static com.ren.tutornearme.util.Common.CURRENT_USER;
 import static com.ren.tutornearme.util.Common.FIRST_NAME;
 import static com.ren.tutornearme.util.Common.GENDER;
 import static com.ren.tutornearme.util.Common.LAST_NAME;
+import static com.ren.tutornearme.util.Common.UNVERIFIED;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -377,7 +378,6 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
         String barangay = barangayEditText.getText().toString().trim();
         long currentDate = System.currentTimeMillis();
         long birthDate = calendar.getTimeInMillis();
-        boolean isVerified = false;
 
         progressBar.setVisibility(View.VISIBLE);
 
@@ -388,6 +388,7 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
         tutorInfo.setAddress(barangay);
         tutorInfo.setBirthDate(birthDate);
         tutorInfo.setUpdatedDate(currentDate);
+        tutorInfo.setAccountStatus(UNVERIFIED);
 
         // existing account
         if (bundle != null) {
@@ -423,7 +424,6 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
         tutorInfo.setValidId("");
         tutorInfo.setValidIdType("");
         tutorInfo.setAvatar("");
-        tutorInfo.setVerified(isVerified);
         tutorInfo.setCreatedDate(currentDate);
 
         basicInfoViewModel.saveTutorInfo(tutorInfo).observe(this,

@@ -53,19 +53,18 @@ public class SharedRepository {
         return mutableLiveData;
     }
 
-    public MutableLiveData<DataOrException<Boolean, Exception>> checkIfTutorVerified() {
-        MutableLiveData<DataOrException<Boolean, Exception>> mutableLiveData = new MutableLiveData<>();
+    public MutableLiveData<DataOrException<String, Exception>> checkIfTutorVerified() {
+        MutableLiveData<DataOrException<String, Exception>> mutableLiveData = new MutableLiveData<>();
 
         if (getCurrentUser() != null) {
-            DataOrException<Boolean, Exception> dataOrException = new DataOrException<>();
+            DataOrException<String, Exception> dataOrException = new DataOrException<>();
 
-            tutorInfoRef.child(getCurrentUser().getUid()).child("isVerified")
+            tutorInfoRef.child(getCurrentUser().getUid()).child("accountStatus")
                     .addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
-
                             if (snapshot.exists())
-                                dataOrException.data = snapshot.getValue(Boolean.class);
+                                dataOrException.data = snapshot.getValue(String.class);
                             mutableLiveData.postValue(dataOrException);
                         }
 
