@@ -410,7 +410,8 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
                         Toast.makeText(BasicInfoActivity.this, "Updated successfully",
                                 Toast.LENGTH_SHORT).show();
 
-                        navigateToHome(dataOrException.data, bundle);
+                        finish();
+                        //navigateToHome(dataOrException.data, bundle);
                     }
                 }
             });
