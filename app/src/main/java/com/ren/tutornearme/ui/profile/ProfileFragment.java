@@ -170,9 +170,17 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
     }
 
     private void initPopulateBasicInfo() {
-        sharedViewModel.getTutorInfoLiveData().observe(mActivity, new Observer<TutorInfo>() {
-            @Override
-            public void onChanged(TutorInfo tutorInfo) {
+        sharedViewModel.getTutorInfoFromFirebase().observe(mActivity, dataOrException -> {
+            if (dataOrException.exception != null) {
+                SnackBarHelper.showSnackBar(mView,
+                        "[ERROR]: " + dataOrException.exception.getMessage());
+                return;
+            }
+
+            if (dataOrException.data != null) {
+                sharedViewModel.setTutorInfo(dataOrException.data);
+                TutorInfo tutorInfo = dataOrException.data;
+
                 String name = String.format(res.getString(R.string.tutor_name),
                         tutorInfo.getFirstName(), tutorInfo.getLastName());
                 tutorName.setText(name);
@@ -188,23 +196,56 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
 
                 if (!avatarPath.isEmpty())
                     Glide.with((Context) mActivity)
-                        .load(avatarPath)
-                        .placeholder(R.mipmap.ic_logo)
-                        .apply(new RequestOptions().override(100, 100))
-                        .into(tutorAvatarImageView);
+                            .load(avatarPath)
+                            .placeholder(R.mipmap.ic_logo)
+                            .apply(new RequestOptions().override(100, 100))
+                            .into(tutorAvatarImageView);
 
                 if (profileViewModel.getValidIdPath().getValue() != null &&
-                    profileViewModel.getValidIdUri().getValue() != null) {
+                        profileViewModel.getValidIdUri().getValue() != null) {
                     tutorID.setText(profileViewModel.getValidIdPath().getValue());
                 }
 
                 if (profileViewModel.getResumePath().getValue() != null &&
-                    profileViewModel.getResumeUri().getValue() != null) {
+                        profileViewModel.getResumeUri().getValue() != null) {
                     tutorResume.setText(profileViewModel.getResumePath().getValue());
                 }
 
             }
         });
+
+        /*sharedViewModel.getTutorInfoLiveData().observe(mActivity, tutorInfo -> {
+            String name = String.format(res.getString(R.string.tutor_name),
+                    tutorInfo.getFirstName(), tutorInfo.getLastName());
+            tutorName.setText(name);
+            tutorGender.setText(tutorInfo.getGender());
+            tutorBarangay.setText(tutorInfo.getAddress());
+            tutorBirthDate.setText(dateTimeFormatter.format(new Date(tutorInfo.getBirthDate())));
+
+            String avatarPath = "";
+            if (!tutorInfo.getAvatar().isEmpty())
+                avatarPath = tutorInfo.getAvatar();
+            if (profileViewModel.getAvatarPath().getValue() != null)
+                avatarPath = profileViewModel.getAvatarPath().getValue();
+
+            if (!avatarPath.isEmpty())
+                Glide.with((Context) mActivity)
+                    .load(avatarPath)
+                    .placeholder(R.mipmap.ic_logo)
+                    .apply(new RequestOptions().override(100, 100))
+                    .into(tutorAvatarImageView);
+
+            if (profileViewModel.getValidIdPath().getValue() != null &&
+                profileViewModel.getValidIdUri().getValue() != null) {
+                tutorID.setText(profileViewModel.getValidIdPath().getValue());
+            }
+
+            if (profileViewModel.getResumePath().getValue() != null &&
+                profileViewModel.getResumeUri().getValue() != null) {
+                tutorResume.setText(profileViewModel.getResumePath().getValue());
+            }
+
+        });*/
     }
 
     @Override
