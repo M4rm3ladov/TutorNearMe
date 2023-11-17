@@ -18,7 +18,7 @@ public class TutorInfo {
     private String validId;
     private String validIdType;
     private String avatar;
-    private boolean isVerified;
+    private String accountStatus;
     private long createdDate;
     private long updatedDate;
 
@@ -27,7 +27,7 @@ public class TutorInfo {
 
     public TutorInfo(String uid, String firstName, String lastName, String gender, String phoneNumber,
                      String address, long birthDate, String resume, String validId, String validIdType,
-                     String avatar, boolean isVerified, long createdDate, long updatedDate) {
+                     String avatar, String accountStatus, long createdDate, long updatedDate) {
         this.uid = uid;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -39,7 +39,7 @@ public class TutorInfo {
         this.validId = validId;
         this.validIdType = validIdType;
         this.avatar = avatar;
-        this.isVerified = isVerified;
+        this.accountStatus = accountStatus;
         this.createdDate = createdDate;
         this.updatedDate = updatedDate;
     }
@@ -132,12 +132,12 @@ public class TutorInfo {
         this.avatar = avatar;
     }
 
-    public boolean isVerified() {
-        return isVerified;
+    public String getAccountStatus() {
+        return accountStatus;
     }
 
-    public void setVerified(boolean verified) {
-        this.isVerified = verified;
+    public void setAccountStatus(String accountStatus) {
+        this.accountStatus = accountStatus;
     }
 
     public long getCreatedDate() {
@@ -164,6 +164,7 @@ public class TutorInfo {
         result.put("birthDate", birthDate);
         result.put("address", address);
         result.put("updatedDate", updatedDate);
+        result.put("accountStatus", accountStatus);
 
         return result;
     }
@@ -182,7 +183,7 @@ public class TutorInfo {
                 ", validId='" + validId + '\'' +
                 ", validIdType='" + validIdType + '\'' +
                 ", avatar='" + avatar + '\'' +
-                ", isVerified=" + isVerified +
+                ", accountStatus=" + accountStatus +
                 ", createdDate=" + createdDate +
                 ", updatedDate=" + updatedDate +
                 '}';

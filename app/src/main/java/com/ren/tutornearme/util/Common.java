@@ -13,6 +13,10 @@ public class Common {
     public static final String BARANGAY = "Barangay";
     public static final String BIRTH_DATE = "BirthDate";
 
+    public static final String UNVERIFIED = "unverified";
+    public static final String VERIFIED = "verified";
+    public static final String RESUBMIT = "resubmit";
+
 
     public static final int LOCATION_INTERVAL = 5000;
     public static final int LOCATION_MAX_WAIT_TIME = 10000;

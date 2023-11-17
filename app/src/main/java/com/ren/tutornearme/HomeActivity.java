@@ -2,6 +2,9 @@ package com.ren.tutornearme;
 
 
 import static com.ren.tutornearme.util.Common.CURRENT_USER;
+import static com.ren.tutornearme.util.Common.RESUBMIT;
+import static com.ren.tutornearme.util.Common.UNVERIFIED;
+import static com.ren.tutornearme.util.Common.VERIFIED;
 
 import android.content.Intent;
 import android.content.res.Resources;
@@ -112,20 +115,31 @@ public class HomeActivity extends AppCompatActivity{
     }
 
     private void setVerifiedListener() {
-        sharedViewModel.isTutorVerified().observe(this, new Observer<DataOrException<Boolean, Exception>>() {
+        sharedViewModel.isTutorVerified().observe(this, new Observer<DataOrException<String, Exception>>() {
             @Override
-            public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
+            public void onChanged(DataOrException<String, Exception> dataOrException) {
                 if (dataOrException.exception != null)
                     SnackBarHelper.showSnackBar(findViewById(android.R.id.content),
                             dataOrException.exception.getMessage());
 
                 if (dataOrException.data != null) {
-                    boolean isVerified = dataOrException.data;
-                    tutorIsVerified.setText(isVerified ? "verified" : "unverified");
-                    tutorVerifiedCardView.setCardBackgroundColor(isVerified ?
-                            Color.parseColor("#009688") : Color.parseColor("#F44336"));
+                    String accountStatus = dataOrException.data;
+                    String accountStatusColor = "#009688";
+                    switch (accountStatus) {
+                        case UNVERIFIED:
+                            accountStatusColor = "#F44336";
+                            break;
+                        case VERIFIED:
+                            accountStatusColor = "#009688";
+                            break;
+                        case RESUBMIT:
+                            accountStatusColor = "#FB7D42";
+                            break;
+                    }
+                    tutorIsVerified.setText(accountStatus);
+                    tutorVerifiedCardView.setCardBackgroundColor(Color.parseColor(accountStatusColor));
 
-                    if (!isVerified) return;
+                    if (!accountStatus.equals(VERIFIED)) return;
 
                     navigationView.getMenu().findItem(R.id.nav_profile).setVisible(false);
                     if (!tutorInfo.getAvatar().isEmpty()) {
@@ -176,14 +190,16 @@ public class HomeActivity extends AppCompatActivity{
     }
 
     private void setNameAndPhoneNumber() {
-        View headerView = navigationView.getHeaderView(0);
-        TextView tutorName = headerView.findViewById(R.id.nav_name_textview);
-        TextView tutorPhone = headerView.findViewById(R.id.nav_phone_textview);
+        sharedViewModel.getTutorInfoLiveData().observe(this, tutorInfo -> {
+            View headerView = navigationView.getHeaderView(0);
+            TextView tutorName = headerView.findViewById(R.id.nav_name_textview);
+            TextView tutorPhone = headerView.findViewById(R.id.nav_phone_textview);
 
-        String name = String.format(res.getString(R.string.tutor_name),
-                tutorInfo.getFirstName(), tutorInfo.getLastName());
-        tutorName.setText(name);
-        tutorPhone.setText(tutorInfo.getPhoneNumber());
+            String name = String.format(res.getString(R.string.tutor_name),
+                    tutorInfo.getFirstName(), tutorInfo.getLastName());
+            tutorName.setText(name);
+            tutorPhone.setText(tutorInfo.getPhoneNumber());
+        });
     }
 
     @Override
