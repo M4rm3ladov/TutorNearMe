@@ -190,14 +190,16 @@ public class HomeActivity extends AppCompatActivity{
     }
 
     private void setNameAndPhoneNumber() {
-        View headerView = navigationView.getHeaderView(0);
-        TextView tutorName = headerView.findViewById(R.id.nav_name_textview);
-        TextView tutorPhone = headerView.findViewById(R.id.nav_phone_textview);
+        sharedViewModel.getTutorInfoLiveData().observe(this, tutorInfo -> {
+            View headerView = navigationView.getHeaderView(0);
+            TextView tutorName = headerView.findViewById(R.id.nav_name_textview);
+            TextView tutorPhone = headerView.findViewById(R.id.nav_phone_textview);
 
-        String name = String.format(res.getString(R.string.tutor_name),
-                tutorInfo.getFirstName(), tutorInfo.getLastName());
-        tutorName.setText(name);
-        tutorPhone.setText(tutorInfo.getPhoneNumber());
+            String name = String.format(res.getString(R.string.tutor_name),
+                    tutorInfo.getFirstName(), tutorInfo.getLastName());
+            tutorName.setText(name);
+            tutorPhone.setText(tutorInfo.getPhoneNumber());
+        });
     }
 
     @Override
