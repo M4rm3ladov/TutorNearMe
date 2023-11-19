@@ -65,7 +65,7 @@ import java.util.Map;
 
 public class ProfileFragment extends Fragment implements View.OnClickListener, PickiTCallbacks {
     private CardView basicInfoCardView;
-    private Button uploadResumeButton, uploadValidIDButton;
+    private Button uploadResumeButton, uploadValidIDButton, submitButton;
     private TextView tutorName, tutorGender, tutorBarangay, tutorBirthDate, tutorResume, tutorID;
     private ImageView tutorAvatarImageView, previewIdImageView, previewResumeImageView;
     private Spinner validIdTypeSpinner;
@@ -148,6 +148,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         tutorID.setOnClickListener(this);
         previewIdImageView.setOnClickListener(this);
         previewResumeImageView.setOnClickListener(this);
+        submitButton.setOnClickListener(this);
     }
 
     private void initBindViews(View view) {
@@ -160,6 +161,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         validIdTypeSpinner = view.findViewById(R.id.profile_id_type_spinner);
         previewIdImageView = view.findViewById(R.id.profile_id_preview);
         previewResumeImageView = view.findViewById(R.id.profile_resume_preview);
+        submitButton = view.findViewById(R.id.profile_submit_button);
 
         tutorName = view.findViewById(R.id.profile_tutor_name_textview);
         tutorGender = view.findViewById(R.id.profile_tutor_gender_textview);
@@ -204,11 +206,19 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
                 if (profileViewModel.getValidIdPath().getValue() != null &&
                         profileViewModel.getValidIdUri().getValue() != null) {
                     tutorID.setText(profileViewModel.getValidIdPath().getValue());
+                } else if (tutorInfo.getValidId() != null) {
+                    tutorID.setText(tutorInfo.getValidId());
+                    profileViewModel.setValidIdPath(tutorInfo.getValidId());
+                    profileViewModel.setValidIdUri(Uri.parse(tutorInfo.getValidId()));
                 }
 
                 if (profileViewModel.getResumePath().getValue() != null &&
                         profileViewModel.getResumeUri().getValue() != null) {
                     tutorResume.setText(profileViewModel.getResumePath().getValue());
+                } else if (tutorInfo.getResume() != null) {
+                    tutorResume.setText(tutorInfo.getResume());
+                    profileViewModel.setResumePath(tutorInfo.getResume());
+                    profileViewModel.setResumeUri(Uri.parse(tutorInfo.getResume()));
                 }
 
             }
@@ -239,7 +249,40 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         } else if (view.getId() == R.id.profile_resume_preview) {
             if(!checkHasInternetConnection()) return;
             showResumePreview();
+        } else if(view.getId() == R.id.profile_submit_button) {
+            if(!checkHasInternetConnection()) return;
+            submitApplication();
         }
+    }
+
+    private void submitApplication() {
+        if (sharedViewModel.getTutorInfo().getAvatar() == null) {
+            SnackBarHelper.showSnackBar(mView, "Please upload a clear image of your face before submitting.");
+            return;
+        }
+
+        if (profileViewModel.getValidIdUri().getValue() == null) {
+            SnackBarHelper.showSnackBar(mView, "Please upload your valid ID before submitting");
+            return;
+        }
+
+        if (profileViewModel.getResumeUri().getValue() == null) {
+            SnackBarHelper.showSnackBar(mView, "Please upload your resume before submitting");
+            return;
+        }
+
+        profileViewModel.setTutorAccountStatus().observe(this, dataOrException -> {
+            if (dataOrException.exception != null) {
+                SnackBarHelper.showSnackBar(mView,
+                        "[ERROR]: " + dataOrException.exception.getMessage());
+            }
+
+            if (dataOrException.data != null) {
+                Toast.makeText(mActivity,
+                        "Successfully submitted! Please wait for verification.", Toast.LENGTH_SHORT).show();
+                getActivity().onBackPressed();
+            }
+        });
     }
 
     private void showResumePreview() {
@@ -576,10 +619,10 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
     private void promptImageFilePermission() {
         String message = "";
         if (AVATAR_IMG.equals(imageFlag))
-            message = "Please make to upload image of you shows your face clearly and without " +
+            message = "Please make sure to upload a clear image of your face without " +
                     "wearing any accessories on.";
         else if (ID_IMG.equals(imageFlag))
-            message = "Please submit a clear and original copy of you valid ID.";
+            message = "Please upload a clear and original copy of you valid ID.";
 
         new AlertDialog.Builder(getActivity())
                 .setTitle("Upload Image")
