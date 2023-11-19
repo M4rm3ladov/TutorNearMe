@@ -59,6 +59,7 @@
     <string name="gender_header">Gender:</string>
     <string name="name_header">Name:</string>
     <string name="basic_information">Basic Information</string>
+    <string name="submit">Submit</string>
 
     <string-array name="valid_ids">
         <item>Student ID</item>
