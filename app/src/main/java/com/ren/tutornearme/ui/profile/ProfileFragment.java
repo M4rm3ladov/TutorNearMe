@@ -129,6 +129,22 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         super.onDetach();
     }
 
+    @Override
+    public void onResume() {
+        if (!InternetHelper.isOnline(mActivity.getApplication()))
+            Snackbar.make(mView,
+                    "[ERROR]: No internet connection. Please check your network",
+                    Snackbar.LENGTH_SHORT).show();
+        sharedViewModel.setTutorInfoListener();
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        sharedViewModel.removeTutorInfoListener();
+        super.onPause();
+    }
+
     private void initViewModels() {
         profileViewModel =
                 new ViewModelProvider(mActivity).get(ProfileViewModel.class);
