@@ -3,6 +3,7 @@ package com.ren.tutornearme;
 
 import static com.ren.tutornearme.util.Common.CURRENT_USER;
 import static com.ren.tutornearme.util.Common.RESUBMIT;
+import static com.ren.tutornearme.util.Common.SUBMITTED;
 import static com.ren.tutornearme.util.Common.UNVERIFIED;
 import static com.ren.tutornearme.util.Common.VERIFIED;
 
@@ -133,13 +134,17 @@ public class HomeActivity extends AppCompatActivity{
                             accountStatusColor = "#009688";
                             break;
                         case RESUBMIT:
+                        case SUBMITTED:
                             accountStatusColor = "#FB7D42";
                             break;
                     }
                     tutorIsVerified.setText(accountStatus);
                     tutorVerifiedCardView.setCardBackgroundColor(Color.parseColor(accountStatusColor));
 
-                    if (!accountStatus.equals(VERIFIED)) return;
+                    if (accountStatus.equals(UNVERIFIED) || accountStatus.equals(RESUBMIT)) {
+                        navigationView.getMenu().findItem(R.id.nav_profile).setVisible(true);
+                        return;
+                    }
 
                     navigationView.getMenu().findItem(R.id.nav_profile).setVisible(false);
                     if (!tutorInfo.getAvatar().isEmpty()) {
