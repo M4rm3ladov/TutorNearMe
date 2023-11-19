@@ -225,6 +225,7 @@
                     android:layout_marginTop="10dp"
                     android:layout_marginRight="16dp"
                     android:text="@string/upload_your_valid_id"
+                    android:theme="@style/AppOutlinedButtonStyle"
                     app:icon="@drawable/ic_upload"
                     app:iconGravity="textStart"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -280,8 +281,8 @@
                     android:id="@+id/profile_id_preview"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
                     android:layout_marginTop="2dp"
+                    android:layout_marginEnd="16dp"
                     android:contentDescription="@string/preview"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/profile_tutor_id_textview"
@@ -293,6 +294,7 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/profile_resume_cardview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -339,12 +341,12 @@
                     android:layout_marginTop="10dp"
                     android:layout_marginRight="16dp"
                     android:text="@string/upload_your_resume"
+                    android:theme="@style/AppOutlinedButtonStyle"
                     app:icon="@drawable/ic_upload"
                     app:iconGravity="textStart"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/profile_tutor_resume_textview" />
-
 
                 <TextView
                     android:id="@+id/profile_tutor_resume_textview"
@@ -383,6 +385,15 @@
 
         </com.google.android.material.card.MaterialCardView>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/profile_submit_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/submit"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/profile_resume_cardview" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
