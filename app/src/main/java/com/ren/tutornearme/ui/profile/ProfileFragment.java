@@ -226,29 +226,38 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
     public void onClick(View view) {
         if (view.getId() == R.id.profile_basic_info_cardview) {
             navigateToBasicInfo();
+
         } else if (view.getId() == R.id.profile_img_imageview) {
             imageFlag = AVATAR_IMG;
             promptImageFilePermission();
+
         } else if (view.getId() == R.id.profile_tutor_id_textview) {
             imageFlag = ID_IMG;
             promptImageFilePermission();
+
         } else if (view.getId() == R.id.profile_tutor_resume_textview) {
             promptResumeMessage();
+
         } else if (view.getId() == R.id.profile_upload_id_button) {
             if(!checkHasInternetConnection()) return;
             uploadValidId();
+
         } else if (view.getId() == R.id.profile_upload_resume_button) {
             if(!checkHasInternetConnection()) return;
             uploadResume();
+
         } else if (view.getId() == R.id.profile_id_preview) {
             if(!checkHasInternetConnection()) return;
             showIdPreviewOrSnackbar();
+
         } else if (view.getId() == R.id.profile_resume_preview) {
             if(!checkHasInternetConnection()) return;
             showResumePreview();
+
         } else if(view.getId() == R.id.profile_submit_button) {
             if(!checkHasInternetConnection()) return;
             submitApplication();
+
         }
     }
 
