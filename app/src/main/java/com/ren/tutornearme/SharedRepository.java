@@ -20,6 +20,9 @@ public class SharedRepository {
     private final FirebaseDatabase db = FirebaseDatabase.getInstance();
     private final DatabaseReference tutorInfoRef = db.getReference(TUTOR_INFO_REFERENCE);
 
+    private ValueEventListener tutorInfoEventListener = null;
+    private ValueEventListener tutorAccountStatusListener = null;
+
     public SharedRepository() {
         firebaseAuth = FirebaseAuth.getInstance();
     }
@@ -34,8 +37,7 @@ public class SharedRepository {
         if (getCurrentUser() != null) {
             DataOrException<TutorInfo, Exception> dataOrException = new DataOrException<>();
 
-            tutorInfoRef.child(getCurrentUser().getUid())
-                    .addValueEventListener(new ValueEventListener() {
+             tutorInfoEventListener = new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.exists())
@@ -48,19 +50,27 @@ public class SharedRepository {
                             dataOrException.exception = error.toException();
                             mutableLiveData.postValue(dataOrException);
                         }
-                    });
+                    };
         }
         return mutableLiveData;
     }
 
-    public MutableLiveData<DataOrException<String, Exception>> checkIfTutorVerified() {
+    public void setTutorInfoListener() {
+        tutorInfoRef.child(getCurrentUser().getUid()).addValueEventListener(tutorInfoEventListener);
+    }
+
+    public void removeTutorInfoListener() {
+        if (tutorInfoEventListener != null)
+            tutorInfoRef.removeEventListener(tutorInfoEventListener);
+    }
+
+    public MutableLiveData<DataOrException<String, Exception>> getTutorAccountStatus() {
         MutableLiveData<DataOrException<String, Exception>> mutableLiveData = new MutableLiveData<>();
 
         if (getCurrentUser() != null) {
             DataOrException<String, Exception> dataOrException = new DataOrException<>();
 
-            tutorInfoRef.child(getCurrentUser().getUid()).child("accountStatus")
-                    .addValueEventListener(new ValueEventListener() {
+            tutorAccountStatusListener = new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.exists())
@@ -73,8 +83,18 @@ public class SharedRepository {
                             dataOrException.exception = error.toException();
                             mutableLiveData.postValue(dataOrException);
                         }
-                    });
+                    };
         }
         return mutableLiveData;
+    }
+
+    public void setTutorAccountStatusListener() {
+        tutorInfoRef.child(getCurrentUser().getUid()).child("accountStatus")
+                .addValueEventListener(tutorAccountStatusListener);
+    }
+
+    public void removeTutorAccountStatusListener() {
+        if (tutorAccountStatusListener != null)
+            tutorInfoRef.removeEventListener(tutorAccountStatusListener);
     }
 }
