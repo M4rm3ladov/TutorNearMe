@@ -12,7 +12,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
@@ -22,11 +21,9 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -37,7 +34,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.ren.tutornearme.auth.MainActivity;
-import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.databinding.ActivityHomeBinding;
 import com.ren.tutornearme.model.TutorInfo;
 import com.ren.tutornearme.util.InternetHelper;
@@ -70,7 +66,14 @@ public class HomeActivity extends AppCompatActivity{
     @Override
     protected void onResume() {
         initNetworkAvailability();
+        sharedViewModel.setTutorAccountStatusListener();
         super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        sharedViewModel.removeTutorAccountStatusListener();
+        super.onPause();
     }
 
     private void initSetTutorInfo() {
@@ -116,72 +119,64 @@ public class HomeActivity extends AppCompatActivity{
     }
 
     private void setVerifiedListener() {
-        sharedViewModel.isTutorVerified().observe(this, new Observer<DataOrException<String, Exception>>() {
-            @Override
-            public void onChanged(DataOrException<String, Exception> dataOrException) {
-                if (dataOrException.exception != null)
-                    SnackBarHelper.showSnackBar(findViewById(android.R.id.content),
-                            dataOrException.exception.getMessage());
+        sharedViewModel.getTutorAccountStatus().observe(this, dataOrException -> {
+            if (dataOrException.exception != null)
+                SnackBarHelper.showSnackBar(findViewById(android.R.id.content),
+                        dataOrException.exception.getMessage());
 
-                if (dataOrException.data != null) {
-                    String accountStatus = dataOrException.data;
-                    String accountStatusColor = "#009688";
-                    switch (accountStatus) {
-                        case UNVERIFIED:
-                            accountStatusColor = "#F44336";
-                            break;
-                        case VERIFIED:
-                            accountStatusColor = "#009688";
-                            break;
-                        case RESUBMIT:
-                        case SUBMITTED:
-                            accountStatusColor = "#FB7D42";
-                            break;
-                    }
-                    tutorIsVerified.setText(accountStatus);
-                    tutorVerifiedCardView.setCardBackgroundColor(Color.parseColor(accountStatusColor));
+            if (dataOrException.data != null) {
+                String accountStatus = dataOrException.data;
+                String accountStatusColor = "#009688";
+                switch (accountStatus) {
+                    case UNVERIFIED:
+                        accountStatusColor = "#F44336";
+                        break;
+                    case VERIFIED:
+                        accountStatusColor = "#009688";
+                        break;
+                    case RESUBMIT:
+                    case SUBMITTED:
+                        accountStatusColor = "#FB7D42";
+                        break;
+                }
+                tutorIsVerified.setText(accountStatus);
+                tutorVerifiedCardView.setCardBackgroundColor(Color.parseColor(accountStatusColor));
 
-                    if (accountStatus.equals(UNVERIFIED) || accountStatus.equals(RESUBMIT)) {
-                        navigationView.getMenu().findItem(R.id.nav_profile).setVisible(true);
-                        return;
-                    }
+                if (accountStatus.equals(UNVERIFIED) || accountStatus.equals(RESUBMIT)) {
+                    navigationView.getMenu().findItem(R.id.nav_profile).setVisible(true);
+                    return;
+                }
 
-                    navigationView.getMenu().findItem(R.id.nav_profile).setVisible(false);
-                    if (!tutorInfo.getAvatar().isEmpty()) {
-                        Glide.with(HomeActivity.this)
-                                .load(tutorInfo.getAvatar())
-                                .placeholder(R.mipmap.ic_logo)
-                                .apply(new RequestOptions().override(100, 100))
-                                .into(tutorProfileAvatar);
-                    }
+                navigationView.getMenu().findItem(R.id.nav_profile).setVisible(false);
+                if (!tutorInfo.getAvatar().isEmpty()) {
+                    Glide.with(HomeActivity.this)
+                            .load(tutorInfo.getAvatar())
+                            .placeholder(R.mipmap.ic_logo)
+                            .apply(new RequestOptions().override(100, 100))
+                            .into(tutorProfileAvatar);
                 }
             }
         });
     }
 
     private void setSignOutBuilder() {
-        navigationView.getMenu().findItem(R.id.nav_sign_out).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(@NonNull MenuItem menuItem) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
-                builder.setTitle("Sign Out")
-                        .setMessage("Do you really wish to sign out?")
-                        .setNegativeButton("Cancel", (dialogInterface, i) -> dialogInterface.dismiss())
-                        .setPositiveButton("Sign Out", (dialogInterface, i) -> {
-                            signOutUser();
-                        })
-                        .setCancelable(false);
+        navigationView.getMenu().findItem(R.id.nav_sign_out).setOnMenuItemClickListener(menuItem -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
+            builder.setTitle("Sign Out")
+                    .setMessage("Do you really wish to sign out?")
+                    .setNegativeButton("Cancel", (dialogInterface, i) -> dialogInterface.dismiss())
+                    .setPositiveButton("Sign Out", (dialogInterface, i) -> signOutUser())
+                    .setCancelable(false);
 
-                AlertDialog dialog = builder.create();
-                dialog.setOnShowListener(dialogInterface -> {
-                    dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
-                            .setTextColor(res.getColor(R.color.red));
-                    dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                            .setTextColor(res.getColor(R.color.green));
-                });
-                dialog.show();
-                return false;
-            }
+            AlertDialog dialog = builder.create();
+            dialog.setOnShowListener(dialogInterface -> {
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                        .setTextColor(res.getColor(R.color.red));
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                        .setTextColor(res.getColor(R.color.green));
+            });
+            dialog.show();
+            return false;
         });
     }
 
