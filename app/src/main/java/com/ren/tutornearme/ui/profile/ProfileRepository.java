@@ -1,5 +1,6 @@
 package com.ren.tutornearme.ui.profile;
 
+import static com.ren.tutornearme.util.Common.SUBMITTED;
 import static com.ren.tutornearme.util.Common.TUTOR_INFO_REFERENCE;
 
 import android.net.Uri;
@@ -190,4 +191,27 @@ public class ProfileRepository {
         return mutableLiveData;
     }
 
+    public MutableLiveData<DataOrException<Boolean, Exception>> setTutorAccountStatus() {
+        MutableLiveData<DataOrException<Boolean, Exception>> mutableLiveData = new MutableLiveData<>();
+
+        if (getCurrentUser() != null) {
+            DataOrException<Boolean, Exception> dataOrException = new DataOrException<>();
+
+            Map<String, Object> updateData = new HashMap<>();
+            updateData.put("accountStatus", SUBMITTED);
+
+            tutorInfoRef.child(getCurrentUser().getUid()).updateChildren(updateData)
+                    .addOnFailureListener(e -> {
+                        dataOrException.exception = e;
+                        mutableLiveData.postValue(dataOrException);
+                    })
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            dataOrException.data = true;
+                            mutableLiveData.postValue(dataOrException);
+                        }
+                    });
+        }
+        return mutableLiveData;
+    }
 }
