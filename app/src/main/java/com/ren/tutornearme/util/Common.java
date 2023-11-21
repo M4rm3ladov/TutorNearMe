@@ -16,6 +16,7 @@ public class Common {
     public static final String UNVERIFIED = "unverified";
     public static final String VERIFIED = "verified";
     public static final String RESUBMIT = "resubmit";
+    public static final String SUBMITTED = "submitted";
 
 
     public static final int LOCATION_INTERVAL = 5000;

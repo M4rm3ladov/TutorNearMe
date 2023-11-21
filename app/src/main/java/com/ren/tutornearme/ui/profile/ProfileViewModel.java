@@ -40,6 +40,9 @@ public class ProfileViewModel extends ViewModel {
         return profileRepository.updateResume();
     }
 
+    public LiveData<DataOrException<Boolean, Exception>> setTutorAccountStatus() {
+        return profileRepository.setTutorAccountStatus();
+    }
 
     public MutableLiveData<String> getAvatarPath() {
         return avatarPath;

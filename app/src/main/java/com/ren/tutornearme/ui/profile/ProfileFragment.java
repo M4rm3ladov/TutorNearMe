@@ -38,7 +38,6 @@ import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
@@ -49,7 +48,6 @@ import com.hbisoft.pickit.PickiTCallbacks;
 import com.ren.tutornearme.BuildConfig;
 import com.ren.tutornearme.R;
 import com.ren.tutornearme.SharedViewModel;
-import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.model.TutorInfo;
 import com.ren.tutornearme.basic_info.BasicInfoActivity;
 import com.ren.tutornearme.util.InternetHelper;
@@ -58,14 +56,13 @@ import com.stfalcon.imageviewer.StfalconImageViewer;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Map;
 
 public class ProfileFragment extends Fragment implements View.OnClickListener, PickiTCallbacks {
     private CardView basicInfoCardView;
-    private Button uploadResumeButton, uploadValidIDButton;
+    private Button uploadResumeButton, uploadValidIDButton, submitButton;
     private TextView tutorName, tutorGender, tutorBarangay, tutorBirthDate, tutorResume, tutorID;
     private ImageView tutorAvatarImageView, previewIdImageView, previewResumeImageView;
     private Spinner validIdTypeSpinner;
@@ -132,6 +129,22 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         super.onDetach();
     }
 
+    @Override
+    public void onResume() {
+        if (!InternetHelper.isOnline(mActivity.getApplication()))
+            Snackbar.make(mView,
+                    "[ERROR]: No internet connection. Please check your network",
+                    Snackbar.LENGTH_SHORT).show();
+        sharedViewModel.setTutorInfoListener();
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        sharedViewModel.removeTutorInfoListener();
+        super.onPause();
+    }
+
     private void initViewModels() {
         profileViewModel =
                 new ViewModelProvider(mActivity).get(ProfileViewModel.class);
@@ -148,6 +161,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         tutorID.setOnClickListener(this);
         previewIdImageView.setOnClickListener(this);
         previewResumeImageView.setOnClickListener(this);
+        submitButton.setOnClickListener(this);
     }
 
     private void initBindViews(View view) {
@@ -160,6 +174,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         validIdTypeSpinner = view.findViewById(R.id.profile_id_type_spinner);
         previewIdImageView = view.findViewById(R.id.profile_id_preview);
         previewResumeImageView = view.findViewById(R.id.profile_resume_preview);
+        submitButton = view.findViewById(R.id.profile_submit_button);
 
         tutorName = view.findViewById(R.id.profile_tutor_name_textview);
         tutorGender = view.findViewById(R.id.profile_tutor_gender_textview);
@@ -204,11 +219,19 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
                 if (profileViewModel.getValidIdPath().getValue() != null &&
                         profileViewModel.getValidIdUri().getValue() != null) {
                     tutorID.setText(profileViewModel.getValidIdPath().getValue());
+                } else if (tutorInfo.getValidId() != null) {
+                    tutorID.setText(tutorInfo.getValidId());
+                    profileViewModel.setValidIdPath(tutorInfo.getValidId());
+                    profileViewModel.setValidIdUri(Uri.parse(tutorInfo.getValidId()));
                 }
 
                 if (profileViewModel.getResumePath().getValue() != null &&
                         profileViewModel.getResumeUri().getValue() != null) {
                     tutorResume.setText(profileViewModel.getResumePath().getValue());
+                } else if (tutorInfo.getResume() != null) {
+                    tutorResume.setText(tutorInfo.getResume());
+                    profileViewModel.setResumePath(tutorInfo.getResume());
+                    profileViewModel.setResumeUri(Uri.parse(tutorInfo.getResume()));
                 }
 
             }
@@ -219,27 +242,69 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
     public void onClick(View view) {
         if (view.getId() == R.id.profile_basic_info_cardview) {
             navigateToBasicInfo();
+
         } else if (view.getId() == R.id.profile_img_imageview) {
             imageFlag = AVATAR_IMG;
             promptImageFilePermission();
+
         } else if (view.getId() == R.id.profile_tutor_id_textview) {
             imageFlag = ID_IMG;
             promptImageFilePermission();
+
         } else if (view.getId() == R.id.profile_tutor_resume_textview) {
-            showPDFPicker();
+            promptResumeMessage();
+
         } else if (view.getId() == R.id.profile_upload_id_button) {
             if(!checkHasInternetConnection()) return;
             uploadValidId();
+
         } else if (view.getId() == R.id.profile_upload_resume_button) {
             if(!checkHasInternetConnection()) return;
             uploadResume();
+
         } else if (view.getId() == R.id.profile_id_preview) {
             if(!checkHasInternetConnection()) return;
             showIdPreviewOrSnackbar();
+
         } else if (view.getId() == R.id.profile_resume_preview) {
             if(!checkHasInternetConnection()) return;
             showResumePreview();
+
+        } else if(view.getId() == R.id.profile_submit_button) {
+            if(!checkHasInternetConnection()) return;
+            submitApplication();
+
         }
+    }
+
+    private void submitApplication() {
+        if (sharedViewModel.getTutorInfo().getAvatar() == null) {
+            SnackBarHelper.showSnackBar(mView, "Please upload a clear image of your face before submitting.");
+            return;
+        }
+
+        if (profileViewModel.getValidIdUri().getValue() == null) {
+            SnackBarHelper.showSnackBar(mView, "Please upload your valid ID before submitting");
+            return;
+        }
+
+        if (profileViewModel.getResumeUri().getValue() == null) {
+            SnackBarHelper.showSnackBar(mView, "Please upload your resume before submitting");
+            return;
+        }
+
+        profileViewModel.setTutorAccountStatus().observe(this, dataOrException -> {
+            if (dataOrException.exception != null) {
+                SnackBarHelper.showSnackBar(mView,
+                        "[ERROR]: " + dataOrException.exception.getMessage());
+            }
+
+            if (dataOrException.data != null) {
+                Toast.makeText(mActivity,
+                        "Successfully submitted! Please wait for verification.", Toast.LENGTH_SHORT).show();
+                mActivity.onBackPressed();
+            }
+        });
     }
 
     private void showResumePreview() {
@@ -261,13 +326,13 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         else {
             Uri currentIdUri = profileViewModel.getValidIdUri().getValue();
             new StfalconImageViewer.Builder<>
-                    (mActivity, Arrays.asList(currentIdUri), (imageView, image) -> {
+                    (mActivity, Collections.singletonList(currentIdUri), (imageView, image) ->
                         Glide.with((Context) mActivity)
                                 .load(image)
                                 .placeholder(R.mipmap.ic_logo)
-                                .into(imageView);
+                                .into(imageView)
 
-                    })
+                    )
                     .withHiddenStatusBar(false)
                     .allowZooming(true)
                     .allowSwipeToDismiss(true)
@@ -375,31 +440,27 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
             waitingDialog.show();
             try {
                 profileViewModel.uploadAvatarOrValidId(selectedImageUri, imageFlag).observe(this,
-                        new Observer<DataOrException<Map<String, Object>, Exception>>() {
-                            @Override
-                            public void onChanged(DataOrException<Map<String, Object>,
-                                    Exception> mapDataOrException) {
+                        mapDataOrException -> {
 
-                                if (mapDataOrException.exception != null) {
-                                    SnackBarHelper.showSnackBar(mView, mapDataOrException.exception.getMessage());
-                                    waitingDialog.dismiss();
-                                    return;
+                            if (mapDataOrException.exception != null) {
+                                SnackBarHelper.showSnackBar(mView, mapDataOrException.exception.getMessage());
+                                waitingDialog.dismiss();
+                                return;
+                            }
+
+                            if (mapDataOrException.data != null) {
+                                if (mapDataOrException.data.get("progress") != null) {
+                                    double progress = Math.round((double) mapDataOrException.data.get("progress"));
+                                    waitingDialog.setMessage(new StringBuilder("Uploading: ")
+                                            .append(progress)
+                                            .append("%"));
                                 }
 
-                                if (mapDataOrException.data != null) {
-                                    if (mapDataOrException.data.get("progress") != null) {
-                                        double progress = Math.round((double) mapDataOrException.data.get("progress"));
-                                        waitingDialog.setMessage(new StringBuilder("Uploading: ")
-                                                .append(progress)
-                                                .append("%"));
-                                    }
-
-                                    if (mapDataOrException.data.get("isComplete") != null) {
-                                        /*Snackbar.make(mView, "Image is now ready to be uploaded",
-                                                Snackbar.LENGTH_SHORT).show();*/
-                                        waitingDialog.dismiss();
-                                        updateTutorValidId();
-                                    }
+                                if (mapDataOrException.data.get("isComplete") != null) {
+                                    /*Snackbar.make(mView, "Image is now ready to be uploaded",
+                                            Snackbar.LENGTH_SHORT).show();*/
+                                    waitingDialog.dismiss();
+                                    updateTutorValidId();
                                 }
                             }
                         });
@@ -424,32 +485,29 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
 
             try {
                 profileViewModel.uploadResume(selectedPdfUri).observe(this,
-                        new Observer<DataOrException<Map<String, Object>, Exception>>() {
-                    @Override
-                    public void onChanged(DataOrException<Map<String, Object>, Exception> mapDataOrException) {
-                        if (mapDataOrException.exception != null) {
-                            SnackBarHelper.showSnackBar(mView, mapDataOrException.exception.getMessage());
-                            waitingDialog.dismiss();
-                            return;
-                        }
-
-                        if (mapDataOrException.data != null) {
-                            if (mapDataOrException.data.get("progress") != null) {
-                                double progress = Math.round((double) mapDataOrException.data.get("progress"));
-                                waitingDialog.setMessage(new StringBuilder("Uploading: ")
-                                        .append(progress)
-                                        .append("%"));
-                            }
-
-                            if (mapDataOrException.data.get("isComplete") != null) {
-                                /*Snackbar.make(mView, "File is now ready to be uploaded",
-                                        Snackbar.LENGTH_SHORT).show();*/
+                        mapDataOrException -> {
+                            if (mapDataOrException.exception != null) {
+                                SnackBarHelper.showSnackBar(mView, mapDataOrException.exception.getMessage());
                                 waitingDialog.dismiss();
-                                updateTutorResume();
+                                return;
                             }
-                        }
-                    }
-                });
+
+                            if (mapDataOrException.data != null) {
+                                if (mapDataOrException.data.get("progress") != null) {
+                                    double progress = Math.round((double) mapDataOrException.data.get("progress"));
+                                    waitingDialog.setMessage(new StringBuilder("Uploading: ")
+                                            .append(progress)
+                                            .append("%"));
+                                }
+
+                                if (mapDataOrException.data.get("isComplete") != null) {
+                                    /*Snackbar.make(mView, "File is now ready to be uploaded",
+                                            Snackbar.LENGTH_SHORT).show();*/
+                                    waitingDialog.dismiss();
+                                    updateTutorResume();
+                                }
+                            }
+                        });
             } catch (Exception e){
                 SnackBarHelper.showSnackBar(mView, e.getMessage());
             }
@@ -464,29 +522,25 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
             waitingDialog.show();
             try {
                 profileViewModel.uploadAvatarOrValidId(selectedImageUri, imageFlag).observe(this,
-                        new Observer<DataOrException<Map<String, Object>, Exception>>() {
-                            @Override
-                            public void onChanged(DataOrException<Map<String, Object>,
-                                    Exception> mapDataOrException) {
-                                    if (mapDataOrException.exception != null) {
-                                        SnackBarHelper.showSnackBar(mView, mapDataOrException.exception.getMessage());
-                                        waitingDialog.dismiss();
-                                        return;
+                        mapDataOrException -> {
+                                if (mapDataOrException.exception != null) {
+                                    SnackBarHelper.showSnackBar(mView, mapDataOrException.exception.getMessage());
+                                    waitingDialog.dismiss();
+                                    return;
+                                }
+
+                                if (mapDataOrException.data != null) {
+                                    if (mapDataOrException.data.get("progress") != null) {
+                                        double progress = Math.round((double) mapDataOrException.data.get("progress"));
+                                        waitingDialog.setMessage(new StringBuilder("Uploading: ")
+                                                        .append(progress)
+                                                        .append("%"));
                                     }
 
-                                    if (mapDataOrException.data != null) {
-                                        if (mapDataOrException.data.get("progress") != null) {
-                                            double progress = Math.round((double) mapDataOrException.data.get("progress"));
-                                            waitingDialog.setMessage(new StringBuilder("Uploading: ")
-                                                            .append(progress)
-                                                            .append("%"));
-                                        }
-
-                                        if (mapDataOrException.data.get("isComplete") != null) {
-                                            updateTutorAvatar(selectedImageUri, waitingDialog);
-                                        }
+                                    if (mapDataOrException.data.get("isComplete") != null) {
+                                        updateTutorAvatar(selectedImageUri, waitingDialog);
                                     }
-                            }
+                                }
                         });
 
             }catch (Exception e){
@@ -498,88 +552,88 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
     private void updateTutorValidId() {
         String selectedIdType = validIdTypeSpinner.getSelectedItem().toString();
         profileViewModel.updateAvatarOrValidId(ID_IMG, selectedIdType).observe(this,
-                new Observer<DataOrException<Boolean, Exception>>() {
-            @Override
-            public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
-                if (dataOrException.exception != null) {
-                    SnackBarHelper.showSnackBar(mView, dataOrException.exception.getMessage());
-                    return;
-                }
-
-                if (dataOrException.data != null) {
-                    if (dataOrException.data) {
-                        Toast.makeText(mActivity, "Valid ID submitted for verification.", Toast.LENGTH_SHORT)
-                                .show();
-                        profileViewModel.setValidIdPath(null);
-                        profileViewModel.setValidIdUri(null);
-                        tutorID.setText(res.getString(R.string.choose_a_file_to_upload));
+                dataOrException -> {
+                    if (dataOrException.exception != null) {
+                        SnackBarHelper.showSnackBar(mView, dataOrException.exception.getMessage());
+                        return;
                     }
 
-                }
-            }
-        });
+                    if (dataOrException.data != null) {
+                        if (dataOrException.data) {
+                            Toast.makeText(mActivity, "Valid ID submitted for verification.", Toast.LENGTH_SHORT)
+                                    .show();
+                            profileViewModel.setValidIdPath(null);
+                            profileViewModel.setValidIdUri(null);
+                            tutorID.setText(res.getString(R.string.choose_a_file_to_upload));
+                        }
+
+                    }
+                });
     }
 
     private void updateTutorResume() {
         profileViewModel.updateResume().observe(this,
-                new Observer<DataOrException<Boolean, Exception>>() {
-            @Override
-            public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
-                if (dataOrException.exception != null) {
-                    SnackBarHelper.showSnackBar(mView, dataOrException.exception.getMessage());
-                    return;
-                }
-
-                if (dataOrException.data != null) {
-                    if (dataOrException.data) {
-                        Toast.makeText(mActivity, "Resume submitted for verification.", Toast.LENGTH_SHORT)
-                                .show();
-                        profileViewModel.setResumePath(null);
-                        profileViewModel.setResumeUri(null);
-                        tutorResume.setText(res.getString(R.string.choose_a_file_to_upload));
+                dataOrException -> {
+                    if (dataOrException.exception != null) {
+                        SnackBarHelper.showSnackBar(mView, dataOrException.exception.getMessage());
+                        return;
                     }
 
-                }
-            }
-        });
+                    if (dataOrException.data != null) {
+                        if (dataOrException.data) {
+                            Toast.makeText(mActivity, "Resume submitted for verification.", Toast.LENGTH_SHORT)
+                                    .show();
+                            profileViewModel.setResumePath(null);
+                            profileViewModel.setResumeUri(null);
+                            tutorResume.setText(res.getString(R.string.choose_a_file_to_upload));
+                        }
+
+                    }
+                });
     }
 
     private void updateTutorAvatar(Uri selectedImageUri, AlertDialog waitingDialog) {
         profileViewModel.updateAvatarOrValidId(AVATAR_IMG, null).observe(this,
-                new Observer<DataOrException<Boolean, Exception>>() {
-            @Override
-            public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
-                if (dataOrException.exception != null) {
-                    SnackBarHelper.showSnackBar(mView, dataOrException.exception.getMessage());
-                    return;
-                }
-
-                if (dataOrException.data != null) {
-                    if (dataOrException.data) {
-                        Toast.makeText(mActivity, "Image saved successfully!", Toast.LENGTH_SHORT)
-                                .show();
-                        Glide.with((Context) mActivity)
-                                .load(selectedImageUri)
-                                .placeholder(R.mipmap.ic_logo_round)
-                                .apply(new RequestOptions().override(100, 100))
-                                .into(tutorAvatarImageView);
-                        waitingDialog.dismiss();
-
-                        profileViewModel.setAvatarPath(selectedImageUri.toString());
+                dataOrException -> {
+                    if (dataOrException.exception != null) {
+                        SnackBarHelper.showSnackBar(mView, dataOrException.exception.getMessage());
+                        return;
                     }
 
-                }
-            }
-        });
+                    if (dataOrException.data != null) {
+                        if (dataOrException.data) {
+                            Toast.makeText(mActivity, "Image saved successfully!", Toast.LENGTH_SHORT)
+                                    .show();
+                            Glide.with((Context) mActivity)
+                                    .load(selectedImageUri)
+                                    .placeholder(R.mipmap.ic_logo_round)
+                                    .apply(new RequestOptions().override(100, 100))
+                                    .into(tutorAvatarImageView);
+                            waitingDialog.dismiss();
+
+                            profileViewModel.setAvatarPath(selectedImageUri.toString());
+                        }
+
+                    }
+                });
+    }
+
+    private void promptResumeMessage() {
+        new AlertDialog.Builder(getActivity())
+                .setTitle("Upload PDF")
+                .setMessage(res.getString(R.string.tell_us_something_about_your_education_experience_and_skills))
+                .setPositiveButton("Ok",
+                        (dialogInterface, i)-> showPDFPicker())
+                .show();
     }
 
     private void promptImageFilePermission() {
         String message = "";
         if (AVATAR_IMG.equals(imageFlag))
-            message = "Please make to upload image of you shows your face clearly and without " +
+            message = "Please make sure to upload a clear image of your face without " +
                     "wearing any accessories on.";
         else if (ID_IMG.equals(imageFlag))
-            message = "Please submit a clear and original copy of you valid ID.";
+            message = "Please upload a clear and original copy of you valid ID.";
 
         new AlertDialog.Builder(getActivity())
                 .setTitle("Upload Image")
