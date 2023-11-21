@@ -203,6 +203,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
                 tutorBarangay.setText(tutorInfo.getAddress());
                 tutorBirthDate.setText(dateTimeFormatter.format(new Date(tutorInfo.getBirthDate())));
 
+                // avatar
                 String avatarPath = "";
                 if (!tutorInfo.getAvatar().isEmpty())
                     avatarPath = tutorInfo.getAvatar();
@@ -216,23 +217,29 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
                             .apply(new RequestOptions().override(100, 100))
                             .into(tutorAvatarImageView);
 
+                // valid id text field
                 if (profileViewModel.getValidIdPath().getValue() != null &&
                         profileViewModel.getValidIdUri().getValue() != null) {
                     tutorID.setText(profileViewModel.getValidIdPath().getValue());
-                } else if (tutorInfo.getValidId() != null) {
+
+                } else if (tutorInfo.getValidId() != null && !tutorInfo.getValidId().isEmpty()) {
                     tutorID.setText(tutorInfo.getValidId());
                     profileViewModel.setValidIdPath(tutorInfo.getValidId());
                     profileViewModel.setValidIdUri(Uri.parse(tutorInfo.getValidId()));
-                }
 
+                } else tutorID.setText(res.getString(R.string.choose_a_file_to_upload));
+
+                // resume text field
                 if (profileViewModel.getResumePath().getValue() != null &&
                         profileViewModel.getResumeUri().getValue() != null) {
                     tutorResume.setText(profileViewModel.getResumePath().getValue());
-                } else if (tutorInfo.getResume() != null) {
+
+                } else if (tutorInfo.getResume() != null && !tutorInfo.getResume().isEmpty()) {
                     tutorResume.setText(tutorInfo.getResume());
                     profileViewModel.setResumePath(tutorInfo.getResume());
                     profileViewModel.setResumeUri(Uri.parse(tutorInfo.getResume()));
-                }
+
+                } else tutorResume.setText(res.getString(R.string.choose_a_file_to_upload));
 
             }
         });
@@ -278,7 +285,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
     }
 
     private void submitApplication() {
-        if (sharedViewModel.getTutorInfo().getAvatar() == null) {
+        if (sharedViewModel.getTutorInfo().getAvatar() == null || sharedViewModel.getTutorInfo().getAvatar().isEmpty()) {
             SnackBarHelper.showSnackBar(mView, "Please upload a clear image of your face before submitting.");
             return;
         }
@@ -560,11 +567,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
 
                     if (dataOrException.data != null) {
                         if (dataOrException.data) {
-                            Toast.makeText(mActivity, "Valid ID submitted for verification.", Toast.LENGTH_SHORT)
+                            Toast.makeText(mActivity, "Valid ID uploaded.", Toast.LENGTH_SHORT)
                                     .show();
-                            profileViewModel.setValidIdPath(null);
+                            /*profileViewModel.setValidIdPath(null);
                             profileViewModel.setValidIdUri(null);
-                            tutorID.setText(res.getString(R.string.choose_a_file_to_upload));
+                            tutorID.setText(res.getString(R.string.choose_a_file_to_upload));*/
                         }
 
                     }
@@ -581,11 +588,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
 
                     if (dataOrException.data != null) {
                         if (dataOrException.data) {
-                            Toast.makeText(mActivity, "Resume submitted for verification.", Toast.LENGTH_SHORT)
+                            Toast.makeText(mActivity, "Resume uploaded.", Toast.LENGTH_SHORT)
                                     .show();
-                            profileViewModel.setResumePath(null);
+                            /*profileViewModel.setResumePath(null);
                             profileViewModel.setResumeUri(null);
-                            tutorResume.setText(res.getString(R.string.choose_a_file_to_upload));
+                            tutorResume.setText(res.getString(R.string.choose_a_file_to_upload));*/
                         }
 
                     }
