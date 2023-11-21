@@ -45,6 +45,7 @@
     <string name="list_of_valid_ids">List of Valid IDs:</string>
     <string name="upload_resume">Upload Resume</string>
     <string name="tell_us_something_about_your_education_experience_and_skills">Tell us something about yourself, your education, experience and skills</string>
+    <string name="profile_email_message">We\'ll need your email to send you updates.</string>
     <string name="upload_your_resume">Upload your resume</string>
     <string name="empty"><![CDATA[<Empty>]]></string>
     <string name="update_basic_info_message">Please make sure the information is correct and matches your ID.</string>
@@ -60,6 +61,9 @@
     <string name="name_header">Name:</string>
     <string name="basic_information">Basic Information</string>
     <string name="submit">Submit</string>
+    <string name="contact_info">Contact</string>
+    <string name="email_header">Email:</string>
+    <string name="email_placeholder">example@mail.com</string>
 
     <string-array name="valid_ids">
         <item>Student ID</item>
