@@ -2,6 +2,7 @@ package com.ren.tutornearme.ui.profile;
 
 import static com.ren.tutornearme.util.Common.BARANGAY;
 import static com.ren.tutornearme.util.Common.BIRTH_DATE;
+import static com.ren.tutornearme.util.Common.EMAIL;
 import static com.ren.tutornearme.util.Common.FIRST_NAME;
 import static com.ren.tutornearme.util.Common.GENDER;
 import static com.ren.tutornearme.util.Common.LAST_NAME;
@@ -48,6 +49,7 @@ import com.hbisoft.pickit.PickiTCallbacks;
 import com.ren.tutornearme.BuildConfig;
 import com.ren.tutornearme.R;
 import com.ren.tutornearme.SharedViewModel;
+import com.ren.tutornearme.contact_info.ContactInfoActivity;
 import com.ren.tutornearme.model.TutorInfo;
 import com.ren.tutornearme.basic_info.BasicInfoActivity;
 import com.ren.tutornearme.util.InternetHelper;
@@ -61,9 +63,9 @@ import java.util.Date;
 import java.util.Locale;
 
 public class ProfileFragment extends Fragment implements View.OnClickListener, PickiTCallbacks {
-    private CardView basicInfoCardView;
+    private CardView basicInfoCardView, emailCardView;
     private Button uploadResumeButton, uploadValidIDButton, submitButton;
-    private TextView tutorName, tutorGender, tutorBarangay, tutorBirthDate, tutorResume, tutorID;
+    private TextView tutorName, tutorGender, tutorBarangay, tutorBirthDate, tutorResume, tutorID, tutorEmail;
     private ImageView tutorAvatarImageView, previewIdImageView, previewResumeImageView;
     private Spinner validIdTypeSpinner;
     private AlertDialog waitingDialog;
@@ -154,6 +156,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
 
     private void initBindListeners() {
         basicInfoCardView.setOnClickListener(this);
+        emailCardView.setOnClickListener(this);
         uploadValidIDButton.setOnClickListener(this);
         uploadResumeButton.setOnClickListener(this);
         tutorAvatarImageView.setOnClickListener(this);
@@ -168,6 +171,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         res = getResources();
 
         basicInfoCardView = view.findViewById(R.id.profile_basic_info_cardview);
+        emailCardView = view.findViewById(R.id.profile_email_cardview);
         tutorAvatarImageView = view.findViewById(R.id.profile_img_imageview);
         uploadValidIDButton = view.findViewById(R.id.profile_upload_id_button);
         uploadResumeButton = view.findViewById(R.id.profile_upload_resume_button);
@@ -182,6 +186,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         tutorBirthDate = view.findViewById(R.id.profile_tutor_birth_textview);
         tutorResume = view.findViewById(R.id.profile_tutor_resume_textview);
         tutorID = view.findViewById(R.id.profile_tutor_id_textview);
+        tutorEmail = view.findViewById(R.id.profile_tutor_email_textview);
     }
 
     private void initPopulateBasicInfo() {
@@ -203,6 +208,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
                 tutorBarangay.setText(tutorInfo.getAddress());
                 tutorBirthDate.setText(dateTimeFormatter.format(new Date(tutorInfo.getBirthDate())));
 
+                // avatar
                 String avatarPath = "";
                 if (!tutorInfo.getAvatar().isEmpty())
                     avatarPath = tutorInfo.getAvatar();
@@ -216,23 +222,32 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
                             .apply(new RequestOptions().override(100, 100))
                             .into(tutorAvatarImageView);
 
+                if (!tutorInfo.getEmail().isEmpty())
+                    tutorEmail.setText(tutorInfo.getEmail());
+
+                // valid id text field
                 if (profileViewModel.getValidIdPath().getValue() != null &&
                         profileViewModel.getValidIdUri().getValue() != null) {
                     tutorID.setText(profileViewModel.getValidIdPath().getValue());
-                } else if (tutorInfo.getValidId() != null) {
+
+                } else if (tutorInfo.getValidId() != null && !tutorInfo.getValidId().isEmpty()) {
                     tutorID.setText(tutorInfo.getValidId());
                     profileViewModel.setValidIdPath(tutorInfo.getValidId());
                     profileViewModel.setValidIdUri(Uri.parse(tutorInfo.getValidId()));
-                }
 
+                } else tutorID.setText(res.getString(R.string.choose_a_file_to_upload));
+
+                // resume text field
                 if (profileViewModel.getResumePath().getValue() != null &&
                         profileViewModel.getResumeUri().getValue() != null) {
                     tutorResume.setText(profileViewModel.getResumePath().getValue());
-                } else if (tutorInfo.getResume() != null) {
+
+                } else if (tutorInfo.getResume() != null && !tutorInfo.getResume().isEmpty()) {
                     tutorResume.setText(tutorInfo.getResume());
                     profileViewModel.setResumePath(tutorInfo.getResume());
                     profileViewModel.setResumeUri(Uri.parse(tutorInfo.getResume()));
-                }
+
+                } else tutorResume.setText(res.getString(R.string.choose_a_file_to_upload));
 
             }
         });
@@ -242,6 +257,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
     public void onClick(View view) {
         if (view.getId() == R.id.profile_basic_info_cardview) {
             navigateToBasicInfo();
+
+        } else if (view.getId() == R.id.profile_email_cardview) {
+            navigateToContactInfo();
 
         } else if (view.getId() == R.id.profile_img_imageview) {
             imageFlag = AVATAR_IMG;
@@ -278,7 +296,12 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
     }
 
     private void submitApplication() {
-        if (sharedViewModel.getTutorInfo().getAvatar() == null) {
+        if (sharedViewModel.getTutorInfo().getEmail().isEmpty()) {
+            SnackBarHelper.showSnackBar(mView, "Please provide your email.");
+            return;
+        }
+
+        if (sharedViewModel.getTutorInfo().getAvatar() == null || sharedViewModel.getTutorInfo().getAvatar().isEmpty()) {
             SnackBarHelper.showSnackBar(mView, "Please upload a clear image of your face before submitting.");
             return;
         }
@@ -560,11 +583,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
 
                     if (dataOrException.data != null) {
                         if (dataOrException.data) {
-                            Toast.makeText(mActivity, "Valid ID submitted for verification.", Toast.LENGTH_SHORT)
+                            Toast.makeText(mActivity, "Valid ID uploaded.", Toast.LENGTH_SHORT)
                                     .show();
-                            profileViewModel.setValidIdPath(null);
+                            /*profileViewModel.setValidIdPath(null);
                             profileViewModel.setValidIdUri(null);
-                            tutorID.setText(res.getString(R.string.choose_a_file_to_upload));
+                            tutorID.setText(res.getString(R.string.choose_a_file_to_upload));*/
                         }
 
                     }
@@ -581,11 +604,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
 
                     if (dataOrException.data != null) {
                         if (dataOrException.data) {
-                            Toast.makeText(mActivity, "Resume submitted for verification.", Toast.LENGTH_SHORT)
+                            Toast.makeText(mActivity, "Resume uploaded.", Toast.LENGTH_SHORT)
                                     .show();
-                            profileViewModel.setResumePath(null);
+                            /*profileViewModel.setResumePath(null);
                             profileViewModel.setResumeUri(null);
-                            tutorResume.setText(res.getString(R.string.choose_a_file_to_upload));
+                            tutorResume.setText(res.getString(R.string.choose_a_file_to_upload));*/
                         }
 
                     }
@@ -678,6 +701,13 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         bundle.putLong(BIRTH_DATE, mTutorInfo.getBirthDate());
 
         intent.putExtras(bundle);
+        startActivity(intent);
+    }
+
+    private void navigateToContactInfo() {
+        Intent intent = new Intent(getActivity(), ContactInfoActivity.class);
+
+        intent.putExtra(EMAIL, sharedViewModel.getTutorInfo().getEmail());
         startActivity(intent);
     }
 

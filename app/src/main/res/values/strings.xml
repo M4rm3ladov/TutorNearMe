@@ -43,15 +43,17 @@
     <string name="title_activity_maps">MapsActivity</string>
     <string name="upload_your_valid_id">Upload your valid ID</string>
     <string name="list_of_valid_ids">List of Valid IDs:</string>
-    <string name="upload_resume">Upload Resume</string>
+    <string name="upload_resume">Resume</string>
     <string name="tell_us_something_about_your_education_experience_and_skills">Tell us something about yourself, your education, experience and skills</string>
+    <string name="profile_email_message">We\'ll need your email to send you updates.</string>
     <string name="upload_your_resume">Upload your resume</string>
     <string name="empty"><![CDATA[<Empty>]]></string>
     <string name="update_basic_info_message">Please make sure the information is correct and matches your ID.</string>
+    <string name="email_creation_message">Please make sure we can reach you with your email.</string>
     <string name="edit_icon">Edit icon</string>
     <string name="choose_a_file_to_upload">Choose a file to upload</string>
     <string name="preview">preview</string>
-    <string name="upload_valid_id">Upload Valid ID</string>
+    <string name="upload_valid_id">Valid ID</string>
     <string name="barangay_header">Barangay:</string>
     <string name="birth_date">Birth Date</string>
     <string name="tutor_avatar">tutor avatar</string>
@@ -59,7 +61,11 @@
     <string name="gender_header">Gender:</string>
     <string name="name_header">Name:</string>
     <string name="basic_information">Basic Information</string>
-    <string name="submit">Submit</string>
+    <string name="submit">Submit application</string>
+    <string name="contact_info">Contact</string>
+    <string name="email_header">Email:</string>
+    <string name="email_placeholder">example@mail.com</string>
+    <string name="email_address">Email Address</string>
 
     <string-array name="valid_ids">
         <item>Student ID</item>

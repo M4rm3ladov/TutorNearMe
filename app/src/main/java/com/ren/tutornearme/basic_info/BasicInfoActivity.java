@@ -194,6 +194,7 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
         barangayList = new AddressBank().getBarangays(new AddressBank.AddressListAsyncResponse() {
             @Override
             public void processFinished(ArrayList<String> barangayArrayList) {
+                barangayList = barangayArrayList;
                 // Add barangay list to adapter
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(BasicInfoActivity.this,
                         android.R.layout.simple_dropdown_item_1line, barangayArrayList);
@@ -425,6 +426,7 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
         tutorInfo.setValidId("");
         tutorInfo.setValidIdType("");
         tutorInfo.setAvatar("");
+        tutorInfo.setEmail("");
         tutorInfo.setCreatedDate(currentDate);
 
         basicInfoViewModel.saveTutorInfo(tutorInfo).observe(this,
