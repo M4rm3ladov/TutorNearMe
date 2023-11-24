@@ -95,6 +95,28 @@
         <item name="android:windowFullscreen">true</item>
     </style>
 
+    <style name="Base.Theme.TutorNearMe.ContactInfo.ActionBar" parent="Theme.Material3.Light">
+        <item name="actionBarStyle">@style/Custom.ActionBar</item>
+        <item name="title">Contact</item>
+        <item name="navigationIcon">@drawable/ic_arrow_back</item>
+
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <item name="colorButtonNormal">@color/colorAccent</item>
+        <item name="colorControlNormal">@color/white</item>
+        <item name="colorControlActivated">@color/white</item>
+        <item name="android:colorControlHighlight">@color/white</item>
+
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textColorPrimary">@color/black</item>
+        <item name="android:textColorSecondary">@color/black</item>
+        <item name="fontFamily">@font/uber_move</item>
+
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
     <style name="Base.Theme.TutorNearMe.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Base.Theme.TutorNearMe.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
