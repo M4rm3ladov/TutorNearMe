@@ -8,14 +8,15 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.WRITE_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-   <!-- Without this entry storage-permission entry will not be visible under app-info permissions list Android-10 and below -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- Without this entry storage-permission entry will not be visible under app-info permissions list Android-10 and below -->
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="29"
         tools:ignore="ScopedStorage" />
 
-    <uses-feature android:name="android.hardware.camera" android:required="true" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
 
     <application
         android:name=".controller.VolleySingleton"
@@ -29,7 +30,6 @@
         android:supportsRtl="true"
         android:theme="@style/Base.Theme.TutorNearMe"
         tools:targetApi="31">
-
         <!--
              TODO: Before you run your application, you need a Google Maps API key.
 
@@ -58,12 +58,16 @@
             android:theme="@style/Base.Theme.TutorNearMe.ActionBar"
             android:windowSoftInputMode="adjustPan" />
         <activity
+            android:name=".contact_info.ContactInfoActivity"
+            android:configChanges="orientation"
+            android:exported="false"
+            android:theme="@style/Base.Theme.TutorNearMe.ContactInfo.ActionBar"
+            android:screenOrientation="portrait"/>
+        <activity
             android:name=".auth.MainActivity"
             android:configChanges="orientation"
             android:exported="false"
-            android:screenOrientation="portrait">
-        </activity>
-
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".PermissionsActivity"
             android:configChanges="orientation"
