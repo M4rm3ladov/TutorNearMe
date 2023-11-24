@@ -12,6 +12,7 @@ public class Common {
     public static final String GENDER = "Gender";
     public static final String BARANGAY = "Barangay";
     public static final String BIRTH_DATE = "BirthDate";
+    public static final String EMAIL = "Email";
 
     public static final String UNVERIFIED = "unverified";
     public static final String VERIFIED = "verified";
