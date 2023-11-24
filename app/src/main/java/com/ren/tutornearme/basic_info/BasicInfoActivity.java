@@ -426,6 +426,7 @@ public class BasicInfoActivity extends AppCompatActivity implements View.OnClick
         tutorInfo.setValidId("");
         tutorInfo.setValidIdType("");
         tutorInfo.setAvatar("");
+        tutorInfo.setEmail("");
         tutorInfo.setCreatedDate(currentDate);
 
         basicInfoViewModel.saveTutorInfo(tutorInfo).observe(this,
