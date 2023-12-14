@@ -51,6 +51,12 @@
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".ui.subject.SubjectRequestActivity"
+            android:configChanges="orientation"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Base.Theme.TutorNearMe.SubjectRequest" />
+        <activity
             android:name=".basic_info.BasicInfoActivity"
             android:configChanges="orientation"
             android:exported="false"
@@ -61,13 +67,13 @@
             android:name=".contact_info.ContactInfoActivity"
             android:configChanges="orientation"
             android:exported="false"
-            android:theme="@style/Base.Theme.TutorNearMe.ContactInfo.ActionBar"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:theme="@style/Base.Theme.TutorNearMe.ContactInfo.ActionBar" />
         <activity
             android:name=".auth.MainActivity"
             android:configChanges="orientation"
             android:exported="false"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".PermissionsActivity"
             android:configChanges="orientation"

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/subject_navigation"
+    app:startDestination="@id/subjectListFragment">
+
+    <fragment
+        android:id="@+id/subjectListFragment"
+        android:name="com.ren.tutornearme.ui.subject.subject_list.SubjectListFragment"
+        android:label="fragment_subject_list"
+        tools:layout="@layout/fragment_subject_list" >
+        <action
+            android:id="@+id/action_subjectListFragment_to_subjectFilesFragment"
+            app:destination="@id/subjectFilesFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/subjectFilesFragment"
+        android:name="com.ren.tutornearme.ui.subject.SubjectFilesFragment"
+        android:label="fragment_subject_files"
+        tools:layout="@layout/fragment_subject_files" >
+        <action
+            android:id="@+id/action_subjectFilesFragment_to_subjectListFragment"
+            app:destination="@id/subjectListFragment" />
+    </fragment>
+</navigation>

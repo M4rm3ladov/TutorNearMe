@@ -105,7 +105,7 @@ public class HomeActivity extends AppCompatActivity{
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_profile)
+                R.id.nav_home, R.id.nav_profile, R.id.nav_subject)
                 .setOpenableLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_home);
@@ -144,10 +144,12 @@ public class HomeActivity extends AppCompatActivity{
 
                 if (accountStatus.equals(UNVERIFIED) || accountStatus.equals(RESUBMIT)) {
                     navigationView.getMenu().findItem(R.id.nav_profile).setVisible(true);
+                    navigationView.getMenu().findItem(R.id.nav_subject).setVisible(false);
                     return;
                 }
 
                 navigationView.getMenu().findItem(R.id.nav_profile).setVisible(false);
+                navigationView.getMenu().findItem(R.id.nav_subject).setVisible(true);
                 if (!tutorInfo.getAvatar().isEmpty()) {
                     Glide.with(HomeActivity.this)
                             .load(tutorInfo.getAvatar())
@@ -220,7 +222,8 @@ public class HomeActivity extends AppCompatActivity{
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START))
             drawer.closeDrawer(GravityCompat.START);
-        else if (navigationView.getMenu().findItem(R.id.nav_profile).isChecked())
+        else if (navigationView.getMenu().findItem(R.id.nav_profile).isChecked() ||
+                navigationView.getMenu().findItem(R.id.nav_subject).isChecked())
             super.onBackPressed();
         else if(navigationView.getMenu().findItem(R.id.nav_home).isChecked())
             moveTaskToBack(true);
