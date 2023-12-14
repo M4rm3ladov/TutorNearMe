@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/subject_row_cardView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="14dp"
+            android:paddingTop="20dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="20dp">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/subject_logo_imageView"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="4dp"
+                android:contentDescription="@string/app_logo"
+                android:src="@mipmap/ic_logo_round"
+                app:civ_border_color="@color/colorAccent"
+                app:civ_border_width="1dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/subject_name_header_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="@string/name_header"
+                android:textSize="16sp"
+                app:layout_constraintStart_toEndOf="@+id/subject_logo_imageView"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/subject_name_textView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:text="@string/empty"
+                android:textSize="16sp"
+                app:fontFamily="@font/roboto_bold"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintBaseline_toBaselineOf="@id/subject_name_header_textView"
+                app:layout_constraintEnd_toStartOf="@+id/subject_delete_imageView"
+                app:layout_constraintStart_toEndOf="@+id/subject_name_header_textView"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/subject_desc_header_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/description_header"
+                android:textSize="16sp"
+                app:layout_constraintStart_toEndOf="@+id/subject_logo_imageView"
+                app:layout_constraintTop_toBottomOf="@+id/subject_name_textView" />
+
+            <TextView
+                android:id="@+id/subject_description_textView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="10dp"
+                android:text="@string/empty"
+                android:textSize="16sp"
+                app:fontFamily="@font/roboto_bold"
+                app:layout_constraintBaseline_toBaselineOf="@+id/subject_desc_header_textView"
+                app:layout_constraintEnd_toStartOf="@+id/subject_delete_imageView"
+                app:layout_constraintStart_toEndOf="@+id/subject_desc_header_textView"
+                app:layout_constraintTop_toBottomOf="@+id/subject_name_textView" />
+
+            <TextView
+                android:id="@+id/subject_updated_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/empty"
+                android:textSize="12sp"
+                app:layout_constraintStart_toEndOf="@+id/subject_logo_imageView"
+                app:layout_constraintTop_toBottomOf="@+id/subject_description_textView" />
+
+            <ImageView
+                android:id="@+id/subject_delete_imageView"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginStart="10dp"
+                android:contentDescription="@string/delete"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/subject_name_textView"
+                app:srcCompat="@drawable/ic_delete" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
