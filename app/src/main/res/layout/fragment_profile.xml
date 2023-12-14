@@ -283,23 +283,6 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-
-                <!--<com.google.android.material.button.MaterialButton
-                    android:id="@+id/profile_upload_id_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="16dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="16dp"
-                    android:text="@string/upload_your_valid_id"
-                    android:theme="@style/AppOutlinedButtonStyle"
-                    app:icon="@drawable/ic_upload"
-                    app:iconGravity="textStart"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/profile_tutor_id_textview" />-->
-
                 <TextView
                     android:id="@+id/profile_id_type_textview"
                     android:layout_width="wrap_content"
@@ -386,21 +369,6 @@
                     android:textSize="18sp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
-
-                <!--<com.google.android.material.button.MaterialButton
-                    android:id="@+id/profile_upload_resume_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="16dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="16dp"
-                    android:text="@string/upload_your_resume"
-                    android:theme="@style/AppOutlinedButtonStyle"
-                    app:icon="@drawable/ic_upload"
-                    app:iconGravity="textStart"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/profile_tutor_resume_textview" />-->
 
                 <TextView
                     android:id="@+id/profile_tutor_resume_textview"

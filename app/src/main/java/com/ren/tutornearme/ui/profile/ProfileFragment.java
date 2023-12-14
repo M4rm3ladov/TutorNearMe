@@ -64,7 +64,6 @@ import java.util.Locale;
 
 public class ProfileFragment extends Fragment implements View.OnClickListener, PickiTCallbacks {
     private CardView basicInfoCardView, emailCardView;
-    //private Button uploadResumeButton, uploadValidIDButton, submitButton;
     private Button submitButton;
     private TextView tutorName, tutorGender, tutorBarangay, tutorBirthDate, tutorResume, tutorID, tutorEmail;
     private ImageView tutorAvatarImageView, previewIdImageView, previewResumeImageView;
@@ -158,8 +157,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
     private void initBindListeners() {
         basicInfoCardView.setOnClickListener(this);
         emailCardView.setOnClickListener(this);
-        /*uploadValidIDButton.setOnClickListener(this);
-        uploadResumeButton.setOnClickListener(this);*/
         tutorAvatarImageView.setOnClickListener(this);
         tutorResume.setOnClickListener(this);
         tutorID.setOnClickListener(this);
@@ -174,8 +171,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         basicInfoCardView = view.findViewById(R.id.profile_basic_info_cardview);
         emailCardView = view.findViewById(R.id.profile_email_cardview);
         tutorAvatarImageView = view.findViewById(R.id.profile_img_imageview);
-        /*uploadValidIDButton = view.findViewById(R.id.profile_upload_id_button);
-        uploadResumeButton = view.findViewById(R.id.profile_upload_resume_button);*/
         validIdTypeSpinner = view.findViewById(R.id.profile_id_type_spinner);
         previewIdImageView = view.findViewById(R.id.profile_id_preview);
         previewResumeImageView = view.findViewById(R.id.profile_resume_preview);
@@ -272,14 +267,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
 
         } else if (view.getId() == R.id.profile_tutor_resume_textview) {
             promptResumeMessage();
-
-        /*} else if (view.getId() == R.id.profile_upload_id_button) {
-            *//*if(!checkHasInternetConnection()) return;
-            uploadValidId();*//*
-
-        } else if (view.getId() == R.id.profile_upload_resume_button) {
-            *//*if(!checkHasInternetConnection()) return;
-            uploadResume();*/
 
         } else if (view.getId() == R.id.profile_id_preview) {
             if(!checkHasInternetConnection()) return;
@@ -487,8 +474,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
                                 }
 
                                 if (mapDataOrException.data.get("isComplete") != null) {
-                                    /*Snackbar.make(mView, "Image is now ready to be uploaded",
-                                            Snackbar.LENGTH_SHORT).show();*/
                                     waitingDialog.dismiss();
                                     updateTutorValidId();
                                 }
@@ -531,8 +516,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
                                 }
 
                                 if (mapDataOrException.data.get("isComplete") != null) {
-                                    /*Snackbar.make(mView, "File is now ready to be uploaded",
-                                            Snackbar.LENGTH_SHORT).show();*/
                                     waitingDialog.dismiss();
                                     updateTutorResume();
                                 }
@@ -592,9 +575,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
                         if (dataOrException.data) {
                             Toast.makeText(mActivity, "Valid ID uploaded.", Toast.LENGTH_SHORT)
                                     .show();
-                            /*profileViewModel.setValidIdPath(null);
-                            profileViewModel.setValidIdUri(null);
-                            tutorID.setText(res.getString(R.string.choose_a_file_to_upload));*/
                         }
 
                     }
@@ -613,11 +593,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
                         if (dataOrException.data) {
                             Toast.makeText(mActivity, "Resume uploaded.", Toast.LENGTH_SHORT)
                                     .show();
-                            /*profileViewModel.setResumePath(null);
-                            profileViewModel.setResumeUri(null);
-                            tutorResume.setText(res.getString(R.string.choose_a_file_to_upload));*/
                         }
-
                     }
                 });
     }
