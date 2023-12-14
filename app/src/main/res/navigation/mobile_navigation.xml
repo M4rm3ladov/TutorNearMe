@@ -17,4 +17,10 @@
         android:label="@string/menu_profile"
         tools:layout="@layout/fragment_profile" />
 
+    <fragment
+        android:id="@+id/nav_subject"
+        android:name="com.ren.tutornearme.ui.subject.SubjectFragment"
+        android:label="My Subjects"
+        tools:layout="@layout/fragment_subject"/>
+
 </navigation>
