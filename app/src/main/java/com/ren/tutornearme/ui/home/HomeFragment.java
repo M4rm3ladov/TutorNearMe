@@ -122,6 +122,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onResume() {
+        isGPSAndLocationPermissionGranted();
         homeViewModel.getOnlineRef().addValueEventListener(onlineValueEventListener);
         super.onResume();
     }
