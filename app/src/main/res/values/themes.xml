@@ -95,6 +95,10 @@
         <item name="android:windowFullscreen">true</item>
     </style>
 
+    <style name="Base.Theme.TutorNearMe.SubjectRequest" parent="Base.Theme.TutorNearMe.ActionBar">
+        <item name="title">Subject List</item>
+    </style>
+
     <style name="Base.Theme.TutorNearMe.ContactInfo.ActionBar" parent="Theme.Material3.Light">
         <item name="actionBarStyle">@style/Custom.ActionBar</item>
         <item name="title">Contact</item>
