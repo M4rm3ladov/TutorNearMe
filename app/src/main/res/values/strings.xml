@@ -67,6 +67,20 @@
     <string name="email_placeholder">example@mail.com</string>
     <string name="email_address">Email Address</string>
 
+    <string name="menu_subject">Field of Study</string>
+    <string name="search_subject">Search for name or category</string>
+    <string name="my_subjects">My Subjects</string>
+    <string name="subject_request">Subject Request</string>
+    <string name="new_field_of_study">New field of Study</string>
+    <string name="app_logo">app logo</string>
+    <string name="description_header">Description:</string>
+    <string name="delete">Delete</string>
+    <string name="status_header">Status:</string>
+    <string name="close_dialog">close dialog</string>
+    <string name="name">Name</string>
+    <string name="description">Description</string>
+    <string name="submit_request">Submit request</string>
+
     <string-array name="valid_ids">
         <item>Student ID</item>
         <item>Passport</item>
@@ -79,4 +93,7 @@
         <item>ePhilID</item>
         <item>Philhealth Card</item>
     </string-array>
+
+    <string name="find_a_subject_you_d_like_to_teach">Choose a subject to start tutoring.</string>
+    <string name="upload_your_credential">Upload your credentials.</string>
 </resources>
