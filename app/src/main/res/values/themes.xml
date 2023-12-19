@@ -96,7 +96,7 @@
     </style>
 
     <style name="Base.Theme.TutorNearMe.SubjectRequest" parent="Base.Theme.TutorNearMe.ActionBar">
-        <item name="title">Subject List</item>
+        <item name="title">Subject Request</item>
     </style>
 
     <style name="Base.Theme.TutorNearMe.ContactInfo.ActionBar" parent="Theme.Material3.Light">
