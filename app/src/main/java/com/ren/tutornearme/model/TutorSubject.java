@@ -4,35 +4,35 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TutorSubject {
-    private String id;
     private String tutorId;
     private String subjectId;
     private String name;
     private String description;
     private String status;
+    private String credential;
     private long updatedDate;
     private long createdDate;
 
     public TutorSubject() {
     }
 
-    public TutorSubject(String id, String tutorId, String subjectId,String name, String description, String status, long updatedDate, long createdDate) {
-        this.id = id;
+    public TutorSubject(String tutorId, String subjectId, String name, String description, String status,
+                        String credential, long updatedDate, long createdDate) {
         this.tutorId = tutorId;
         this.subjectId = subjectId;
         this.name = name;
         this.description = description;
         this.status = status;
+        this.credential = credential;
         this.updatedDate = updatedDate;
         this.createdDate = createdDate;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+    public TutorSubject(String status, String credential, long updatedDate, long createdDate) {
+        this.status = status;
+        this.credential = credential;
+        this.updatedDate = updatedDate;
+        this.createdDate = createdDate;
     }
 
     public String getTutorId() {
@@ -75,6 +75,14 @@ public class TutorSubject {
         this.status = status;
     }
 
+    public String getCredential() {
+        return credential;
+    }
+
+    public void setCredential(String credential) {
+        this.credential = credential;
+    }
+
     public long getUpdatedDate() {
         return updatedDate;
     }
@@ -91,21 +99,29 @@ public class TutorSubject {
         this.createdDate = createdDate;
     }
 
-    public TutorSubject copyWith(String id, String tutorId, String subjectId, String name, String description,
-                                 String status, Long updatedDate, Long createdDate) {
+    public TutorSubject copyWith(String tutorId, String subjectId, String name, String description,
+                                 String status, String credential, Long updatedDate, Long createdDate) {
         return new TutorSubject(
-                (id != null) ? id : this.id,
                 (tutorId != null) ? tutorId : this.tutorId,
                 (subjectId != null) ? subjectId : this.subjectId,
                 (name != null) ? name : this.name,
                 (description != null) ? description : this.description,
                 (status != null) ? status : this.status,
+                (credential != null) ? credential : this.credential,
+                (updatedDate != null) ? updatedDate : this.updatedDate,
+                (createdDate !=  null) ? createdDate : this.createdDate);
+    }
+
+    public TutorSubject copyWith(String status, String credential, Long updatedDate, Long createdDate) {
+        return new TutorSubject(
+                (status != null) ? status : this.status,
+                (credential != null) ? credential : this.credential,
                 (updatedDate != null) ? updatedDate : this.updatedDate,
                 (createdDate !=  null) ? createdDate : this.createdDate);
     }
 
     public TutorSubject clone() {
-        return copyWith(id, tutorId, subjectId, name, description, status, updatedDate, createdDate);
+        return copyWith(tutorId, subjectId, name, description, status, credential, updatedDate, createdDate);
     }
 
     public Map<String, Object> toMap() {
@@ -119,12 +135,12 @@ public class TutorSubject {
     @Override
     public String toString() {
         return "TutorSubject{" +
-                "id='" + id + '\'' +
                 ", tutorId='" + tutorId + '\'' +
                 ", subjectId='" + subjectId + '\'' +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status='" + status + '\'' +
+                ", credential='" + credential + '\'' +
                 ", updatedDate=" + updatedDate +
                 ", createdDate=" + createdDate +
                 '}';
