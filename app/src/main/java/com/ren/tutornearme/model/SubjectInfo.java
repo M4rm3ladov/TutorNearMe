@@ -1,8 +1,10 @@
 package com.ren.tutornearme.model;
 
+import org.parceler.Parcel;
 import java.util.HashMap;
 import java.util.Map;
 
+@Parcel(Parcel.Serialization.BEAN)
 public class SubjectInfo {
     private String id;
     private String name;
