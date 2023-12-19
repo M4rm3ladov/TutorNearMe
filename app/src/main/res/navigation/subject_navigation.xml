@@ -17,7 +17,7 @@
 
     <fragment
         android:id="@+id/subjectFilesFragment"
-        android:name="com.ren.tutornearme.ui.subject.SubjectFilesFragment"
+        android:name="com.ren.tutornearme.ui.subject.subject_file.SubjectFilesFragment"
         android:label="fragment_subject_files"
         tools:layout="@layout/fragment_subject_files" >
         <action

@@ -1,6 +1,9 @@
 package com.ren.tutornearme.adapter;
 
+import static com.ren.tutornearme.util.Common.CURRENT_SUBJECT;
+
 import android.content.Context;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,13 +11,14 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.navigation.NavController;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ren.tutornearme.R;
 import com.ren.tutornearme.model.SubjectInfo;
-import com.ren.tutornearme.ui.subject.subject_list.SubjectListViewModel;
+import com.ren.tutornearme.ui.subject.SubjectSharedViewModel;
+
+import org.parceler.Parcels;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -24,22 +28,18 @@ import java.util.Locale;
 public class SubjectListAdapter extends RecyclerView.Adapter<SubjectListAdapter.SubjectListViewHolder>{
     private final Context context;
     private View view;
-    private final NavController navController;
     private ArrayList<SubjectInfo> subjectInfoArrayList = new ArrayList<>();
     private final SimpleDateFormat dateTimeFormatter =
             new SimpleDateFormat( "dd-MMM-yyyy, hh:mm" , Locale.ENGLISH);
 
-    private final SubjectListViewModel subjectListViewModel;
-    private final LifecycleOwner lifecycleOwner;
+    private final SubjectSharedViewModel subjectSharedViewModel;
+    private final NavController navController;
 
-    public SubjectListAdapter(SubjectListViewModel subjectViewModel,
-                          LifecycleOwner lifecycleOwner, Context context, NavController navController) {
+    public SubjectListAdapter(SubjectSharedViewModel subjectSharedViewModel, Context context, NavController navController) {
         this.context = context;
-        this.lifecycleOwner = lifecycleOwner;
-        this.subjectListViewModel = subjectViewModel;
+        this.subjectSharedViewModel = subjectSharedViewModel;
         this.navController = navController;
     }
-
 
     @NonNull
     @Override
@@ -56,7 +56,9 @@ public class SubjectListAdapter extends RecyclerView.Adapter<SubjectListAdapter.
         holder.updatedDateTextView
                 .setText(dateTimeFormatter.format(new Date(subjectInfo.getUpdatedDate())));
         holder.rowCardView.setOnClickListener(view -> {
-            navController.navigate(R.id.action_subjectListFragment_to_subjectFilesFragment);
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(CURRENT_SUBJECT, Parcels.wrap(subjectInfo));
+            navController.navigate(R.id.action_subjectListFragment_to_subjectFilesFragment, bundle);
         });
     }
 
