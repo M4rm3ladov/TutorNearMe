@@ -11,9 +11,11 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.navigation.NavController;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.ren.tutornearme.R;
 import com.ren.tutornearme.model.SubjectInfo;
 import com.ren.tutornearme.ui.subject.SubjectSharedViewModel;
@@ -34,11 +36,14 @@ public class SubjectListAdapter extends RecyclerView.Adapter<SubjectListAdapter.
 
     private final SubjectSharedViewModel subjectSharedViewModel;
     private final NavController navController;
+    private final LifecycleOwner lifecycleOwner;
 
-    public SubjectListAdapter(SubjectSharedViewModel subjectSharedViewModel, Context context, NavController navController) {
+    public SubjectListAdapter(SubjectSharedViewModel subjectSharedViewModel, LifecycleOwner lifecycleOwner,
+                              Context context, NavController navController) {
         this.context = context;
         this.subjectSharedViewModel = subjectSharedViewModel;
         this.navController = navController;
+        this.lifecycleOwner = lifecycleOwner;
     }
 
     @NonNull
@@ -55,10 +60,29 @@ public class SubjectListAdapter extends RecyclerView.Adapter<SubjectListAdapter.
         holder.subjectDescriptionTextView.setText(subjectInfo.getDescription());
         holder.updatedDateTextView
                 .setText(dateTimeFormatter.format(new Date(subjectInfo.getUpdatedDate())));
+
         holder.rowCardView.setOnClickListener(view -> {
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(CURRENT_SUBJECT, Parcels.wrap(subjectInfo));
-            navController.navigate(R.id.action_subjectListFragment_to_subjectFilesFragment, bundle);
+            subjectSharedViewModel.checkIfDuplicateRequest(subjectInfo.getId())
+                    .observe(lifecycleOwner, isDuplicate -> {
+                        if (isDuplicate.exception != null) {
+                            Snackbar.make(view,
+                                    "[ERROR]: " + isDuplicate.exception.getMessage(),
+                                    Snackbar.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        if (isDuplicate.data != null) {
+                            if (isDuplicate.data) {
+                                Snackbar.make(view,
+                                        "[INFO]: You have an active request ticket for this subject.",
+                                        Snackbar.LENGTH_SHORT).show();
+                            } else {
+                                Bundle bundle = new Bundle();
+                                bundle.putParcelable(CURRENT_SUBJECT, Parcels.wrap(subjectInfo));
+                                navController.navigate(R.id.action_subjectListFragment_to_subjectFilesFragment, bundle);
+                            }
+                        }
+                    });
         });
     }
 

@@ -25,18 +25,20 @@ import com.google.android.material.snackbar.Snackbar;
 import com.ren.tutornearme.adapter.SubjectListAdapter;
 import com.ren.tutornearme.databinding.FragmentSubjectListBinding;
 import com.ren.tutornearme.model.SubjectInfo;
+import com.ren.tutornearme.ui.subject.SubjectSharedViewModel;
 import com.ren.tutornearme.util.InternetHelper;
 import com.ren.tutornearme.util.SnackBarHelper;
 
 import java.util.ArrayList;
 
-public class SubjectListFragment extends Fragment implements View.OnClickListener {
+public class SubjectListFragment extends Fragment {
     private FragmentSubjectListBinding binding;
     private Context mContext;
     private View mView;
     private Application mApplication;
     private NavController navController;
     private SubjectListViewModel subjectListViewModel;
+    private SubjectSharedViewModel subjectSharedViewModel;
     private SubjectListAdapter subjectListAdapter;
     private ArrayList<SubjectInfo> subjectInfoArrayList;
 
@@ -104,10 +106,11 @@ public class SubjectListFragment extends Fragment implements View.OnClickListene
                              Bundle savedInstanceState) {
         subjectListViewModel =
                 new ViewModelProvider(this).get(SubjectListViewModel.class);
+        subjectSharedViewModel =
+                new ViewModelProvider(this).get(SubjectSharedViewModel.class);
 
         binding = FragmentSubjectListBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-        /*initBindFragmentViews();*/
 
         return root;
     }
@@ -125,8 +128,7 @@ public class SubjectListFragment extends Fragment implements View.OnClickListene
         subjectListRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
 
         subjectInfoArrayList = new ArrayList<>();
-        subjectListAdapter = new SubjectListAdapter(
-                subjectListViewModel, getViewLifecycleOwner(), mContext, navController);
+        subjectListAdapter = new SubjectListAdapter(subjectSharedViewModel, this, mContext, navController);
         subjectListRecyclerView.setAdapter(subjectListAdapter);
     }
 
@@ -159,10 +161,5 @@ public class SubjectListFragment extends Fragment implements View.OnClickListene
                 subjectListAdapter.setSubjectList(filteredList);
             }
         });
-    }
-
-    @Override
-    public void onClick(View view) {
-
     }
 }

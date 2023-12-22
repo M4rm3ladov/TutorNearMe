@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -38,6 +39,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.hbisoft.pickit.PickiT;
 import com.hbisoft.pickit.PickiTCallbacks;
 import com.ren.tutornearme.R;
+import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.databinding.FragmentSubjectFilesBinding;
 import com.ren.tutornearme.model.SubjectInfo;
 import com.ren.tutornearme.model.TutorInfo;
@@ -59,6 +61,7 @@ public class SubjectFilesFragment extends Fragment implements View.OnClickListen
     private FragmentActivity mActivity;
     private Resources res;
     private NavController navController;
+    private SubjectInfo subjectInfo;
 
     private TextView subjectFileTextView;
     private ImageView subjectFilePreviewImageView;
@@ -106,6 +109,11 @@ public class SubjectFilesFragment extends Fragment implements View.OnClickListen
                 new ViewModelProvider(this).get(SubjectFilesViewModel.class);
 
         binding = FragmentSubjectFilesBinding.inflate(inflater, container, false);
+
+        Bundle bundle = this.getArguments();
+        if (bundle != null)
+            subjectInfo = Parcels.unwrap(bundle.getParcelable(CURRENT_SUBJECT));
+
         return binding.getRoot();
     }
 
@@ -171,10 +179,6 @@ public class SubjectFilesFragment extends Fragment implements View.OnClickListen
     }
 
     private void sendTutorSubjectRequest(TutorInfo tutorInfo) {
-        Bundle bundle = this.getArguments();
-        if (bundle == null) return;
-        SubjectInfo subjectInfo = Parcels.unwrap(bundle.getParcelable(CURRENT_SUBJECT));
-
         long currentDate = System.currentTimeMillis();
         TutorSubject tutorSubject = new TutorSubject();
         tutorSubject.setStatus(UNVERIFIED);
@@ -216,7 +220,7 @@ public class SubjectFilesFragment extends Fragment implements View.OnClickListen
 
                 if (mapDataOrException.data.get("isComplete") != null) {
                     waitingDialog.dismiss();
-                    saveCredentialField(key);
+                    saveTutorSubjectLookUp(key);
                 }
             }
         });
@@ -235,6 +239,25 @@ public class SubjectFilesFragment extends Fragment implements View.OnClickListen
                             Toast.makeText(mActivity, "Request has been submitted.", Toast.LENGTH_SHORT)
                                     .show();
                             mActivity.finish();
+                        }
+                    }
+                });
+    }
+
+    private void saveTutorSubjectLookUp(String key) {
+        subjectSharedViewModel.saveTutorSubjectLookUp(subjectInfo.getId())
+                .observe(this, new Observer<DataOrException<Boolean, Exception>>() {
+                    @Override
+                    public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
+                        if (dataOrException.exception != null) {
+                            SnackBarHelper.showSnackBar(mView, dataOrException.exception.getMessage());
+                            return;
+                        }
+
+                        if (dataOrException.data != null) {
+                            if (dataOrException.data) {
+                                saveCredentialField(key);
+                            }
                         }
                     }
                 });
