@@ -23,4 +23,12 @@ public class SubjectSharedViewModel extends ViewModel {
             (TutorSubject tutorSubject, SubjectInfo subjectInfo, TutorInfo tutorInfo) {
         return subjectSharedRepository.saveTutorSubject(tutorSubject, subjectInfo, tutorInfo);
     }
+
+    public LiveData<DataOrException<Boolean, Exception>> saveTutorSubjectLookUp (String subjectInfoId) {
+        return subjectSharedRepository.saveTutorSubjectLookUp(subjectInfoId);
+    }
+
+    public LiveData<DataOrException<Boolean, Exception>> checkIfDuplicateRequest(String subjectId) {
+        return subjectSharedRepository.checkIfDuplicateRequest(subjectId);
+    }
 }
