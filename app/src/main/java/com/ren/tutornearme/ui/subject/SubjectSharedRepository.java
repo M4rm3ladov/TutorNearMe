@@ -19,7 +19,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.ren.tutornearme.data.DataOrException;
-import com.ren.tutornearme.model.SubjectInfo;
 import com.ren.tutornearme.model.TutorInfo;
 import com.ren.tutornearme.model.TutorSubject;
 
@@ -41,8 +40,7 @@ public class SubjectSharedRepository {
         return firebaseAuth.getCurrentUser();
     }
 
-    public MutableLiveData<DataOrException<String, Exception>> saveTutorSubject
-            (TutorSubject tutorSubject, SubjectInfo subjectInfo, TutorInfo tutorInfo) {
+    public MutableLiveData<DataOrException<String, Exception>> saveTutorSubject (TutorSubject tutorSubject) {
         MutableLiveData<DataOrException<String, Exception>> mutableLiveData = new MutableLiveData<>();
 
         if (getCurrentUser() != null) {
@@ -54,35 +52,9 @@ public class SubjectSharedRepository {
                 public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
                     if (error != null)
                         dataOrException.exception = error.toException();
-                    else {
-                        if(ref.getKey() == null) {
-                            dataOrException.data = "";
-                        }
-                        tutorSubjectRef.child(ref.getKey()).child(subjectInfo.getId()).setValue(subjectInfo)
-                                .addOnCompleteListener(
-                                new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        tutorSubjectRef.child(ref.getKey()).child(getCurrentUser().getUid()).setValue(tutorInfo)
-                                                .addOnCompleteListener(
-                                                new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        dataOrException.data = ref.getKey();
-                                                        mutableLiveData.postValue(dataOrException);
-                                                    }
-                                                }
-                                        ).addOnFailureListener(e -> {
-                                            dataOrException.exception = e;
-                                            mutableLiveData.postValue(dataOrException);
-                                        });
-                                    }
-                                }
-                        ).addOnFailureListener(e -> {
-                            dataOrException.exception = e;
-                            mutableLiveData.postValue(dataOrException);
-                        });
-                    }
+                    else
+                        dataOrException.data = ref.getKey();
+                    mutableLiveData.postValue(dataOrException);
                 }
             });
         }
