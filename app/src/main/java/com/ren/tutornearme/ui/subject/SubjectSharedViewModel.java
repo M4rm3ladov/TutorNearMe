@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.ren.tutornearme.data.DataOrException;
-import com.ren.tutornearme.model.SubjectInfo;
 import com.ren.tutornearme.model.TutorInfo;
 import com.ren.tutornearme.model.TutorSubject;
 
@@ -20,8 +19,8 @@ public class SubjectSharedViewModel extends ViewModel {
     }
 
     public LiveData<DataOrException<String, Exception>> saveTutorSubject
-            (TutorSubject tutorSubject, SubjectInfo subjectInfo, TutorInfo tutorInfo) {
-        return subjectSharedRepository.saveTutorSubject(tutorSubject, subjectInfo, tutorInfo);
+            (TutorSubject tutorSubject) {
+        return subjectSharedRepository.saveTutorSubject(tutorSubject);
     }
 
     public LiveData<DataOrException<Boolean, Exception>> saveTutorSubjectLookUp (String subjectInfoId) {

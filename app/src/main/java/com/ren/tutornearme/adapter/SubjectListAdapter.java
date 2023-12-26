@@ -32,7 +32,7 @@ public class SubjectListAdapter extends RecyclerView.Adapter<SubjectListAdapter.
     private View view;
     private ArrayList<SubjectInfo> subjectInfoArrayList = new ArrayList<>();
     private final SimpleDateFormat dateTimeFormatter =
-            new SimpleDateFormat( "dd-MMM-yyyy, hh:mm" , Locale.ENGLISH);
+            new SimpleDateFormat( "dd-MMM-yyyy, HH:mm" , Locale.ENGLISH);
 
     private final SubjectSharedViewModel subjectSharedViewModel;
     private final NavController navController;
@@ -74,7 +74,7 @@ public class SubjectListAdapter extends RecyclerView.Adapter<SubjectListAdapter.
                         if (isDuplicate.data != null) {
                             if (isDuplicate.data) {
                                 Snackbar.make(view,
-                                        "[INFO]: You have an active request ticket for this subject.",
+                                        "[INFO]: Duplicate subject request.",
                                         Snackbar.LENGTH_SHORT).show();
                             } else {
                                 Bundle bundle = new Bundle();

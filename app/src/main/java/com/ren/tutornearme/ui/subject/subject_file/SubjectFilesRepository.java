@@ -40,11 +40,22 @@ public class SubjectFilesRepository {
             DataOrException<Map<String, Object>, Exception> dataOrException = new DataOrException<>();
             dataOrException.data = new HashMap<>();
 
-            subjectCredentialRef.putFile(pdfUri)
+            String filePostKey = db.getReference().child("temp").push().getKey();
+            subjectCredentialRef
+                    .child( "/"+ filePostKey).putFile(pdfUri)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            dataOrException.data.put("isComplete", true);
-                            mutableLiveData.postValue(dataOrException);
+
+                            subjectCredentialRef
+                                    .child("/"+ filePostKey)
+                                            .getDownloadUrl()
+                                    .addOnSuccessListener(uri -> {
+                                        dataOrException.data.put("isComplete", uri.toString());
+                                        mutableLiveData.postValue(dataOrException);
+                                    }).addOnFailureListener(e -> {
+                                        dataOrException.exception = e;
+                                        mutableLiveData.postValue(dataOrException);
+                                    });
                         }
                     })
                     .addOnFailureListener(e -> {
@@ -53,7 +64,7 @@ public class SubjectFilesRepository {
                     }).addOnProgressListener(snapshot -> {
                         double progress =
                                 (100.0 * snapshot.getBytesTransferred() / snapshot.getTotalByteCount());
-                        dataOrException.data.put("progress", progress);
+                            dataOrException.data.put("progress", progress);
                         mutableLiveData.postValue(dataOrException);
                     });
         }

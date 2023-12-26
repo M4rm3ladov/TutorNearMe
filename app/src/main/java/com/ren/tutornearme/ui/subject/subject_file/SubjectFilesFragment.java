@@ -62,6 +62,7 @@ public class SubjectFilesFragment extends Fragment implements View.OnClickListen
     private Resources res;
     private NavController navController;
     private SubjectInfo subjectInfo;
+    private TutorInfo tutorInfo;
 
     private TextView subjectFileTextView;
     private ImageView subjectFilePreviewImageView;
@@ -172,37 +173,41 @@ public class SubjectFilesFragment extends Fragment implements View.OnClickListen
             }
 
             if (dataOrException.data != null) {
-                sendTutorSubjectRequest(dataOrException.data);
+                tutorInfo = dataOrException.data;
+                uploadCredential();
             }
         });
 
     }
 
-    private void sendTutorSubjectRequest(TutorInfo tutorInfo) {
+    private void sendTutorSubjectRequest(String credentialUriPath) {
         long currentDate = System.currentTimeMillis();
         TutorSubject tutorSubject = new TutorSubject();
+        tutorSubject.setTutorInfo(tutorInfo);
+        tutorSubject.setSubjectInfo(subjectInfo);
         tutorSubject.setStatus(UNVERIFIED);
-        tutorSubject.setCredential(null);
+        tutorSubject.setCredential(credentialUriPath);
         tutorSubject.setCreatedDate(currentDate);
         tutorSubject.setUpdatedDate(currentDate);
 
-        subjectSharedViewModel.saveTutorSubject(tutorSubject, subjectInfo, tutorInfo).observe(this, dataOrException -> {
+        subjectSharedViewModel.saveTutorSubject(tutorSubject).observe(this, dataOrException -> {
             if (dataOrException.exception != null) {
                 Snackbar.make(mView,
                         "[ERROR]: " + dataOrException.exception.getMessage(),
                         Snackbar.LENGTH_SHORT).show();
+                waitingDialog.dismiss();
                 return;
             }
 
             if (dataOrException.data != null) {
-                createWaitingDialog();
-                waitingDialog.show();
-                uploadCredential(dataOrException.data);
+                saveTutorSubjectLookUp();
             }
         });
     }
 
-    private void uploadCredential(String key) {
+    private void uploadCredential() {
+        createWaitingDialog();
+        waitingDialog.show();
         subjectFilesViewModel.uploadCredential(selectedResumeUri).observe(this,  mapDataOrException -> {
             if (mapDataOrException.exception != null) {
                 SnackBarHelper.showSnackBar(mView, mapDataOrException.exception.getMessage());
@@ -219,44 +224,31 @@ public class SubjectFilesFragment extends Fragment implements View.OnClickListen
                 }
 
                 if (mapDataOrException.data.get("isComplete") != null) {
-                    waitingDialog.dismiss();
-                    saveTutorSubjectLookUp(key);
+                    String credentialUriPath = (String) mapDataOrException.data.get("isComplete");
+                    sendTutorSubjectRequest(credentialUriPath);
+                    //saveTutorSubjectLookUp(key);
                 }
             }
         });
     }
 
-    private void saveCredentialField(String key) {
-        subjectFilesViewModel.updateCredential(key).observe(this,
-                dataOrException -> {
-                    if (dataOrException.exception != null) {
-                        SnackBarHelper.showSnackBar(mView, dataOrException.exception.getMessage());
-                        return;
-                    }
-
-                    if (dataOrException.data != null) {
-                        if (dataOrException.data) {
-                            Toast.makeText(mActivity, "Request has been submitted.", Toast.LENGTH_SHORT)
-                                    .show();
-                            mActivity.finish();
-                        }
-                    }
-                });
-    }
-
-    private void saveTutorSubjectLookUp(String key) {
+    private void saveTutorSubjectLookUp() {
         subjectSharedViewModel.saveTutorSubjectLookUp(subjectInfo.getId())
                 .observe(this, new Observer<DataOrException<Boolean, Exception>>() {
                     @Override
                     public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
                         if (dataOrException.exception != null) {
                             SnackBarHelper.showSnackBar(mView, dataOrException.exception.getMessage());
+                            waitingDialog.dismiss();
                             return;
                         }
 
                         if (dataOrException.data != null) {
                             if (dataOrException.data) {
-                                saveCredentialField(key);
+                                waitingDialog.dismiss();
+                                Toast.makeText(mActivity, "Request has been submitted.", Toast.LENGTH_SHORT)
+                                        .show();
+                                mActivity.finish();
                             }
                         }
                     }

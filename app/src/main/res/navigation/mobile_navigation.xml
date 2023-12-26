@@ -19,7 +19,7 @@
 
     <fragment
         android:id="@+id/nav_subject"
-        android:name="com.ren.tutornearme.ui.subject.SubjectFragment"
+        android:name="com.ren.tutornearme.ui.subject.tutor_subject.TutorSubjectFragment"
         android:label="My Subjects"
         tools:layout="@layout/fragment_subject"/>
 
