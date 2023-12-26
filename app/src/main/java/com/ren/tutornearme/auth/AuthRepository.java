@@ -92,10 +92,11 @@ public class AuthRepository {
                     .addOnCompleteListener(new OnCompleteListener<String>() {
                         @Override
                         public void onComplete(@NonNull Task<String> task) {
-                            if (task.isSuccessful()) {
+                            if (task.isSuccessful())
                                 dataOrException.data = task.getResult();
-                                mutableLiveData.postValue(dataOrException);
-                            }
+                            else
+                                dataOrException.exception = task.getException();
+                            mutableLiveData.postValue(dataOrException);
                         }
                     });
         }
