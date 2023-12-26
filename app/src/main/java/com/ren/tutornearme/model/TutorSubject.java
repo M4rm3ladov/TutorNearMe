@@ -26,6 +26,14 @@ public class TutorSubject {
         this.createdDate = createdDate;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public TutorInfo getTutorInfo() {
         return tutorInfo;
     }
