@@ -21,16 +21,14 @@ public class HomeRepository {
     private final FirebaseDatabase db = FirebaseDatabase.getInstance();
     //private final DatabaseReference collectionReference = db.getReference(TUTOR_INFO_REFERENCE);
     private final DatabaseReference onlineRef = db.getReference().child(".info/connected");
-    private final DatabaseReference tutorLocationRef = db.getReference(TUTOR_LOCATION_REFERENCE);
-    private final DatabaseReference currentUserRef;
-    private final GeoFire geoFire;
+    private DatabaseReference tutorLocationRef;// = db.getReference(TUTOR_LOCATION_REFERENCE);
+    private DatabaseReference currentUserRef;
+    private GeoFire geoFire;
 
 
     public HomeRepository() {
         firebaseAuth = FirebaseAuth.getInstance();
         currentUser = firebaseAuth.getCurrentUser();
-        currentUserRef = tutorLocationRef.child(getCurrentUser().getUid());
-        geoFire = new GeoFire(tutorLocationRef);
     }
 
     public FirebaseUser getCurrentUser() {
@@ -45,6 +43,7 @@ public class HomeRepository {
         MutableLiveData<DataOrException<Boolean, Exception>> mutableLiveData = new MutableLiveData<>();
         DataOrException<Boolean, Exception> dataOrException = new DataOrException<>();
 
+        geoFire = new GeoFire(tutorLocationRef);
         geoFire.setLocation(currentUser.getUid(),
                 new GeoLocation(locationResult.getLastLocation().getLatitude(),
                         locationResult.getLastLocation().getLongitude()),
@@ -65,5 +64,10 @@ public class HomeRepository {
     public DatabaseReference getOnlineRef() { return onlineRef; }
 
     public DatabaseReference getCurrentUserRef() { return currentUserRef; }
+
+    public void setCurrentTutorLocationRef(String barangay) {
+        tutorLocationRef = db.getReference(TUTOR_LOCATION_REFERENCE).child(barangay);
+        currentUserRef = tutorLocationRef.child(getCurrentUser().getUid());
+    }
 
 }
