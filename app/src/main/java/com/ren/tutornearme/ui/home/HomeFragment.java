@@ -42,6 +42,11 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.maps.android.PolyUtil;
+import com.google.maps.android.data.Feature;
+import com.google.maps.android.data.geojson.GeoJsonLayer;
+import com.google.maps.android.data.geojson.GeoJsonMultiPolygon;
+import com.google.maps.android.data.geojson.GeoJsonPolygon;
 import com.ren.tutornearme.R;
 import com.ren.tutornearme.auth.MainActivity;
 import com.ren.tutornearme.data.DataOrException;
@@ -59,6 +64,10 @@ import static com.ren.tutornearme.util.Common.ZAM_LONG;
 import static com.ren.tutornearme.util.PermissionsHelper.isGPSPermissionGranted;
 import static com.ren.tutornearme.util.PermissionsHelper.isLocationPermissionGranted;
 import static com.ren.tutornearme.util.SnackBarHelper.showSnackBar;
+
+import org.json.JSONException;
+
+import java.io.IOException;
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private GoogleMap mMap;
@@ -78,7 +87,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private final ValueEventListener onlineValueEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(@NonNull DataSnapshot snapshot) {
-            if (snapshot.exists())
+            if (snapshot.exists() && homeViewModel.getCurrentUserRef() != null)
                 homeViewModel.getCurrentUserRef().onDisconnect().removeValue();
         }
 
@@ -116,15 +125,29 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         initLocationRequestBuilder();
         initMapBinding();
+        initFusedLocationProvider();
 
         return root;
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onResume() {
-        isGPSAndLocationPermissionGranted();
+        if(isGPSAndLocationPermissionGranted())
+            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
         homeViewModel.getOnlineRef().addValueEventListener(onlineValueEventListener);
+
         super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        if (fusedLocationProviderClient != null)
+            fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+
+        homeViewModel.getOnlineRef().removeEventListener(onlineValueEventListener);
+        homeViewModel.removeTutorLocation();
+        super.onPause();
     }
 
     @Override
@@ -135,11 +158,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onDestroy() {
-        if (fusedLocationProviderClient != null)
-            fusedLocationProviderClient.removeLocationUpdates(locationCallback);
-
         homeViewModel.removeTutorLocation();
-        homeViewModel.getOnlineRef().removeEventListener(onlineValueEventListener);
         super.onDestroy();
     }
 
@@ -149,16 +168,50 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+
                 LatLng newPosition = new LatLng(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude());
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newPosition, ZOOM_VAL));
+
+                try {
+                    GeoJsonLayer layer = new GeoJsonLayer(mMap, R.raw.zambo_mid_res, mContext);
+                    //layer.addLayerToMap();
+
+                    GeoJsonMultiPolygon geoJsonMultiPolygon;
+                    GeoJsonPolygon geoJsonPolygon;
+                    String currentTutorBarangay = "";
+
+                    for (Feature feature : layer.getFeatures()) {
+                        if (feature.getGeometry().getGeometryType().equals("MultiPolygon")) {
+                            geoJsonMultiPolygon = (GeoJsonMultiPolygon) feature.getGeometry();
+                            geoJsonPolygon = geoJsonMultiPolygon.getPolygons().get(0);
+                            Log.d("multipoly", "onLocationResult: " + geoJsonMultiPolygon.getPolygons());
+                            Log.d("poly", "onLocationResult: " + geoJsonPolygon);
+                        } else {
+                            geoJsonPolygon = (GeoJsonPolygon) feature.getGeometry();
+                        }
+
+                        if (PolyUtil.containsLocation(newPosition, geoJsonPolygon.getOuterBoundaryCoordinates(), true)) {
+                            currentTutorBarangay = feature.getProperty("ADM4_EN");
+                            break;
+                        }
+                    }
+
+                    homeViewModel.setTutorLocationRef(currentTutorBarangay);
+                    Log.d("BarangayCurrent", "onLocationResult: " + currentTutorBarangay);
+                } catch (IOException | JSONException e) {
+                    throw new RuntimeException(e);
+                }
 
                 homeViewModel.isTutorLocationSet(locationResult).observe(mActivity,
                         new Observer<DataOrException<Boolean, Exception>>() {
                             @Override
                             public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
-                                if (dataOrException.exception != null)
+                                if (dataOrException.exception != null) {
                                     SnackBarHelper.showSnackBar(mContainerView,
                                             "[ERROR]: " + dataOrException.exception.getMessage());
+                                    return;
+                                }
 
                                 if (dataOrException.data)
                                     Toast.makeText(mContext, "You're Online!", Toast.LENGTH_SHORT)
@@ -166,11 +219,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                             }
                         });
 
-                super.onLocationResult(locationResult);
             }
         };
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(mContext);
-        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
     }
 
     private void initMapBinding() {
@@ -273,7 +324,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
 
-        initFusedLocationProvider();
+        //initFusedLocationProvider();
         mMap.setOnMyLocationButtonClickListener(() -> {
 
             fusedLocationProviderClient.getLastLocation()
@@ -282,6 +333,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                         if (task.isSuccessful() && task.getResult() != null) {
                             Location location = task.getResult();
                             LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+
                             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, ZOOM_VAL));
 
                         } else {

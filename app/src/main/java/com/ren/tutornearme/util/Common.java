@@ -6,9 +6,11 @@ public class Common {
     public static final String SUBJECT_REFERENCE = "SubjectInfo";
     public static final String TUTOR_SUBJECT_REFERENCE = "TutorSubject";
     public static final String TUTOR_SUBJECT_LOOKUP_REFERENCE = "TutorSubjectLookUp";
+
     public static final String TOKEN_REFERENCE = "MessagingToken";
     public static final String NOTIFICATION_TITLE = "title";
     public static final String NOTIFICATION_BODY = "body";
+
     public static final String CURRENT_USER = "user";
     public static final String CURRENT_SUBJECT = "subject";
     public static final String FIRST_NAME = "FirstName";
