@@ -1,7 +1,6 @@
 package com.ren.tutornearme.ui.home;
 
 import static com.ren.tutornearme.util.Common.TUTOR_LOCATION_REFERENCE;
-
 import androidx.lifecycle.MutableLiveData;
 
 import com.firebase.geofire.GeoFire;
@@ -19,9 +18,8 @@ public class HomeRepository {
     private final FirebaseAuth firebaseAuth;
     private final FirebaseUser currentUser;
     private final FirebaseDatabase db = FirebaseDatabase.getInstance();
-    //private final DatabaseReference collectionReference = db.getReference(TUTOR_INFO_REFERENCE);
     private final DatabaseReference onlineRef = db.getReference().child(".info/connected");
-    private DatabaseReference tutorLocationRef;// = db.getReference(TUTOR_LOCATION_REFERENCE);
+    private DatabaseReference tutorLocationRef;
     private DatabaseReference currentUserRef;
     private GeoFire geoFire;
 
@@ -65,8 +63,8 @@ public class HomeRepository {
 
     public DatabaseReference getCurrentUserRef() { return currentUserRef; }
 
-    public void setCurrentTutorLocationRef(String barangay) {
-        tutorLocationRef = db.getReference(TUTOR_LOCATION_REFERENCE).child(barangay);
+    public void setCurrentTutorLocationRef(String cityName) {
+        tutorLocationRef = db.getReference(TUTOR_LOCATION_REFERENCE).child(cityName);
         currentUserRef = tutorLocationRef.child(getCurrentUser().getUid());
     }
 
