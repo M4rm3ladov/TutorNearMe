@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
@@ -42,15 +44,12 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-import com.google.maps.android.PolyUtil;
-import com.google.maps.android.data.Feature;
-import com.google.maps.android.data.geojson.GeoJsonLayer;
-import com.google.maps.android.data.geojson.GeoJsonMultiPolygon;
-import com.google.maps.android.data.geojson.GeoJsonPolygon;
 import com.ren.tutornearme.R;
 import com.ren.tutornearme.auth.MainActivity;
 import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.databinding.FragmentHomeBinding;
+import com.ren.tutornearme.model.TutorSubject;
+import com.ren.tutornearme.ui.subject.tutor_subject.TutorSubjectViewModel;
 import com.ren.tutornearme.util.GPSHelper;
 import com.ren.tutornearme.util.LocationHelper;
 import com.ren.tutornearme.util.SnackBarHelper;
@@ -59,15 +58,17 @@ import static com.ren.tutornearme.util.Common.LOCATION_FASTEST_INTERVAL;
 import static com.ren.tutornearme.util.Common.LOCATION_INTERVAL;
 import static com.ren.tutornearme.util.Common.LOCATION_MAX_WAIT_TIME;
 import static com.ren.tutornearme.util.Common.LOCATION_MIN_DISTANCE;
+import static com.ren.tutornearme.util.Common.VERIFIED;
 import static com.ren.tutornearme.util.Common.ZAM_LAT;
 import static com.ren.tutornearme.util.Common.ZAM_LONG;
 import static com.ren.tutornearme.util.PermissionsHelper.isGPSPermissionGranted;
 import static com.ren.tutornearme.util.PermissionsHelper.isLocationPermissionGranted;
 import static com.ren.tutornearme.util.SnackBarHelper.showSnackBar;
 
-import org.json.JSONException;
-
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private GoogleMap mMap;
@@ -78,7 +79,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private SupportMapFragment mapFragment;
 
     private static final float ZOOM_VAL = 18f;
+    private boolean ifTutorHasVerifiedSubject = false;
 
+    private TutorSubjectViewModel subjectViewModel;
     private HomeViewModel homeViewModel;
     private View mContainerView;
     private Context mContext;
@@ -116,8 +119,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         homeViewModel =
                 new ViewModelProvider(this).get(HomeViewModel.class);
+        subjectViewModel =
+                new ViewModelProvider(this).get(TutorSubjectViewModel.class);
 
-        /*mContainerView = container;*/
 
         mContainerView = mActivity.findViewById(android.R.id.content);
         binding = FragmentHomeBinding.inflate(inflater, container, false);
@@ -125,6 +129,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         initLocationRequestBuilder();
         initMapBinding();
+        checkIfTutorHasVerifiedSubject();
         initFusedLocationProvider();
 
         return root;
@@ -142,12 +147,18 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onPause() {
+        subjectViewModel.removeTutorSubjectListener();
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
         if (fusedLocationProviderClient != null)
             fusedLocationProviderClient.removeLocationUpdates(locationCallback);
 
-        homeViewModel.getOnlineRef().removeEventListener(onlineValueEventListener);
         homeViewModel.removeTutorLocation();
-        super.onPause();
+        homeViewModel.getOnlineRef().removeEventListener(onlineValueEventListener);
+        super.onDestroy();
     }
 
     @Override
@@ -156,15 +167,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         binding = null;
     }
 
-    @Override
-    public void onDestroy() {
-        homeViewModel.removeTutorLocation();
-        super.onDestroy();
-    }
-
     @SuppressLint("MissingPermission")
     private void initFusedLocationProvider() {
-
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
@@ -173,7 +177,39 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 LatLng newPosition = new LatLng(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude());
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newPosition, ZOOM_VAL));
 
+                if (!ifTutorHasVerifiedSubject) return;
+
                 try {
+                    Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
+                    List<Address> addressList;
+
+                    addressList = geocoder.getFromLocation(locationResult.getLastLocation().getLatitude(),
+                            locationResult.getLastLocation().getLongitude(), 1);
+                    String cityName = addressList.get(0).getLocality();
+
+                    homeViewModel.setTutorLocationRef(cityName);
+                    homeViewModel.isTutorLocationSet(locationResult).observe(mActivity,
+                            new Observer<DataOrException<Boolean, Exception>>() {
+                                @Override
+                                public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
+                                    if (dataOrException.exception != null) {
+                                        SnackBarHelper.showSnackBar(mContainerView,
+                                                "[ERROR]: " + dataOrException.exception.getMessage());
+                                        return;
+                                    }
+
+                                    if (dataOrException.data)
+                                        Toast.makeText(mContext, "You're Online!", Toast.LENGTH_SHORT)
+                                                .show();
+                                }
+                            });
+
+                    homeViewModel.getOnlineRef().addValueEventListener(onlineValueEventListener);
+                } catch (IOException e) {
+                    showSnackBar(mContainerView, "[ERROR]: " + e.getMessage());
+                }
+
+                /*try {
                     GeoJsonLayer layer = new GeoJsonLayer(mMap, R.raw.zambo_mid_res, mContext);
                     //layer.addLayerToMap();
 
@@ -201,27 +237,37 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     Log.d("BarangayCurrent", "onLocationResult: " + currentTutorBarangay);
                 } catch (IOException | JSONException e) {
                     throw new RuntimeException(e);
-                }
-
-                homeViewModel.isTutorLocationSet(locationResult).observe(mActivity,
-                        new Observer<DataOrException<Boolean, Exception>>() {
-                            @Override
-                            public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
-                                if (dataOrException.exception != null) {
-                                    SnackBarHelper.showSnackBar(mContainerView,
-                                            "[ERROR]: " + dataOrException.exception.getMessage());
-                                    return;
-                                }
-
-                                if (dataOrException.data)
-                                    Toast.makeText(mContext, "You're Online!", Toast.LENGTH_SHORT)
-                                            .show();
-                            }
-                        });
-
+                }*/
             }
         };
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(mContext);
+    }
+
+    private void checkIfTutorHasVerifiedSubject() {
+        subjectViewModel.getTutorSubjectList()
+                .observe(mActivity, dataOrException -> {
+                    if (dataOrException.exception != null) {
+                        SnackBarHelper.showSnackBar(mContainerView,
+                                "[ERROR]: " + dataOrException.exception.getMessage());
+                        return;
+                    }
+
+                    if (dataOrException.data != null) {
+                        ArrayList<TutorSubject> tutorSubjectArrayList = dataOrException.data;
+
+                        for (TutorSubject tutorSubject : tutorSubjectArrayList) {
+                            if (tutorSubject.getStatus().equals(VERIFIED)) {
+                                SnackBarHelper.showSnackBar(mContainerView,
+                                        "[INFO]: Awaiting student...");
+                                ifTutorHasVerifiedSubject = true;
+                                return;
+                            }
+                            SnackBarHelper.showSnackBar(mContainerView,
+                                    "[INFO]: No verified subject currently.");
+                            homeViewModel.removeTutorLocation();
+                        }
+                    }
+                });
     }
 
     private void initMapBinding() {
@@ -316,7 +362,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-        params.setMargins(0, 0, 0, 0);
+        params.setMargins(0, 0, 0, 250);
     }
 
     @SuppressLint("MissingPermission")
