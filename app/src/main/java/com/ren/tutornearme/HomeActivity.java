@@ -145,11 +145,13 @@ public class HomeActivity extends AppCompatActivity{
                 if (accountStatus.equals(UNVERIFIED) || accountStatus.equals(RESUBMIT)) {
                     navigationView.getMenu().findItem(R.id.nav_profile).setVisible(true);
                     navigationView.getMenu().findItem(R.id.nav_subject).setVisible(false);
+                    navigationView.getMenu().findItem(R.id.nav_home).setVisible(false);
                     return;
                 }
 
                 navigationView.getMenu().findItem(R.id.nav_profile).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_subject).setVisible(true);
+                navigationView.getMenu().findItem(R.id.nav_home).setVisible(true);
                 if (!tutorInfo.getAvatar().isEmpty()) {
                     Glide.with(HomeActivity.this)
                             .load(tutorInfo.getAvatar())
