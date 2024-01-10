@@ -24,8 +24,8 @@ public class HomeViewModel extends ViewModel {
 
     public DatabaseReference getCurrentUserRef() { return homeRepository.getCurrentUserRef(); }
 
-    public void setTutorLocationRef(String barangay) {
-        homeRepository.setCurrentTutorLocationRef(barangay);
+    public void setTutorLocationRef(String cityName) {
+        homeRepository.setCurrentTutorLocationRef(cityName);
     }
 
     public DatabaseReference getOnlineRef() { return homeRepository.getOnlineRef(); }
