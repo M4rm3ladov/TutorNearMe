@@ -4,16 +4,15 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -24,7 +23,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -39,14 +37,12 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.ren.tutornearme.R;
 import com.ren.tutornearme.auth.MainActivity;
-import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.databinding.FragmentHomeBinding;
 import com.ren.tutornearme.model.TutorSubject;
 import com.ren.tutornearme.ui.subject.tutor_subject.TutorSubjectViewModel;
@@ -79,7 +75,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private SupportMapFragment mapFragment;
 
     private static final float ZOOM_VAL = 18f;
-    private boolean ifTutorHasVerifiedSubject = false;
+    private boolean isTutorWorking = false;
+    private ImageButton workingImageButton;
 
     private TutorSubjectViewModel subjectViewModel;
     private HomeViewModel homeViewModel;
@@ -122,13 +119,15 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         subjectViewModel =
                 new ViewModelProvider(this).get(TutorSubjectViewModel.class);
 
-
         mContainerView = mActivity.findViewById(android.R.id.content);
         binding = FragmentHomeBinding.inflate(inflater, container, false);
+        workingImageButton = binding.workingImageButton;
+
         View root = binding.getRoot();
 
         initLocationRequestBuilder();
         initMapBinding();
+        initSwitchToggleListener();
         checkIfTutorHasVerifiedSubject();
         initFusedLocationProvider();
 
@@ -174,10 +173,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 super.onLocationResult(locationResult);
 
+                if (!isTutorWorking) return;
+
                 LatLng newPosition = new LatLng(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude());
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newPosition, ZOOM_VAL));
-
-                if (!ifTutorHasVerifiedSubject) return;
 
                 try {
                     Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
@@ -189,19 +188,16 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
                     homeViewModel.setTutorLocationRef(cityName);
                     homeViewModel.isTutorLocationSet(locationResult).observe(mActivity,
-                            new Observer<DataOrException<Boolean, Exception>>() {
-                                @Override
-                                public void onChanged(DataOrException<Boolean, Exception> dataOrException) {
-                                    if (dataOrException.exception != null) {
-                                        SnackBarHelper.showSnackBar(mContainerView,
-                                                "[ERROR]: " + dataOrException.exception.getMessage());
-                                        return;
-                                    }
-
-                                    if (dataOrException.data)
-                                        Toast.makeText(mContext, "You're Online!", Toast.LENGTH_SHORT)
-                                                .show();
+                            dataOrException -> {
+                                if (dataOrException.exception != null) {
+                                    SnackBarHelper.showSnackBar(mContainerView,
+                                            "[ERROR]: " + dataOrException.exception.getMessage());
+                                    return;
                                 }
+
+                                if (dataOrException.data)
+                                    Toast.makeText(mContext, "You're Online!", Toast.LENGTH_SHORT)
+                                            .show();
                             });
 
                     homeViewModel.getOnlineRef().addValueEventListener(onlineValueEventListener);
@@ -243,6 +239,28 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(mContext);
     }
 
+    private void initSwitchToggleListener() {
+        workingImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!isTutorWorking) {
+                    isTutorWorking = true;
+                    workingImageButton.setImageResource(R.drawable.ic_location_on);
+                    Toast.makeText(mContext,
+                            "Awaiting student booking", Toast.LENGTH_SHORT).show();
+
+                    getLastLocation();
+                } else {
+                    isTutorWorking = false;
+                    workingImageButton.setImageResource(R.drawable.ic_location_off );
+                    homeViewModel.removeTutorLocation();
+                    Toast.makeText(mContext,
+                            "Tutor on break", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
     private void checkIfTutorHasVerifiedSubject() {
         subjectViewModel.getTutorSubjectList()
                 .observe(mActivity, dataOrException -> {
@@ -257,14 +275,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
                         for (TutorSubject tutorSubject : tutorSubjectArrayList) {
                             if (tutorSubject.getStatus().equals(VERIFIED)) {
-                                SnackBarHelper.showSnackBar(mContainerView,
-                                        "[INFO]: Awaiting student...");
-                                ifTutorHasVerifiedSubject = true;
+                                workingImageButton.setEnabled(true);
                                 return;
                             }
-                            SnackBarHelper.showSnackBar(mContainerView,
-                                    "[INFO]: No verified subject currently.");
-                            homeViewModel.removeTutorLocation();
+                            Toast.makeText(mContext,
+                                    "No verified subject currently. Contact support for more information"
+                                    , Toast.LENGTH_SHORT).show();
+                            workingImageButton.setEnabled(false);
                         }
                     }
                 });
@@ -320,7 +337,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void initLocationRequestBuilder() {
-        locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, LOCATION_INTERVAL)
+        locationRequest = new LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, LOCATION_INTERVAL)
                 .setWaitForAccurateLocation(false)
                 .setMinUpdateDistanceMeters(LOCATION_MIN_DISTANCE)
                 .setMinUpdateIntervalMillis(LOCATION_FASTEST_INTERVAL)
@@ -342,12 +359,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         mMap = googleMap;
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
-        try {
-            boolean isSuccessful = googleMap.setMapStyle(MapStyleOptions
+        googleMap.setMapStyle(MapStyleOptions
                     .loadRawResourceStyle(mContext, R.raw.uber_maps_style));
-        } catch (Resources.NotFoundException e) {
-            Log.d("MAP_PARSE_ERROR", "onMapReady: " + e.getMessage());
-        }
 
         showDefaultLocation();
         // if permission already granted
@@ -370,7 +383,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
 
-        //initFusedLocationProvider();
         mMap.setOnMyLocationButtonClickListener(() -> {
 
             fusedLocationProviderClient.getLastLocation()
@@ -396,9 +408,57 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
+    @SuppressLint("MissingPermission")
+    private void getLastLocation() {
+        if (isGPSAndLocationPermissionGranted())
+            fusedLocationProviderClient.getLastLocation()
+                    .addOnCompleteListener(task -> {
+
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            Location location = task.getResult();
+                            LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, ZOOM_VAL));
+
+                            try {
+                                Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
+                                List<Address> addressList;
+
+                                addressList = geocoder.getFromLocation(location.getLatitude(),
+                                        location.getLongitude(), 1);
+                                String cityName = addressList.get(0).getLocality();
+
+                                homeViewModel.setTutorLocationRef(cityName);
+                                homeViewModel.isTutorLocationSet(location).observe(mActivity,
+                                        dataOrException -> {
+                                            if (dataOrException.exception != null) {
+                                                SnackBarHelper.showSnackBar(mContainerView,
+                                                        "[ERROR]: " + dataOrException.exception.getMessage());
+                                                return;
+                                            }
+
+                                            if (dataOrException.data)
+                                                Toast.makeText(mContext, "You're Online!", Toast.LENGTH_SHORT)
+                                                        .show();
+                                        });
+
+                                homeViewModel.getOnlineRef().addValueEventListener(onlineValueEventListener);
+                            } catch (IOException e) {
+                                showSnackBar(mContainerView, "[ERROR]: " + e.getMessage());
+                            }
+                        } else {
+                            showDefaultLocation();
+                            if (task.getException() != null)
+                                showSnackBar(mContainerView, String.format("[ERROR]: %s",
+                                        task.getException().getMessage()));
+                        }
+                    })
+                    .addOnFailureListener(e -> showSnackBar(mContainerView, String.format("[ERROR]: %s",
+                            e.getMessage())));
+    }
+
     private void showDefaultLocation() {
         LatLng userLatLng = new LatLng(ZAM_LAT, ZAM_LONG);
-        mMap.addMarker(new MarkerOptions().position(userLatLng).title("Marker in Zamboanga"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(userLatLng));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, ZOOM_VAL));
     }
