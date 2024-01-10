@@ -1,5 +1,7 @@
 package com.ren.tutornearme.ui.home;
 
+import android.location.Location;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -20,6 +22,10 @@ public class HomeViewModel extends ViewModel {
 
     public LiveData<DataOrException<Boolean, Exception>> isTutorLocationSet(LocationResult locationResult) {
         return homeRepository.checkTutorLocationSet(locationResult);
+    }
+
+    public LiveData<DataOrException<Boolean, Exception>> isTutorLocationSet(Location location) {
+        return homeRepository.checkTutorLocationSet(location);
     }
 
     public DatabaseReference getCurrentUserRef() { return homeRepository.getCurrentUserRef(); }

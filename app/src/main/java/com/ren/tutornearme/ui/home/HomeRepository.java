@@ -1,6 +1,7 @@
 package com.ren.tutornearme.ui.home;
 
 import static com.ren.tutornearme.util.Common.TUTOR_LOCATION_REFERENCE;
+import android.location.Location;
 import androidx.lifecycle.MutableLiveData;
 
 import com.firebase.geofire.GeoFire;
@@ -27,6 +28,7 @@ public class HomeRepository {
     public HomeRepository() {
         firebaseAuth = FirebaseAuth.getInstance();
         currentUser = firebaseAuth.getCurrentUser();
+        geoFire = new GeoFire(db.getReference(TUTOR_LOCATION_REFERENCE));
     }
 
     public FirebaseUser getCurrentUser() {
@@ -45,6 +47,28 @@ public class HomeRepository {
         geoFire.setLocation(currentUser.getUid(),
                 new GeoLocation(locationResult.getLastLocation().getLatitude(),
                         locationResult.getLastLocation().getLongitude()),
+                new GeoFire.CompletionListener() {
+                    @Override
+                    public void onComplete(String key, DatabaseError error) {
+                        if (error != null)
+                            dataOrException.exception = error.toException();
+                        else
+                            dataOrException.data = true;
+
+                        mutableLiveData.postValue(dataOrException);
+                    }
+                });
+        return mutableLiveData;
+    }
+
+    public MutableLiveData<DataOrException<Boolean, Exception>> checkTutorLocationSet(Location location) {
+        MutableLiveData<DataOrException<Boolean, Exception>> mutableLiveData = new MutableLiveData<>();
+        DataOrException<Boolean, Exception> dataOrException = new DataOrException<>();
+
+        geoFire = new GeoFire(tutorLocationRef);
+        geoFire.setLocation(currentUser.getUid(),
+                new GeoLocation(location.getLatitude(),
+                        location.getLongitude()),
                 new GeoFire.CompletionListener() {
                     @Override
                     public void onComplete(String key, DatabaseError error) {
