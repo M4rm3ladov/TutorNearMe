@@ -43,6 +43,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.ren.tutornearme.R;
 import com.ren.tutornearme.auth.MainActivity;
+import com.ren.tutornearme.data.NavButtonAsyncResponse;
 import com.ren.tutornearme.databinding.FragmentHomeBinding;
 import com.ren.tutornearme.model.TutorSubject;
 import com.ren.tutornearme.ui.subject.tutor_subject.TutorSubjectViewModel;
@@ -249,6 +250,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             @Override
             public void onClick(View view) {
                 if (!isTutorWorking) {
+                    ((NavButtonAsyncResponse) mActivity).setProfileButtonEnabled(true);
+
                     isTutorWorking = true;
                     workingImageButton.setImageResource(R.drawable.ic_location_on);
                     Toast.makeText(mContext,
@@ -256,6 +259,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
                     getLastLocation();
                 } else {
+                    ((NavButtonAsyncResponse) mActivity).setProfileButtonEnabled(false);
+
                     isTutorWorking = false;
                     workingImageButton.setImageResource(R.drawable.ic_location_off );
                     homeViewModel.removeTutorLocation();

@@ -34,6 +34,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.ren.tutornearme.auth.MainActivity;
+import com.ren.tutornearme.data.NavButtonAsyncResponse;
 import com.ren.tutornearme.databinding.ActivityHomeBinding;
 import com.ren.tutornearme.model.TutorInfo;
 import com.ren.tutornearme.util.InternetHelper;
@@ -41,7 +42,7 @@ import com.ren.tutornearme.util.SnackBarHelper;
 
 import org.parceler.Parcels;
 
-public class HomeActivity extends AppCompatActivity{
+public class HomeActivity extends AppCompatActivity implements NavButtonAsyncResponse {
     private CardView tutorVerifiedCardView;
     private TextView tutorIsVerified;
     private ShapeableImageView tutorProfileAvatar;
@@ -229,5 +230,10 @@ public class HomeActivity extends AppCompatActivity{
             super.onBackPressed();
         else if(navigationView.getMenu().findItem(R.id.nav_home).isChecked())
             moveTaskToBack(true);
+    }
+
+    @Override
+    public void setProfileButtonEnabled(boolean enabled) {
+        navigationView.getMenu().findItem(R.id.nav_subject).setEnabled(!enabled);
     }
 }
