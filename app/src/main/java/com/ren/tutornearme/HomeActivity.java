@@ -21,6 +21,7 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
@@ -62,6 +63,16 @@ public class HomeActivity extends AppCompatActivity implements NavButtonAsyncRes
         initSetTutorInfo();
         initNetworkAvailability();
         initLayoutBinding();
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (drawer.isDrawerOpen(GravityCompat.START))
+                    drawer.closeDrawer(GravityCompat.START);
+                else
+                    moveTaskToBack(true);
+            }
+        });
     }
 
     @Override
@@ -112,6 +123,7 @@ public class HomeActivity extends AppCompatActivity implements NavButtonAsyncRes
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_home);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+        navigationView.getMenu().findItem(R.id.nav_subject).setEnabled(false);
 
         res = getResources();
         setSignOutBuilder();
@@ -219,17 +231,6 @@ public class HomeActivity extends AppCompatActivity implements NavButtonAsyncRes
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_home);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (drawer.isDrawerOpen(GravityCompat.START))
-            drawer.closeDrawer(GravityCompat.START);
-        else if (navigationView.getMenu().findItem(R.id.nav_profile).isChecked() ||
-                navigationView.getMenu().findItem(R.id.nav_subject).isChecked())
-            super.onBackPressed();
-        else if(navigationView.getMenu().findItem(R.id.nav_home).isChecked())
-            moveTaskToBack(true);
     }
 
     @Override
