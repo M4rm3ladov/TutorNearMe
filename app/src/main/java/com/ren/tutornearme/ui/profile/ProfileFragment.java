@@ -6,6 +6,9 @@ import static com.ren.tutornearme.util.Common.EMAIL;
 import static com.ren.tutornearme.util.Common.FIRST_NAME;
 import static com.ren.tutornearme.util.Common.GENDER;
 import static com.ren.tutornearme.util.Common.LAST_NAME;
+import static com.ren.tutornearme.util.Common.RESUBMIT;
+import static com.ren.tutornearme.util.Common.SUBMITTED;
+import static com.ren.tutornearme.util.Common.UNVERIFIED;
 
 import android.Manifest;
 import android.app.Activity;
@@ -114,7 +117,12 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
 
         initBindViews(view);
         initPopulateBasicInfo();
-        initBindListeners();
+        sharedViewModel.getTutorAccountText().observe(mActivity, accountStatus -> {
+            if (accountStatus.equals(RESUBMIT) || accountStatus.equals(UNVERIFIED))
+                initBindListeners(this);
+            else if (accountStatus.equals(SUBMITTED))
+                initBindListeners(null);
+        });
 
         return view;
     }
@@ -154,15 +162,15 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, P
         sharedViewModel = new ViewModelProvider(mActivity).get(SharedViewModel.class);
     }
 
-    private void initBindListeners() {
-        basicInfoCardView.setOnClickListener(this);
-        emailCardView.setOnClickListener(this);
-        tutorAvatarImageView.setOnClickListener(this);
-        tutorResume.setOnClickListener(this);
-        tutorID.setOnClickListener(this);
-        previewIdImageView.setOnClickListener(this);
-        previewResumeImageView.setOnClickListener(this);
-        submitButton.setOnClickListener(this);
+    private void initBindListeners(View.OnClickListener clickListener) {
+        basicInfoCardView.setOnClickListener(clickListener);
+        emailCardView.setOnClickListener(clickListener);
+        tutorAvatarImageView.setOnClickListener(clickListener);
+        tutorResume.setOnClickListener(clickListener);
+        tutorID.setOnClickListener(clickListener);
+        previewIdImageView.setOnClickListener(clickListener);
+        previewResumeImageView.setOnClickListener(clickListener);
+        submitButton.setOnClickListener(clickListener);
     }
 
     private void initBindViews(View view) {

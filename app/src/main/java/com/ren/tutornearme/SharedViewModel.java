@@ -11,10 +11,20 @@ public class SharedViewModel extends ViewModel {
     private final MutableLiveData<TutorInfo> tutorInfoLiveData;
     private final SharedRepository sharedRepository;
     private TutorInfo tutorInfo;
+    private final MutableLiveData<String> tutorAccounText;
 
     public SharedViewModel() {
         sharedRepository = new SharedRepository();
         tutorInfoLiveData = new MutableLiveData<>();
+        tutorAccounText = new MutableLiveData<>();
+    }
+
+    public void setTutorAccountText(String tutorAccountStatus) {
+        tutorAccounText.postValue(tutorAccountStatus);
+    }
+
+    public MutableLiveData<String> getTutorAccountText() {
+        return tutorAccounText;
     }
 
     public LiveData<DataOrException<TutorInfo, Exception>> getTutorInfoFromFirebase() {

@@ -27,7 +27,9 @@ import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
+import androidx.navigation.NavGraph;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -51,6 +53,8 @@ public class HomeActivity extends AppCompatActivity implements NavButtonAsyncRes
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityHomeBinding binding;
     private NavigationView navigationView;
+    private NavGraph navGraph;
+    private NavController navController;
     private DrawerLayout drawer;
     private Resources res;
     private TutorInfo tutorInfo;
@@ -120,10 +124,12 @@ public class HomeActivity extends AppCompatActivity implements NavButtonAsyncRes
                 R.id.nav_home, R.id.nav_profile, R.id.nav_subject)
                 .setOpenableLayout(drawer)
                 .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_home);
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_content_home);
+        navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_home);
+        navGraph = navController.getNavInflater().inflate(R.navigation.mobile_navigation);
+
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
-        navigationView.getMenu().findItem(R.id.nav_subject).setEnabled(false);
 
         res = getResources();
         setSignOutBuilder();
@@ -139,6 +145,7 @@ public class HomeActivity extends AppCompatActivity implements NavButtonAsyncRes
 
             if (dataOrException.data != null) {
                 String accountStatus = dataOrException.data;
+                sharedViewModel.setTutorAccountText(accountStatus);
                 String accountStatusColor = "#009688";
                 switch (accountStatus) {
                     case UNVERIFIED:
@@ -155,23 +162,27 @@ public class HomeActivity extends AppCompatActivity implements NavButtonAsyncRes
                 tutorIsVerified.setText(accountStatus);
                 tutorVerifiedCardView.setCardBackgroundColor(Color.parseColor(accountStatusColor));
 
-                if (accountStatus.equals(UNVERIFIED) || accountStatus.equals(RESUBMIT)) {
+                if (accountStatus.equals(UNVERIFIED) || accountStatus.equals(RESUBMIT)
+                        || accountStatus.equals(SUBMITTED)) {
                     navigationView.getMenu().findItem(R.id.nav_profile).setVisible(true);
                     navigationView.getMenu().findItem(R.id.nav_subject).setVisible(false);
                     navigationView.getMenu().findItem(R.id.nav_home).setVisible(false);
-                    return;
-                }
+                    navGraph.setStartDestination(R.id.nav_profile);
 
-                navigationView.getMenu().findItem(R.id.nav_profile).setVisible(false);
-                navigationView.getMenu().findItem(R.id.nav_subject).setVisible(true);
-                navigationView.getMenu().findItem(R.id.nav_home).setVisible(true);
-                if (!tutorInfo.getAvatar().isEmpty()) {
-                    Glide.with(HomeActivity.this)
-                            .load(tutorInfo.getAvatar())
-                            .placeholder(R.mipmap.ic_logo)
-                            .apply(new RequestOptions().override(100, 100))
-                            .into(tutorProfileAvatar);
+                } else if (accountStatus.equals(VERIFIED)) {
+                    navigationView.getMenu().findItem(R.id.nav_profile).setVisible(false);
+                    navigationView.getMenu().findItem(R.id.nav_subject).setVisible(true);
+                    navigationView.getMenu().findItem(R.id.nav_home).setVisible(true);
+                    navGraph.setStartDestination(R.id.nav_subject);
+
+                    if (!tutorInfo.getAvatar().isEmpty())
+                        Glide.with(HomeActivity.this)
+                                .load(tutorInfo.getAvatar())
+                                .placeholder(R.mipmap.ic_logo)
+                                .apply(new RequestOptions().override(100, 100))
+                                .into(tutorProfileAvatar);
                 }
+                navController.setGraph(navGraph);
             }
         });
     }
