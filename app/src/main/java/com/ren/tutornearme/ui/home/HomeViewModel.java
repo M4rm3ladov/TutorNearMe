@@ -1,5 +1,6 @@
 package com.ren.tutornearme.ui.home;
 
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 
 import androidx.lifecycle.LiveData;
@@ -11,9 +12,18 @@ import com.ren.tutornearme.data.DataOrException;
 
 public class HomeViewModel extends ViewModel {
     private final HomeRepository homeRepository;
+    private Drawable locationButtonImage;
 
     public HomeViewModel() {
         this.homeRepository = new HomeRepository();
+    }
+
+    public void setLocationButtonImage(Drawable locationButtonImage) {
+        this.locationButtonImage = locationButtonImage;
+    }
+
+    public Drawable getLocationButtonImage() {
+        return locationButtonImage;
     }
 
     public void removeTutorLocation() {

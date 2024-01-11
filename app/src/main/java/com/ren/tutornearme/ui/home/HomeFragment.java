@@ -162,8 +162,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
         binding = null;
+        homeViewModel.setLocationButtonImage(workingImageButton.getDrawable());
+        super.onDestroyView();
     }
 
     @SuppressLint("MissingPermission")
@@ -240,6 +241,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void initSwitchToggleListener() {
+
+        if (homeViewModel.getLocationButtonImage() != null)
+            workingImageButton.setImageDrawable(homeViewModel.getLocationButtonImage());
+
         workingImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
