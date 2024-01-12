@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -16,7 +17,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingStart="14dp"
-            android:paddingTop="20dp"
             android:paddingEnd="14dp"
             android:paddingBottom="20dp">
 
@@ -24,19 +24,19 @@
                 android:id="@+id/tutor_subject_logo_imageView"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:layout_marginTop="4dp"
                 android:contentDescription="@string/app_logo"
                 android:src="@mipmap/ic_logo_round"
                 app:civ_border_color="@color/colorAccent"
                 app:civ_border_width="1dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="@+id/tutor_subject_name_header_textView" />
 
             <TextView
                 android:id="@+id/tutor_subject_name_header_textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginStart="8dp"
                 android:text="@string/name_header"
                 android:textSize="16sp"
                 app:layout_constraintStart_toEndOf="@+id/tutor_subject_logo_imageView"
@@ -47,12 +47,14 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginTop="56dp"
                 android:text="@string/empty"
                 android:textSize="16sp"
                 app:fontFamily="@font/roboto_bold"
                 app:layout_constrainedWidth="true"
                 app:layout_constraintBaseline_toBaselineOf="@id/tutor_subject_name_header_textView"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/tutor_subject_switch"
                 app:layout_constraintStart_toEndOf="@+id/tutor_subject_name_header_textView"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -91,6 +93,15 @@
                 android:textSize="12sp"
                 app:layout_constraintStart_toEndOf="@+id/tutor_subject_logo_imageView"
                 app:layout_constraintTop_toBottomOf="@+id/tutor_subject_description_textView" />
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/tutor_subject_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto_bold"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
