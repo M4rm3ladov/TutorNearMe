@@ -1,5 +1,7 @@
 package com.ren.tutornearme.model;
 
+import com.google.firebase.database.PropertyName;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,6 +11,8 @@ public class TutorSubject {
     private SubjectInfo subjectInfo;
     private String status;
     private String credential;
+    private int sessionHours;
+    private boolean isAvailable;
     private long updatedDate;
     private long createdDate;
 
@@ -16,12 +20,14 @@ public class TutorSubject {
     }
 
     public TutorSubject(String id, TutorInfo tutorInfo, SubjectInfo subjectInfo, String status,
-                        String credential, long updatedDate, long createdDate) {
+                        String credential, int sessionHours, boolean isAvailable, long updatedDate, long createdDate) {
         this.id = id;
         this.tutorInfo = tutorInfo;
         this.subjectInfo = subjectInfo;
         this.status = status;
         this.credential = credential;
+        this.sessionHours = sessionHours;
+        this.isAvailable = isAvailable;
         this.updatedDate = updatedDate;
         this.createdDate = createdDate;
     }
@@ -66,6 +72,24 @@ public class TutorSubject {
         this.credential = credential;
     }
 
+    public int getSessionHours() {
+        return sessionHours;
+    }
+
+    public void setSessionHours(int sessionHours) {
+        this.sessionHours = sessionHours;
+    }
+
+    @PropertyName("isAvailable")
+    public boolean isAvailable() {
+        return isAvailable;
+    }
+
+    @PropertyName("isAvailable")
+    public void setAvailable(boolean available) {
+        this.isAvailable = available;
+    }
+
     public long getUpdatedDate() {
         return updatedDate;
     }
@@ -83,19 +107,21 @@ public class TutorSubject {
     }
 
     public TutorSubject copyWith(String id, TutorInfo tutorInfo, SubjectInfo subjectInfo,
-                                 String status, String credential, Long updatedDate, Long createdDate) {
+                                 String status, String credential, Integer sessionHours, Boolean isAvailable, Long updatedDate, Long createdDate) {
         return new TutorSubject(
                 (id != null) ? id : this.id,
                 (tutorInfo != null) ? tutorInfo : this.tutorInfo,
                 (subjectInfo != null) ? subjectInfo : this.subjectInfo,
                 (status != null) ? status : this.status,
                 (credential != null) ? credential : this.credential,
+                (sessionHours != null) ? sessionHours : this.sessionHours,
+                (isAvailable != null) ? isAvailable : this.isAvailable,
                 (updatedDate != null) ? updatedDate : this.updatedDate,
                 (createdDate !=  null) ? createdDate : this.createdDate);
     }
 
     public TutorSubject clone() {
-        return copyWith(id, tutorInfo, subjectInfo, status, credential, updatedDate, createdDate);
+        return copyWith(id, tutorInfo, subjectInfo, status,  credential, sessionHours, isAvailable, updatedDate, createdDate);
     }
 
     public Map<String, Object> toMap() {
@@ -114,6 +140,8 @@ public class TutorSubject {
                 ", subjectInfo=" + subjectInfo +
                 ", status='" + status + '\'' +
                 ", credential='" + credential + '\'' +
+                ", sessionHours =" + sessionHours +
+                ", isAvailable =" + isAvailable +
                 ", updatedDate=" + updatedDate +
                 ", createdDate=" + createdDate +
                 '}';
