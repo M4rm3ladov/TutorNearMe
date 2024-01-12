@@ -284,15 +284,15 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                         ArrayList<TutorSubject> tutorSubjectArrayList = dataOrException.data;
 
                         for (TutorSubject tutorSubject : tutorSubjectArrayList) {
-                            if (tutorSubject.getStatus().equals(VERIFIED)) {
+                            if (tutorSubject.getStatus().equals(VERIFIED) && tutorSubject.isAvailable()) {
                                 workingImageButton.setEnabled(true);
                                 return;
                             }
-                            Toast.makeText(mContext,
-                                    "No verified subject currently. Contact support for more information"
-                                    , Toast.LENGTH_SHORT).show();
-                            workingImageButton.setEnabled(false);
                         }
+                        Toast.makeText(mContext,
+                                "No verified or available subject currently."
+                                , Toast.LENGTH_SHORT).show();
+                        workingImageButton.setEnabled(false);
                     }
                 });
     }
