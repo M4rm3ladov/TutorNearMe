@@ -187,6 +187,8 @@ public class SubjectFilesFragment extends Fragment implements View.OnClickListen
         tutorSubject.setSubjectInfo(subjectInfo);
         tutorSubject.setStatus(UNVERIFIED);
         tutorSubject.setCredential(credentialUriPath);
+        tutorSubject.setSessionHours(1);
+        tutorSubject.setAvailable(false);
         tutorSubject.setCreatedDate(currentDate);
         tutorSubject.setUpdatedDate(currentDate);
 
