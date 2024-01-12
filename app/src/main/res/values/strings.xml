@@ -80,6 +80,7 @@
     <string name="name">Name</string>
     <string name="description">Description</string>
     <string name="submit_request">Submit request</string>
+    <string name="session_hour_header">Session Length:</string>
 
     <string-array name="valid_ids">
         <item>Student ID</item>

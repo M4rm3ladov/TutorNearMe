@@ -84,15 +84,38 @@
                 app:layout_constraintTop_toBottomOf="@+id/tutor_subject_name_textView" />
 
             <TextView
+                android:id="@+id/tutor_subject_session_hour_header_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/session_hour_header"
+                android:textSize="16sp"
+                app:layout_constraintStart_toEndOf="@+id/tutor_subject_logo_imageView"
+                app:layout_constraintTop_toBottomOf="@+id/tutor_subject_description_textView" />
+
+            <TextView
+                android:id="@+id/tutor_subject_session_hour_textView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="8dp"
+                android:text="@string/empty"
+                android:textSize="16sp"
+                app:fontFamily="@font/roboto_bold"
+                app:layout_constraintStart_toEndOf="@+id/tutor_subject_session_hour_header_textView"
+                app:layout_constraintTop_toBottomOf="@+id/tutor_subject_description_textView" />
+
+            <TextView
                 android:id="@+id/tutor_subject_updated_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:text="@string/empty"
                 android:textSize="12sp"
                 app:layout_constraintStart_toEndOf="@+id/tutor_subject_logo_imageView"
-                app:layout_constraintTop_toBottomOf="@+id/tutor_subject_description_textView" />
+                app:layout_constraintTop_toBottomOf="@+id/tutor_subject_session_hour_textView" />
 
             <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/tutor_subject_switch"
