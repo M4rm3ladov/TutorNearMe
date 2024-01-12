@@ -1,5 +1,6 @@
 package com.ren.tutornearme.ui.subject.tutor_subject;
 
+import static com.ren.tutornearme.util.Common.AVAILABLE_TUTOR_SUBJECT_REFERENCE;
 import static com.ren.tutornearme.util.Common.TUTOR_SUBJECT_REFERENCE;
 
 import androidx.annotation.NonNull;
@@ -17,12 +18,15 @@ import com.ren.tutornearme.data.DataOrException;
 import com.ren.tutornearme.model.TutorSubject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TutorSubjectRepository {
 
     private final FirebaseAuth firebaseAuth;
     private final FirebaseDatabase db = FirebaseDatabase.getInstance();
     private final DatabaseReference tutorSubjectRef = db.getReference(TUTOR_SUBJECT_REFERENCE);
+    private final DatabaseReference availableTutorSubjectRef = db.getReference(AVAILABLE_TUTOR_SUBJECT_REFERENCE);
     private ChildEventListener tutorSubjectEventListener = null;
 
     public TutorSubjectRepository() {
@@ -50,7 +54,7 @@ public class TutorSubjectRepository {
                                 TutorSubject tutorSubject = snapshot.getValue(TutorSubject.class);
                                 TutorSubject tutorSubjectClone = tutorSubject
                                         .copyWith(snapshot.getKey(), null, null, null,
-                                                null, null, null);
+                                                null, null, null, null, null);
 
                                 tutorSubjects.add(tutorSubjectClone);
 
@@ -65,7 +69,7 @@ public class TutorSubjectRepository {
                                 TutorSubject tutorSubject = snapshot.getValue(TutorSubject.class);
                                 TutorSubject tutorSubjectClone = tutorSubject
                                         .copyWith(snapshot.getKey(), null, null, null,
-                                                null, null, null);
+                                                null,null, null, null, null);
 
                                 int index = -1;
                                 for (int i = 0; i < tutorSubjects.size(); i++)
@@ -105,6 +109,48 @@ public class TutorSubjectRepository {
                             dataOrException.exception = error.toException();
                             mutableLiveData.postValue(dataOrException);
                         }
+                    });
+        }
+        return mutableLiveData;
+    }
+
+    public MutableLiveData<DataOrException<Boolean, Exception>> setTutorSubjectSession(String key, int sessionLength) {
+        MutableLiveData<DataOrException<Boolean, Exception>> mutableLiveData = new MutableLiveData<>();
+
+        if (getCurrentUser() != null) {
+            DataOrException<Boolean, Exception> dataOrException = new DataOrException<>();
+            Map<String, Object> updateData = new HashMap<>();
+
+            updateData.put("sessionHours", sessionLength);
+
+            tutorSubjectRef.child(key).updateChildren(updateData)
+                    .addOnCompleteListener(documentReference -> {
+                        if (documentReference.isSuccessful())
+                            dataOrException.data = true;
+                        else
+                            dataOrException.exception = documentReference.getException();
+                        mutableLiveData.postValue(dataOrException);
+                    });
+        }
+        return mutableLiveData;
+    }
+
+    public MutableLiveData<DataOrException<Boolean, Exception>> setTutorSubjectAvailability(String key, boolean isAvailable) {
+        MutableLiveData<DataOrException<Boolean, Exception>> mutableLiveData = new MutableLiveData<>();
+
+        if (getCurrentUser() != null) {
+            DataOrException<Boolean, Exception> dataOrException = new DataOrException<>();
+            Map<String, Object> updateData = new HashMap<>();
+
+            updateData.put("isAvailable", isAvailable);
+
+            tutorSubjectRef.child(key).updateChildren(updateData)
+                    .addOnCompleteListener(documentReference -> {
+                        if (documentReference.isSuccessful())
+                            dataOrException.data = true;
+                        else
+                            dataOrException.exception = documentReference.getException();
+                        mutableLiveData.postValue(dataOrException);
                     });
         }
         return mutableLiveData;

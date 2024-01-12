@@ -20,6 +20,14 @@ public class TutorSubjectViewModel extends ViewModel {
         return tutorSubjectRepository.getTutorSubjectList();
     }
 
+    public LiveData<DataOrException<Boolean, Exception>> setTutorSubjectSession(String key, int sessionLength) {
+        return tutorSubjectRepository.setTutorSubjectSession(key, sessionLength);
+    }
+
+    public LiveData<DataOrException<Boolean, Exception>> setTutorSubjectAvailability(String key, boolean isAvailable) {
+        return tutorSubjectRepository.setTutorSubjectAvailability(key, isAvailable);
+    }
+
     public void removeTutorSubjectListener () {
         tutorSubjectRepository.removeTutorSubjectListener();
     }
