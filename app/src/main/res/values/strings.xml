@@ -97,4 +97,6 @@
     <string name="find_a_subject_you_d_like_to_teach">Choose a subject to start tutoring.</string>
     <string name="upload_your_credential">Upload your credentials.</string>
     <string name="subject_credential_message">Compile all of your scanned credential(s) in a pdf format.</string>
+    <string name="tutor_subject_hour">Session Length</string>
+    <string name="tutor_subject_min_hour">Hour(s)</string>
 </resources>
