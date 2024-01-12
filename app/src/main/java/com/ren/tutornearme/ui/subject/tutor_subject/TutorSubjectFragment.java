@@ -45,7 +45,7 @@ public class TutorSubjectFragment extends Fragment implements View.OnClickListen
     private View mView;
     private Application mApplication;
 
-    private ArrayList<TutorSubject> tutorSubjectArrayList;
+    private final ArrayList<TutorSubject> tutorSubjectArrayList = new ArrayList<>();
     private ArrayList<SubjectInfo> subjectInfoArrayList;
     private TutorSubjectAdapter tutorSubjectAdapter;
 
@@ -91,6 +91,7 @@ public class TutorSubjectFragment extends Fragment implements View.OnClickListen
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+        subjectViewModel.removeTutorSubjectListener();
     }
 
     @Override
@@ -101,7 +102,7 @@ public class TutorSubjectFragment extends Fragment implements View.OnClickListen
                     Snackbar.LENGTH_SHORT).show();
 
         subjectViewModel.getTutorSubjectList()
-                .observe(this, dataOrException -> {
+                .observe(getViewLifecycleOwner(), dataOrException -> {
                     if (dataOrException.exception != null) {
                         SnackBarHelper.showSnackBar(mView,
                                 "[ERROR]: " + dataOrException.exception.getMessage());
@@ -111,14 +112,14 @@ public class TutorSubjectFragment extends Fragment implements View.OnClickListen
                     if (dataOrException.data != null) {
                         tutorSubjectArrayList.clear();
 
-                        for (TutorSubject tutorSubject : dataOrException.data) {
+                        for (TutorSubject tutorSubject : dataOrException.data)
                             if (tutorSubject.getStatus().equals(VERIFIED))
                                 tutorSubjectArrayList.add(tutorSubject);
-                        }
+
+                        tutorSubjectAdapter.setTutorSubjectList(tutorSubjectArrayList);
 
                         subjectInfoArrayList = (ArrayList<SubjectInfo>) tutorSubjectArrayList
                                 .stream().map(TutorSubject::getSubjectInfo).collect(Collectors.toList());
-                        tutorSubjectAdapter.setSubjectList(subjectInfoArrayList);
 
                         ArrayAdapter<SubjectInfo> adapter = new ArrayAdapter<>(mContext,
                                 android.R.layout.simple_dropdown_item_1line, subjectInfoArrayList);
@@ -127,12 +128,12 @@ public class TutorSubjectFragment extends Fragment implements View.OnClickListen
                         attachSearchInputListener();
                     }
                 });
+
         super.onResume();
     }
 
     @Override
     public void onPause() {
-        subjectViewModel.removeTutorSubjectListener();
         super.onPause();
     }
 
@@ -149,8 +150,8 @@ public class TutorSubjectFragment extends Fragment implements View.OnClickListen
         subjectRecyclerView.setHasFixedSize(true);
         subjectRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
 
-        tutorSubjectArrayList = new ArrayList<>();
-        tutorSubjectAdapter = new TutorSubjectAdapter(mContext);
+        tutorSubjectAdapter = new TutorSubjectAdapter(mContext,
+                subjectViewModel, getViewLifecycleOwner());
         subjectRecyclerView.setAdapter(tutorSubjectAdapter);
     }
 
@@ -184,15 +185,15 @@ public class TutorSubjectFragment extends Fragment implements View.OnClickListen
             }
 
             private void filterSearch(String text) {
-                ArrayList<SubjectInfo> filteredList = new ArrayList<>();
+                ArrayList<TutorSubject> filteredList = new ArrayList<>();
 
-                for (SubjectInfo subjectItem: subjectInfoArrayList) {
-                    if (subjectItem.getName().toLowerCase().contains(text.toLowerCase()) ||
-                            subjectItem.getDescription().toLowerCase().contains(text.toLowerCase())) {
-                        filteredList.add(subjectItem);
+                for (TutorSubject tutorSubject: tutorSubjectArrayList) {
+                    if (tutorSubject.getSubjectInfo().getName().toLowerCase().contains(text.toLowerCase()) ||
+                            tutorSubject.getSubjectInfo().getDescription().toLowerCase().contains(text.toLowerCase())) {
+                        filteredList.add(tutorSubject);
                     }
                 }
-                tutorSubjectAdapter.setSubjectList(filteredList);
+                tutorSubjectAdapter.setTutorSubjectList(filteredList);
             }
         });
     }
