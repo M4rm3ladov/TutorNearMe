@@ -47,9 +47,7 @@ public class TutorSubjectAdapter extends RecyclerView.Adapter<TutorSubjectAdapte
     private EditText tutorHourEditText;
     private TextInputLayout tutorHourInputLayout;
     private boolean isValid = true;
-
     private final InputValidatorHelper inputValidatorHelper = new InputValidatorHelper();
-
 
     private ArrayList<TutorSubject> tutorSubjectArrayList = new ArrayList<>();
     private final SimpleDateFormat dateTimeFormatter =
@@ -73,6 +71,9 @@ public class TutorSubjectAdapter extends RecyclerView.Adapter<TutorSubjectAdapte
         TutorSubject tutorSubject = tutorSubjectArrayList.get(position);
         holder.subjectNameTextView.setText(tutorSubject.getSubjectInfo().getName());
         holder.subjectDescriptionTextView.setText(tutorSubject.getSubjectInfo().getDescription());
+        holder.subjectHourLength.setText(tutorSubject.getSessionHours() > 1 ?
+                String.format("%s hrs", tutorSubject.getSessionHours()) :
+                String.format("%s hr", tutorSubject.getSessionHours()));
         holder.updatedDateTextView
                 .setText(dateTimeFormatter.format(new Date(tutorSubject.getSubjectInfo().getUpdatedDate())));
         holder.logoImageView.setBackgroundResource(R.mipmap.ic_logo_round);
@@ -112,6 +113,7 @@ public class TutorSubjectAdapter extends RecyclerView.Adapter<TutorSubjectAdapte
         initBindDialogViews(tutorHourDialogView);
         initAttachButtonListeners(position);
         initAttachInputListeners();
+        tutorHourEditText.setText(String.valueOf(tutorSubjectArrayList.get(position).getSessionHours()));
 
         builder.setView(tutorHourDialogView);
         builder.setCancelable(false);
@@ -176,6 +178,9 @@ public class TutorSubjectAdapter extends RecyclerView.Adapter<TutorSubjectAdapte
         } else if (!inputValidatorHelper.isNumeric(tutorHour)) {
             tutorHourInputLayout.setHelperText("Fill in a valid hour.");
             isValid = false;
+        } else if (Integer.parseInt(tutorHour) <= 0) {
+            tutorHourInputLayout.setHelperText("Minimum of 1.");
+            isValid = false;
         }
 
     }
@@ -189,6 +194,8 @@ public class TutorSubjectAdapter extends RecyclerView.Adapter<TutorSubjectAdapte
                     tutorHourInputLayout.setHelperText("Fill in session.");
                 else if (!inputValidatorHelper.isNumeric(tutorHour))
                     tutorHourInputLayout.setHelperText("Fill in a valid hour.");
+                else if (Integer.parseInt(tutorHour) <= 0)
+                    tutorHourInputLayout.setHelperText("Minimum of 1.");
             }
         });
 
@@ -217,7 +224,7 @@ public class TutorSubjectAdapter extends RecyclerView.Adapter<TutorSubjectAdapte
 
     public static class SubjectViewHolder extends RecyclerView.ViewHolder {
 
-        private final TextView subjectNameTextView, subjectDescriptionTextView, updatedDateTextView;
+        private final TextView subjectNameTextView, subjectDescriptionTextView, subjectHourLength, updatedDateTextView;
         private final ImageView logoImageView;
         private final CardView rowCardView;
         private final MaterialSwitch subjectSwitch;
@@ -226,6 +233,7 @@ public class TutorSubjectAdapter extends RecyclerView.Adapter<TutorSubjectAdapte
 
             subjectNameTextView = itemView.findViewById(R.id.tutor_subject_name_textView);
             subjectDescriptionTextView = itemView.findViewById(R.id.tutor_subject_description_textView);
+            subjectHourLength = itemView.findViewById(R.id.tutor_subject_session_hour_textView);
             updatedDateTextView = itemView.findViewById(R.id.tutor_subject_updated_date);
             logoImageView = itemView.findViewById(R.id.tutor_subject_logo_imageView);
             rowCardView = itemView.findViewById(R.id.tutor_subject_row_cardView);
