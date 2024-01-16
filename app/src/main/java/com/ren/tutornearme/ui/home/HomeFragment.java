@@ -88,8 +88,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private final ValueEventListener onlineValueEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(@NonNull DataSnapshot snapshot) {
-            if (snapshot.exists() && homeViewModel.getCurrentUserRef() != null)
+            if (snapshot.exists() && homeViewModel.getCurrentUserRef() != null) {
                 homeViewModel.getCurrentUserRef().onDisconnect().removeValue();
+                homeViewModel.getTutorRequestRef().onDisconnect().removeValue();
+                homeViewModel.getTutorWorkingRef().onDisconnect().removeValue();
+            }
         }
 
         @Override
@@ -201,7 +204,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                                     Toast.makeText(mContext, "You're Online!", Toast.LENGTH_SHORT)
                                             .show();
                             });
-
                     homeViewModel.getOnlineRef().addValueEventListener(onlineValueEventListener);
                 } catch (IOException e) {
                     showSnackBar(mContainerView, "[ERROR]: " + e.getMessage());
