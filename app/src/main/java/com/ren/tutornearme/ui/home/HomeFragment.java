@@ -141,8 +141,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     @SuppressLint("MissingPermission")
     @Override
     public void onResume() {
-        if(isGPSAndLocationPermissionGranted())
-            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
         homeViewModel.getOnlineRef().addValueEventListener(onlineValueEventListener);
 
         super.onResume();
@@ -173,14 +171,17 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     private void initFusedLocationProvider() {
+
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 super.onLocationResult(locationResult);
 
-                if (!isTutorWorking) return;
-
                 LatLng newPosition = new LatLng(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude());
+                Location tutorLocation = new Location("");
+                tutorLocation.setLongitude(locationResult.getLastLocation().getLongitude());
+                tutorLocation.setLatitude(locationResult.getLastLocation().getLatitude());
+
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newPosition, ZOOM_VAL));
 
                 try {
@@ -192,23 +193,35 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     String cityName = addressList.get(0).getLocality();
 
                     homeViewModel.setTutorLocationRef(cityName);
-                    homeViewModel.isTutorLocationSet(locationResult).observe(mActivity,
-                            dataOrException -> {
-                                if (dataOrException.exception != null) {
-                                    SnackBarHelper.showSnackBar(mContainerView,
-                                            "[ERROR]: " + dataOrException.exception.getMessage());
-                                    return;
-                                }
 
-                                if (dataOrException.data)
-                                    Toast.makeText(mContext, "You're Online!", Toast.LENGTH_SHORT)
-                                            .show();
-                            });
+                    homeViewModel.getIsTutorWorking().observe(getViewLifecycleOwner(), isTutorWorking -> {
+                        if (isTutorWorking)
+                            homeViewModel.updateTutorWorkingLocation(tutorLocation)
+                                    .observe(getViewLifecycleOwner(), dataOrException -> {
+                                        if (dataOrException.exception != null) {
+                                            showSnackBar(mContainerView,
+                                                    dataOrException.exception.getMessage());
+                                        }
+                                    });
+                        else
+                            homeViewModel.isTutorLocationSet(locationResult).observe(mActivity,
+                                    dataOrException -> {
+                                        if (dataOrException.exception != null) {
+                                            SnackBarHelper.showSnackBar(mContainerView,
+                                                    "[ERROR]: " + dataOrException.exception.getMessage());
+                                            return;
+                                        }
+
+                                        if (dataOrException.data)
+                                            Toast.makeText(mContext, "You're Online!", Toast.LENGTH_SHORT)
+                                                    .show();
+                                    });
+                    });
+
                     homeViewModel.getOnlineRef().addValueEventListener(onlineValueEventListener);
                 } catch (IOException e) {
                     showSnackBar(mContainerView, "[ERROR]: " + e.getMessage());
                 }
-
                 /*try {
                     GeoJsonLayer layer = new GeoJsonLayer(mMap, R.raw.zambo_mid_res, mContext);
                     //layer.addLayerToMap();
@@ -249,6 +262,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             workingImageButton.setImageDrawable(homeViewModel.getLocationButtonImage());
 
         workingImageButton.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("MissingPermission")
             @Override
             public void onClick(View view) {
                 if (!isTutorWorking) {
@@ -260,17 +274,73 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                             "Awaiting student booking", Toast.LENGTH_SHORT).show();
 
                     getLastLocation();
+                    if(isGPSAndLocationPermissionGranted())
+                        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
                 } else {
                     ((NavButtonAsyncResponse) mActivity).setProfileButtonEnabled(false);
 
                     isTutorWorking = false;
                     workingImageButton.setImageResource(R.drawable.ic_location_off );
+
+                    homeViewModel.removeCustomerRequestListener();
                     homeViewModel.removeTutorLocation();
+                    if (fusedLocationProviderClient != null)
+                        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
                     Toast.makeText(mContext,
                             "Tutor on break", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+    }
+
+    @SuppressLint("MissingPermission")
+    private void getLastLocation() {
+        if (isGPSAndLocationPermissionGranted())
+            fusedLocationProviderClient.getLastLocation()
+                    .addOnCompleteListener(task -> {
+
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            Location location = task.getResult();
+                            LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, ZOOM_VAL));
+
+                            try {
+                                Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
+                                List<Address> addressList;
+
+                                addressList = geocoder.getFromLocation(location.getLatitude(),
+                                        location.getLongitude(), 1);
+                                String cityName = addressList.get(0).getLocality();
+
+                                homeViewModel.setTutorLocationRef(cityName);
+
+                                homeViewModel.checkStudentRequest(location).observe(getViewLifecycleOwner(),
+                                        dataOrException -> {
+                                            if (dataOrException.exception != null) {
+                                                showSnackBar(mContainerView, String.format("[ERROR]: %s",
+                                                        dataOrException.exception.getMessage()));
+                                                return;
+                                            }
+
+                                            if (dataOrException.data != null) {
+                                                homeViewModel.setIsTutorWorking(dataOrException.data);
+                                            }
+                                        });
+
+                                homeViewModel.getOnlineRef().addValueEventListener(onlineValueEventListener);
+                            } catch (IOException e) {
+                                showSnackBar(mContainerView, "[ERROR]: " + e.getMessage());
+                            }
+                        } else {
+                            showDefaultLocation();
+                            if (task.getException() != null)
+                                showSnackBar(mContainerView, String.format("[ERROR]: %s",
+                                        task.getException().getMessage()));
+                        }
+                    })
+                    .addOnFailureListener(e -> showSnackBar(mContainerView, String.format("[ERROR]: %s",
+                            e.getMessage())));
     }
 
     private void checkIfTutorHasVerifiedSubject() {
@@ -418,55 +488,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
             return true;
         });
-    }
-
-    @SuppressLint("MissingPermission")
-    private void getLastLocation() {
-        if (isGPSAndLocationPermissionGranted())
-            fusedLocationProviderClient.getLastLocation()
-                    .addOnCompleteListener(task -> {
-
-                        if (task.isSuccessful() && task.getResult() != null) {
-                            Location location = task.getResult();
-                            LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-
-                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, ZOOM_VAL));
-
-                            try {
-                                Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
-                                List<Address> addressList;
-
-                                addressList = geocoder.getFromLocation(location.getLatitude(),
-                                        location.getLongitude(), 1);
-                                String cityName = addressList.get(0).getLocality();
-
-                                homeViewModel.setTutorLocationRef(cityName);
-                                homeViewModel.isTutorLocationSet(location).observe(mActivity,
-                                        dataOrException -> {
-                                            if (dataOrException.exception != null) {
-                                                SnackBarHelper.showSnackBar(mContainerView,
-                                                        "[ERROR]: " + dataOrException.exception.getMessage());
-                                                return;
-                                            }
-
-                                            if (dataOrException.data)
-                                                Toast.makeText(mContext, "You're Online!", Toast.LENGTH_SHORT)
-                                                        .show();
-                                        });
-
-                                homeViewModel.getOnlineRef().addValueEventListener(onlineValueEventListener);
-                            } catch (IOException e) {
-                                showSnackBar(mContainerView, "[ERROR]: " + e.getMessage());
-                            }
-                        } else {
-                            showDefaultLocation();
-                            if (task.getException() != null)
-                                showSnackBar(mContainerView, String.format("[ERROR]: %s",
-                                        task.getException().getMessage()));
-                        }
-                    })
-                    .addOnFailureListener(e -> showSnackBar(mContainerView, String.format("[ERROR]: %s",
-                            e.getMessage())));
     }
 
     private void showDefaultLocation() {
