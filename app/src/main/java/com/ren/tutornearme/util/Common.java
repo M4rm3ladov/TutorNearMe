@@ -6,6 +6,8 @@ public class Common {
     public static final String SUBJECT_REFERENCE = "SubjectInfo";
     public static final String TUTOR_SUBJECT_REFERENCE = "TutorSubject";
     public static final String TUTOR_SUBJECT_LOOKUP_REFERENCE = "TutorSubjectLookUp";
+    public static final String TUTOR_REQUEST_REFERENCE = "TutorRequest";
+    public static final String TUTOR_WORKING_REFERENCE = "TutorWorking";
 
     public static final String TOKEN_REFERENCE = "MessagingToken";
     public static final String NOTIFICATION_TITLE = "title";
@@ -25,11 +27,10 @@ public class Common {
     public static final String RESUBMIT = "resubmit";
     public static final String SUBMITTED = "submitted";
 
-
-    public static final int LOCATION_INTERVAL = 5000;
+    public static final int LOCATION_INTERVAL = 5000;//15000;
     public static final int LOCATION_MAX_WAIT_TIME = 10000;
-    public static final int LOCATION_FASTEST_INTERVAL = 3000;
-    public static final float LOCATION_MIN_DISTANCE = 10f;
+    public static final int LOCATION_FASTEST_INTERVAL = 3000;//10000;
+    public static final float LOCATION_MIN_DISTANCE = 10f;//50f;
     public static final double ZAM_LONG = 122.079025;
     public static final double ZAM_LAT = 6.921442;
 }
