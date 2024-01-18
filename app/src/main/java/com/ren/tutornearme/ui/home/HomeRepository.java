@@ -20,6 +20,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.ren.tutornearme.data.DataOrException;
+import com.ren.tutornearme.model.StudentGeo;
+import com.ren.tutornearme.model.StudentInfo;
+import com.ren.tutornearme.model.TutorSubject;
 
 
 public class HomeRepository {
@@ -141,11 +144,11 @@ public class HomeRepository {
         DataOrException<Boolean, Exception> dataOrException = new DataOrException<>();
 
         if (getCurrentUser() != null) {
-            tutorRequestRefListener = tutorRequestRef
+            tutorRequestRefListener = tutorRequestRef.child(getCurrentUser().getUid())
                     .addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.child(getCurrentUser().getUid()).exists()) {
+                    if (snapshot.exists()) {
                         dataOrException.data = true;
                         mutableLiveData.postValue(dataOrException);
                     } else {
@@ -161,6 +164,69 @@ public class HomeRepository {
                 }
             });
         }
+        return mutableLiveData;
+    }
+
+    public MutableLiveData<DataOrException<StudentGeo, Exception>> getStudentGeo() {
+        MutableLiveData<DataOrException<StudentGeo, Exception>> mutableLiveData = new MutableLiveData<>();
+        DataOrException<StudentGeo, Exception> dataOrException = new DataOrException<>();
+
+        tutorRequestRef.child(getCurrentUser().getUid()).child("studentLocation")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        dataOrException.data = snapshot.getValue(StudentGeo.class);
+                        mutableLiveData.postValue(dataOrException);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        dataOrException.exception = error.toException();
+                        mutableLiveData.postValue(dataOrException);
+                    }
+                });
+        return mutableLiveData;
+    }
+
+    public MutableLiveData<DataOrException<TutorSubject, Exception>> getStudentTutorSubject() {
+        MutableLiveData<DataOrException<TutorSubject, Exception>> mutableLiveData = new MutableLiveData<>();
+        DataOrException<TutorSubject, Exception> dataOrException = new DataOrException<>();
+
+        tutorRequestRef.child(getCurrentUser().getUid()).child("tutorSubject")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        dataOrException.data = snapshot.getValue(TutorSubject.class);
+                        mutableLiveData.postValue(dataOrException);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        dataOrException.exception = error.toException();
+                        mutableLiveData.postValue(dataOrException);
+                    }
+                });
+        return mutableLiveData;
+    }
+
+    public MutableLiveData<DataOrException<StudentInfo, Exception>> getStudentInfo() {
+        MutableLiveData<DataOrException<StudentInfo, Exception>> mutableLiveData = new MutableLiveData<>();
+        DataOrException<StudentInfo, Exception> dataOrException = new DataOrException<>();
+
+        tutorRequestRef.child(getCurrentUser().getUid()).child("studentInfo")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        dataOrException.data = snapshot.getValue(StudentInfo.class);
+                        mutableLiveData.postValue(dataOrException);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        dataOrException.exception = error.toException();
+                        mutableLiveData.postValue(dataOrException);
+                    }
+                });
         return mutableLiveData;
     }
 
@@ -185,8 +251,8 @@ public class HomeRepository {
     public DatabaseReference getOnlineRef() { return onlineRef; }
 
     public DatabaseReference getCurrentUserRef() { return currentUserRef; }
-    public DatabaseReference getTutorWorkingRef() { return tutorWorkingRef; }
-    public DatabaseReference getTutorRequestRef() { return tutorRequestRef; }
+    public DatabaseReference getTutorWorkingRef() { return tutorWorkingRef.child(getCurrentUser().getUid()); }
+    public DatabaseReference getTutorRequestRef() { return tutorRequestRef.child(getCurrentUser().getUid()); }
 
     public void setCurrentTutorLocationRef(String cityName) {
         tutorLocationRef = db.getReference(TUTOR_LOCATION_REFERENCE).child(cityName);

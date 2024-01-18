@@ -10,6 +10,9 @@ import androidx.lifecycle.ViewModel;
 import com.google.android.gms.location.LocationResult;
 import com.google.firebase.database.DatabaseReference;
 import com.ren.tutornearme.data.DataOrException;
+import com.ren.tutornearme.model.StudentGeo;
+import com.ren.tutornearme.model.StudentInfo;
+import com.ren.tutornearme.model.TutorSubject;
 
 public class HomeViewModel extends ViewModel {
     private final HomeRepository homeRepository;
@@ -66,6 +69,18 @@ public class HomeViewModel extends ViewModel {
 
     public LiveData<DataOrException<Boolean, Exception>> updateTutorWorkingLocation(Location location) {
         return homeRepository.updateTutorWorkingLocation(location);
+    }
+
+    public LiveData<DataOrException<StudentInfo, Exception>> getStudentInfo() {
+        return homeRepository.getStudentInfo();
+    }
+
+    public LiveData<DataOrException<TutorSubject, Exception>> getStudentTutorSubject() {
+        return homeRepository.getStudentTutorSubject();
+    }
+
+    public LiveData<DataOrException<StudentGeo, Exception>> getStudentGeo() {
+        return homeRepository.getStudentGeo();
     }
 
     public DatabaseReference getCurrentUserRef() { return homeRepository.getCurrentUserRef(); }
