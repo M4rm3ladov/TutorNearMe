@@ -18,9 +18,36 @@ public class HomeViewModel extends ViewModel {
     private final HomeRepository homeRepository;
     private Drawable locationButtonImage;
     private final MutableLiveData<Boolean> isTutorWorking = new MutableLiveData<>();
+    private StudentGeo mStudentGeo;
+    private StudentInfo mStudentInfo;
+    private TutorSubject mStudentTutorSubject;
 
     public HomeViewModel() {
         this.homeRepository = new HomeRepository();
+    }
+
+    public StudentGeo getmStudentGeo() {
+        return mStudentGeo;
+    }
+
+    public void setmStudentGeo(StudentGeo mStudentGeo) {
+        this.mStudentGeo = mStudentGeo;
+    }
+
+    public StudentInfo getmStudentInfo() {
+        return mStudentInfo;
+    }
+
+    public void setmStudentInfo(StudentInfo mStudentInfo) {
+        this.mStudentInfo = mStudentInfo;
+    }
+
+    public TutorSubject getmStudentTutorSubject() {
+        return mStudentTutorSubject;
+    }
+
+    public void setmStudentTutorSubject(TutorSubject mStudentTutorSubject) {
+        this.mStudentTutorSubject = mStudentTutorSubject;
     }
 
     public MutableLiveData<Boolean> getIsTutorWorking() {

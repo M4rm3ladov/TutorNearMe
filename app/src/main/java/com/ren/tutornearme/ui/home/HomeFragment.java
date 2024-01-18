@@ -9,6 +9,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,12 +23,17 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.IntentSenderRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.directions.route.Route;
+import com.directions.route.RouteException;
+import com.directions.route.Routing;
+import com.directions.route.RoutingListener;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -42,6 +48,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
@@ -77,7 +85,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class HomeFragment extends Fragment implements OnMapReadyCallback {
+public class HomeFragment extends Fragment implements OnMapReadyCallback, RoutingListener {
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private LocationRequest locationRequest;
@@ -100,6 +108,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private Button acceptStudentButton;
     private TextView studentDistanceTextView, studentSubjectTextView, studentNameTextView,
             studentSessionTextView, studentFeeTextView;
+
+    private List<Polyline> polylines;
+    private static final int[] COLORS = new int[] { R.color.colorPrimaryDark, R.color.colorPrimary, R.color.colorAccent };
 
     private final ValueEventListener onlineValueEventListener = new ValueEventListener() {
         @Override
@@ -131,6 +142,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         mContext = null;
         mActivity = null;
         super.onDetach();
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        polylines = new ArrayList<>();
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -207,6 +224,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
+    @SuppressLint("MissingPermission")
     private void initBindBottomSheetViews() {
         acceptStudentButton = binding.homeBookButton;
         studentDistanceTextView = binding.homeStudentDistanceTextview;
@@ -214,6 +232,29 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         studentNameTextView = binding.homeStudentName;
         studentSessionTextView = binding.homeStudentSession;
         studentFeeTextView = binding.homeStudentFee;
+
+        acceptStudentButton.setOnClickListener(view -> {
+            if (!isGPSAndLocationPermissionGranted()) return;
+            fusedLocationProviderClient.getLastLocation().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Location currentLocation = task.getResult();
+                    LatLng start = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+                    LatLng end = new LatLng(homeViewModel.getmStudentGeo().getL().get(0), homeViewModel.getmStudentGeo().getL().get(1));
+
+                    Routing routing = new Routing.Builder()
+                            .travelMode(Routing.TravelMode.DRIVING)
+                            .withListener(this)
+                            .waypoints(start, end)
+                            .key("AIzaSyDK5LORNVBfwaBxwPklkptPG2By_jZUeQ4")
+                            .build();
+                    routing.execute();
+
+                } else if (task.getException() != null) {
+                        showSnackBar(mContainerView, String.format("[ERROR]: %s",
+                                task.getException().getMessage()));
+                }
+            });
+        });
     }
 
     @SuppressLint("MissingPermission")
@@ -251,9 +292,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 .position(new LatLng(studentGeo.getL().get(0), studentGeo.getL().get(1)))
                 .flat(true)
                 .title(String.format(getString(R.string.tutor_name),
-                        tutorSubject.getTutorInfo().getFirstName(),
-                        tutorSubject.getTutorInfo().getLastName()))
-                .snippet(tutorSubject.getTutorInfo().getPhoneNumber())
+                        studentInfo.getFirstName(),
+                        studentInfo.getLastName()))
+                .snippet(studentInfo.getPhoneNumber())
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.book_icon)));
 
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
@@ -406,8 +447,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                                                     workingImageButton.setVisibility(View.GONE);
                                                 } else {
                                                     workingImageButton.setVisibility(View.VISIBLE);
-                                                    mMap.clear();
                                                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                                                    eraseRoutePolyLines();
+                                                    mMap.clear();
                                                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, ZOOM_VAL));
                                                 }
                                             }
@@ -439,7 +481,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
             if (studentGeo.data != null) {
                 // get student info
-                StudentGeo customerGeo = studentGeo.data;
+                homeViewModel.setmStudentGeo(studentGeo.data);
                 homeViewModel.getStudentInfo().observe(this, studentInfo -> {
                     if (studentInfo.exception != null) {
                         SnackBarHelper.showSnackBar(mContainerView,
@@ -449,7 +491,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
                     if (studentInfo.data != null) {
                         // get tutor subject
-                        StudentInfo customerInfo = studentInfo.data;
+                        homeViewModel.setmStudentInfo(studentInfo.data);
                         homeViewModel.getStudentTutorSubject().observe(this, tutorSubject -> {
                             if (tutorSubject.exception != null) {
                                 SnackBarHelper.showSnackBar(mContainerView,
@@ -458,8 +500,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                             }
 
                             if (tutorSubject.data != null) {
-                                TutorSubject customerTutorSubject = tutorSubject.data;
-                                showStudentBottomSheet(customerGeo, customerTutorSubject, customerInfo);
+                                homeViewModel.setmStudentTutorSubject(tutorSubject.data);
+                                showStudentBottomSheet(homeViewModel.getmStudentGeo(),
+                                        homeViewModel.getmStudentTutorSubject(),
+                                        homeViewModel.getmStudentInfo());
                             }
                         });
                     }
@@ -565,6 +609,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
         mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.setPadding(0, 0 , 0, 500);
 
         googleMap.setMapStyle(MapStyleOptions
                     .loadRawResourceStyle(mContext, R.raw.uber_maps_style));
@@ -582,7 +627,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-        params.setMargins(0, 0, 0, 250);
     }
 
     @SuppressLint("MissingPermission")
@@ -619,5 +663,63 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         LatLng userLatLng = new LatLng(ZAM_LAT, ZAM_LONG);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(userLatLng));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, ZOOM_VAL));
+    }
+
+    @Override
+    public void onRoutingFailure(RouteException e) {
+        if (e != null) {
+            showSnackBar(mContainerView, String.format("[ERROR]: %s", e.getMessage()));
+            Log.d("MapFail", "onRoutingFailure: " + e.getMessage());
+        } else
+            showSnackBar(mContainerView, "[ERROR]: Something went wrong, try again.");
+        }
+
+    @Override
+    public void onRoutingStart() {
+
+    }
+
+    @Override
+    public void onRoutingSuccess(ArrayList<Route> routes, int shortestRouteIndex    ) {
+        if(polylines.size()>0) {
+            for (Polyline poly : polylines) {
+                poly.remove();
+            }
+        }
+
+        polylines = new ArrayList<>();
+        //add route(s) to the map.
+        for (int i = 0; i < routes.size(); i++) {
+
+            //In case of more than 5 alternative routes
+            int colorIndex = i % COLORS.length;
+
+            PolylineOptions polyOptions = new PolylineOptions();
+            polyOptions.color(getResources().getColor(COLORS[colorIndex]));
+            polyOptions.width(10 + i * 3);
+            polyOptions.addAll(routes.get(i).getPoints());
+            Polyline polyline = mMap.addPolyline(polyOptions);
+            polylines.add(polyline);
+
+            Toast.makeText(mContext,"Route "+ (i+1) +": distance - "+
+                    routes.get(i).getDistanceValue()+": duration - "+ routes.get(i).getDurationValue(),Toast.LENGTH_SHORT).show();
+
+            double durationInMins = (double) routes.get(i).getDurationValue() / 60;
+            studentDistanceTextView.setText((durationInMins >= 60) ?
+                    String.format(Locale.getDefault(), "%.1f hrs", durationInMins) :
+                    String.format(Locale.getDefault(), "%.1f mins" ,durationInMins));
+        }
+    }
+
+    @Override
+    public void onRoutingCancelled() {
+
+    }
+
+    private void eraseRoutePolyLines() {
+        for (Polyline polyline : polylines) {
+            polyline.remove();
+        }
+        polylines.clear();
     }
 }
