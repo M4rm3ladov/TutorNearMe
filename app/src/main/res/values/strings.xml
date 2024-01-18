@@ -100,4 +100,5 @@
     <string name="subject_credential_message">Compile all of your scanned credential(s) in a pdf format.</string>
     <string name="tutor_subject_hour">Session Length</string>
     <string name="tutor_subject_min_hour">Hour(s)</string>
+    <string name="accept_student">Accept student</string>
 </resources>
