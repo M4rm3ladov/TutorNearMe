@@ -33,4 +33,7 @@ public class Common {
     public static final float LOCATION_MIN_DISTANCE = 10f;//50f;
     public static final double ZAM_LONG = 122.079025;
     public static final double ZAM_LAT = 6.921442;
+
+    public static final double AVERAGE_TUTOR_FEE = 147.81;
+    public static final double FARE_PER_KM = 15;
 }
