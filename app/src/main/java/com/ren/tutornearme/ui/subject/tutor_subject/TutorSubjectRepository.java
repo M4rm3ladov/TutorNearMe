@@ -1,6 +1,5 @@
 package com.ren.tutornearme.ui.subject.tutor_subject;
 
-import static com.ren.tutornearme.util.Common.AVAILABLE_TUTOR_SUBJECT_REFERENCE;
 import static com.ren.tutornearme.util.Common.TUTOR_SUBJECT_REFERENCE;
 
 import androidx.annotation.NonNull;
@@ -26,7 +25,6 @@ public class TutorSubjectRepository {
     private final FirebaseAuth firebaseAuth;
     private final FirebaseDatabase db = FirebaseDatabase.getInstance();
     private final DatabaseReference tutorSubjectRef = db.getReference(TUTOR_SUBJECT_REFERENCE);
-    private final DatabaseReference availableTutorSubjectRef = db.getReference(AVAILABLE_TUTOR_SUBJECT_REFERENCE);
     private ChildEventListener tutorSubjectEventListener = null;
 
     public TutorSubjectRepository() {
