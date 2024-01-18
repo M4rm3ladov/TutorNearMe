@@ -12,8 +12,10 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -21,6 +23,7 @@ import androidx.activity.result.IntentSenderRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -35,8 +38,11 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -45,12 +51,16 @@ import com.ren.tutornearme.R;
 import com.ren.tutornearme.auth.MainActivity;
 import com.ren.tutornearme.data.NavButtonAsyncResponse;
 import com.ren.tutornearme.databinding.FragmentHomeBinding;
+import com.ren.tutornearme.model.StudentGeo;
+import com.ren.tutornearme.model.StudentInfo;
 import com.ren.tutornearme.model.TutorSubject;
 import com.ren.tutornearme.ui.subject.tutor_subject.TutorSubjectViewModel;
 import com.ren.tutornearme.util.GPSHelper;
 import com.ren.tutornearme.util.LocationHelper;
 import com.ren.tutornearme.util.SnackBarHelper;
 
+import static com.ren.tutornearme.util.Common.AVERAGE_TUTOR_FEE;
+import static com.ren.tutornearme.util.Common.FARE_PER_KM;
 import static com.ren.tutornearme.util.Common.LOCATION_FASTEST_INTERVAL;
 import static com.ren.tutornearme.util.Common.LOCATION_INTERVAL;
 import static com.ren.tutornearme.util.Common.LOCATION_MAX_WAIT_TIME;
@@ -84,6 +94,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private View mContainerView;
     private Context mContext;
     private FragmentActivity mActivity;
+
+    private ConstraintLayout bottomSheetLayout;
+    private BottomSheetBehavior bottomSheetBehavior;
+    private Button acceptStudentButton;
+    private TextView studentDistanceTextView, studentSubjectTextView, studentNameTextView,
+            studentSessionTextView, studentFeeTextView;
 
     private final ValueEventListener onlineValueEventListener = new ValueEventListener() {
         @Override
@@ -129,6 +145,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         View root = binding.getRoot();
 
+        initBottomSheet();
+        initBindBottomSheetViews();
         initLocationRequestBuilder();
         initMapBinding();
         initSwitchToggleListener();
@@ -142,7 +160,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onResume() {
         homeViewModel.getOnlineRef().addValueEventListener(onlineValueEventListener);
-
+        if(isGPSAndLocationPermissionGranted())
+            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
         super.onResume();
     }
 
@@ -169,6 +188,79 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         super.onDestroyView();
     }
 
+    private void initBottomSheet() {
+        bottomSheetLayout = binding.studentInfoBottomSheet;
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_DRAGGING) {
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+
+            }
+        });
+    }
+
+    private void initBindBottomSheetViews() {
+        acceptStudentButton = binding.homeBookButton;
+        studentDistanceTextView = binding.homeStudentDistanceTextview;
+        studentSubjectTextView = binding.homeStudentSubject;
+        studentNameTextView = binding.homeStudentName;
+        studentSessionTextView = binding.homeStudentSession;
+        studentFeeTextView = binding.homeStudentFee;
+    }
+
+    @SuppressLint("MissingPermission")
+    private void showStudentBottomSheet(StudentGeo studentGeo, TutorSubject tutorSubject, StudentInfo studentInfo) {
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        fusedLocationProviderClient.getLastLocation().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Location currentLocation = task.getResult();
+
+                float[] result = new float[2];
+                Location.distanceBetween(studentGeo.getL().get(0), studentGeo.getL().get(1),
+                        currentLocation.getLatitude(), currentLocation.getLongitude(), result);
+
+                double distanceInM = Math.round(result[0] * 10.0) / 10.0;
+                double distanceInKm = Math.round((distanceInM / 1000) * 10.0) / 10.0;
+                double feeOnKm = (Math.round(distanceInKm) * FARE_PER_KM) + AVERAGE_TUTOR_FEE * tutorSubject.getSessionHours();
+                double feeOnM = AVERAGE_TUTOR_FEE * tutorSubject.getSessionHours();
+
+                studentDistanceTextView.setText((distanceInM >= 1000) ? distanceInKm + " km" :
+                        distanceInM + " m");
+                studentFeeTextView.setText((distanceInM >= 1000) ? "Php " + feeOnKm : "Php " + feeOnM);
+            } else
+                showSnackBar(mContainerView, task.getException().getMessage());
+        });
+
+        studentSubjectTextView.setText((String.format("%s | %s", tutorSubject.getSubjectInfo().getName(),
+                tutorSubject.getSubjectInfo().getDescription())));
+        studentNameTextView.setText(String.format(getString(R.string.tutor_name),
+                studentInfo.getFirstName(),
+                studentInfo.getLastName()));
+        studentSessionTextView.setText(tutorSubject.getSessionHours() > 1 ?
+                tutorSubject.getSessionHours() + " hrs -" : tutorSubject.getSessionHours() + " hr -");
+
+        mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(studentGeo.getL().get(0), studentGeo.getL().get(1)))
+                .flat(true)
+                .title(String.format(getString(R.string.tutor_name),
+                        tutorSubject.getTutorInfo().getFirstName(),
+                        tutorSubject.getTutorInfo().getLastName()))
+                .snippet(tutorSubject.getTutorInfo().getPhoneNumber())
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.book_icon)));
+
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                new LatLng(studentGeo.getL().get(0), studentGeo.getL().get(1)), ZOOM_VAL));
+
+    }
+
     @SuppressLint("MissingPermission")
     private void initFusedLocationProvider() {
 
@@ -184,44 +276,29 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newPosition, ZOOM_VAL));
 
-                try {
-                    Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
-                    List<Address> addressList;
+                homeViewModel.getIsTutorWorking().observe(getViewLifecycleOwner(), isTutorWorking -> {
+                    if (isTutorWorking)
+                        homeViewModel.updateTutorWorkingLocation(tutorLocation)
+                                .observe(getViewLifecycleOwner(), dataOrException -> {
+                                    if (dataOrException.exception != null) {
+                                        showSnackBar(mContainerView,
+                                                dataOrException.exception.getMessage());
+                                    }
+                                });
+                    else
+                        homeViewModel.isTutorLocationSet(locationResult).observe(mActivity,
+                                dataOrException -> {
+                                    if (dataOrException.exception != null) {
+                                        SnackBarHelper.showSnackBar(mContainerView,
+                                                "[ERROR]: " + dataOrException.exception.getMessage());
+                                        return;
+                                    }
 
-                    addressList = geocoder.getFromLocation(locationResult.getLastLocation().getLatitude(),
-                            locationResult.getLastLocation().getLongitude(), 1);
-                    String cityName = addressList.get(0).getLocality();
-
-                    homeViewModel.setTutorLocationRef(cityName);
-
-                    homeViewModel.getIsTutorWorking().observe(getViewLifecycleOwner(), isTutorWorking -> {
-                        if (isTutorWorking)
-                            homeViewModel.updateTutorWorkingLocation(tutorLocation)
-                                    .observe(getViewLifecycleOwner(), dataOrException -> {
-                                        if (dataOrException.exception != null) {
-                                            showSnackBar(mContainerView,
-                                                    dataOrException.exception.getMessage());
-                                        }
-                                    });
-                        else
-                            homeViewModel.isTutorLocationSet(locationResult).observe(mActivity,
-                                    dataOrException -> {
-                                        if (dataOrException.exception != null) {
-                                            SnackBarHelper.showSnackBar(mContainerView,
-                                                    "[ERROR]: " + dataOrException.exception.getMessage());
-                                            return;
-                                        }
-
-                                        if (dataOrException.data)
-                                            Toast.makeText(mContext, "You're Online!", Toast.LENGTH_SHORT)
-                                                    .show();
-                                    });
-                    });
-
-                    homeViewModel.getOnlineRef().addValueEventListener(onlineValueEventListener);
-                } catch (IOException e) {
-                    showSnackBar(mContainerView, "[ERROR]: " + e.getMessage());
-                }
+                                    if (dataOrException.data)
+                                        Toast.makeText(mContext, "You're Online!", Toast.LENGTH_SHORT)
+                                                .show();
+                                });
+                });
                 /*try {
                     GeoJsonLayer layer = new GeoJsonLayer(mMap, R.raw.zambo_mid_res, mContext);
                     //layer.addLayerToMap();
@@ -274,8 +351,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                             "Awaiting student booking", Toast.LENGTH_SHORT).show();
 
                     getLastLocation();
-                    if(isGPSAndLocationPermissionGranted())
-                        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
                 } else {
                     ((NavButtonAsyncResponse) mActivity).setProfileButtonEnabled(false);
 
@@ -284,8 +359,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
                     homeViewModel.removeCustomerRequestListener();
                     homeViewModel.removeTutorLocation();
-                    if (fusedLocationProviderClient != null)
-                        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+
                     Toast.makeText(mContext,
                             "Tutor on break", Toast.LENGTH_SHORT).show();
                 }
@@ -324,7 +398,18 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                                             }
 
                                             if (dataOrException.data != null) {
-                                                homeViewModel.setIsTutorWorking(dataOrException.data);
+                                                boolean isTutorWorking = dataOrException.data;
+                                                homeViewModel.setIsTutorWorking(isTutorWorking);
+
+                                                if (isTutorWorking) {
+                                                    getStudentRequestDetails();
+                                                    workingImageButton.setVisibility(View.GONE);
+                                                } else {
+                                                    workingImageButton.setVisibility(View.VISIBLE);
+                                                    mMap.clear();
+                                                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                                                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, ZOOM_VAL));
+                                                }
                                             }
                                         });
 
@@ -341,6 +426,46 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     })
                     .addOnFailureListener(e -> showSnackBar(mContainerView, String.format("[ERROR]: %s",
                             e.getMessage())));
+    }
+
+    private void getStudentRequestDetails() {
+        // get student geo
+        homeViewModel.getStudentGeo().observe(this, studentGeo -> {
+            if (studentGeo.exception != null) {
+                SnackBarHelper.showSnackBar(mContainerView,
+                        "[ERROR]: " + studentGeo.exception.getMessage());
+                return;
+            }
+
+            if (studentGeo.data != null) {
+                // get student info
+                StudentGeo customerGeo = studentGeo.data;
+                homeViewModel.getStudentInfo().observe(this, studentInfo -> {
+                    if (studentInfo.exception != null) {
+                        SnackBarHelper.showSnackBar(mContainerView,
+                                "[ERROR]: " + studentInfo.exception.getMessage());
+                        return;
+                    }
+
+                    if (studentInfo.data != null) {
+                        // get tutor subject
+                        StudentInfo customerInfo = studentInfo.data;
+                        homeViewModel.getStudentTutorSubject().observe(this, tutorSubject -> {
+                            if (tutorSubject.exception != null) {
+                                SnackBarHelper.showSnackBar(mContainerView,
+                                        "[ERROR]: " + tutorSubject.exception.getMessage());
+                                return;
+                            }
+
+                            if (tutorSubject.data != null) {
+                                TutorSubject customerTutorSubject = tutorSubject.data;
+                                showStudentBottomSheet(customerGeo, customerTutorSubject, customerInfo);
+                            }
+                        });
+                    }
+                });
+            }
+        });
     }
 
     private void checkIfTutorHasVerifiedSubject() {
