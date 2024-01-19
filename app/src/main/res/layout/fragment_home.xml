@@ -36,7 +36,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/student_info_bottom_sheet"
         android:layout_width="match_parent"
-        android:layout_height="190dp"
+        android:layout_height="260dp"
         android:paddingBottom="10dp"
         app:behavior_hideable="true"
         android:background="@color/white"
@@ -56,6 +56,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/home_student_imageview"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:adjustViewBounds="true"
+        android:padding="5dp"
+        android:scaleType="centerCrop"
+        app:shapeAppearanceOverlay="@style/circleImageView"
+        app:srcCompat="@mipmap/ic_logo_round"
+        app:strokeColor="@color/colorPrimary"
+        app:strokeWidth="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/home_student_distance_textview"/>
 
     <TextView
         android:id="@+id/home_student_name"
@@ -79,7 +94,7 @@
         app:fontFamily="@font/roboto_bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/home_student_distance_textview" />
+        app:layout_constraintTop_toBottomOf="@id/home_student_imageview" />
 
     <LinearLayout
         android:id="@+id/home_linear_layout"
@@ -127,12 +142,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/home_book_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginTop="12dp"
             android:layout_marginStart="12dp"
             android:layout_marginEnd="10dp"
@@ -140,6 +153,70 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <LinearLayout
+            android:id="@+id/start_linear_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/home_call_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginTop="12dp"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="10dp"
+                android:text="@string/call_student" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/home_start_session_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginTop="12dp"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="10dp"
+                android:text="@string/start_session" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/end_linear_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/home_clock_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginTop="12dp"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="10dp"
+                android:text="@string/timer" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/home_end_session_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginTop="12dp"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="10dp"
+                android:text="@string/end_session" />
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

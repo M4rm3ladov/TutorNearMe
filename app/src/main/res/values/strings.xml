@@ -101,4 +101,8 @@
     <string name="tutor_subject_hour">Session Length</string>
     <string name="tutor_subject_min_hour">Hour(s)</string>
     <string name="accept_student">Accept student</string>
+    <string name="call_student">Call student</string>
+    <string name="start_session">Start session</string>
+    <string name="timer">Timer</string>
+    <string name="end_session">End session</string>
 </resources>
