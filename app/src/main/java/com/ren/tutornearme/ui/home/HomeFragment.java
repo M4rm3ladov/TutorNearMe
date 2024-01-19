@@ -7,14 +7,18 @@ import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
+import android.provider.AlarmClock;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,6 +34,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.directions.route.Route;
 import com.directions.route.RouteException;
 import com.directions.route.Routing;
@@ -104,10 +110,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
     private FragmentActivity mActivity;
 
     private ConstraintLayout bottomSheetLayout;
+    private LinearLayout startLayout, endLayout;
     private BottomSheetBehavior bottomSheetBehavior;
-    private Button acceptStudentButton;
+    private Button acceptStudentButton, callStudentButton, startSessionButton, endSessionButton, clockButton;
     private TextView studentDistanceTextView, studentSubjectTextView, studentNameTextView,
             studentSessionTextView, studentFeeTextView;
+    private ImageView studentImageView;
 
     private List<Polyline> polylines;
     private static final int[] COLORS = new int[] { R.color.colorPrimaryDark, R.color.colorPrimary, R.color.colorAccent };
@@ -232,7 +240,28 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
         studentNameTextView = binding.homeStudentName;
         studentSessionTextView = binding.homeStudentSession;
         studentFeeTextView = binding.homeStudentFee;
+        studentImageView = binding.homeStudentImageview;
+        callStudentButton = binding.homeCallButton;
+        startSessionButton = binding.homeStartSessionButton;
+        endSessionButton = binding.homeEndSessionButton;
+        clockButton = binding.homeClockButton;
+        startLayout = binding.startLinearLayout;
+        endLayout = binding.endLinearLayout;
 
+        startSessionButton.setOnClickListener(view -> {
+            startLayout.setVisibility(View.GONE);
+            endLayout.setVisibility(View.VISIBLE);
+
+            //add cutomer session
+            Toast.makeText(mContext, "Tutoring session started", Toast.LENGTH_SHORT).show();
+        });
+        endSessionButton.setOnClickListener(view -> {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            //remove tutor request
+            //remove tutor working
+            //add tutorLocation
+
+        });
         acceptStudentButton.setOnClickListener(view -> {
             if (!isGPSAndLocationPermissionGranted()) return;
             fusedLocationProviderClient.getLastLocation().addOnCompleteListener(task -> {
@@ -249,11 +278,24 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
                             .build();
                     routing.execute();
 
+                    acceptStudentButton.setVisibility(View.GONE);
+                    startLayout.setVisibility(View.VISIBLE);
+
                 } else if (task.getException() != null) {
                         showSnackBar(mContainerView, String.format("[ERROR]: %s",
                                 task.getException().getMessage()));
                 }
             });
+        });
+        callStudentButton.setOnClickListener(view -> {
+            Intent intent = new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel",
+                    homeViewModel.getmStudentInfo().getPhoneNumber(), null));
+            startActivity(intent);
+        });
+        clockButton.setOnClickListener(view -> {
+            Intent mClockIntent = new Intent(AlarmClock.ACTION_SET_TIMER);
+            mClockIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(mClockIntent);
         });
     }
 
@@ -280,6 +322,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
                 showSnackBar(mContainerView, task.getException().getMessage());
         });
 
+        Glide.with(mContext)
+                .load(studentInfo.getAvatar())
+                .placeholder(R.mipmap.ic_logo)
+                .apply(new RequestOptions().override(100, 100))
+                .into(studentImageView);
         studentSubjectTextView.setText((String.format("%s | %s", tutorSubject.getSubjectInfo().getName(),
                 tutorSubject.getSubjectInfo().getDescription())));
         studentNameTextView.setText(String.format(getString(R.string.tutor_name),
@@ -324,6 +371,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
                                     if (dataOrException.exception != null) {
                                         showSnackBar(mContainerView,
                                                 dataOrException.exception.getMessage());
+
                                     }
                                 });
                     else
@@ -338,6 +386,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
                                     if (dataOrException.data)
                                         Toast.makeText(mContext, "You're Online!", Toast.LENGTH_SHORT)
                                                 .show();
+
+                                    acceptStudentButton.setVisibility(View.VISIBLE);
+                                    startLayout.setVisibility(View.GONE);
                                 });
                 });
                 /*try {
@@ -609,7 +660,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
         mMap.getUiSettings().setZoomControlsEnabled(true);
-        mMap.setPadding(0, 0 , 0, 500);
+        mMap.setPadding(0, 0 , 0, 800);
 
         googleMap.setMapStyle(MapStyleOptions
                     .loadRawResourceStyle(mContext, R.raw.uber_maps_style));
@@ -672,7 +723,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
             Log.d("MapFail", "onRoutingFailure: " + e.getMessage());
         } else
             showSnackBar(mContainerView, "[ERROR]: Something went wrong, try again.");
-        }
+    }
 
     @Override
     public void onRoutingStart() {
