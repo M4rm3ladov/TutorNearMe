@@ -57,6 +57,7 @@ public class HomeRepository {
     }
 
     public void removeTutorLocation() {
+        if (tutorLocationRef == null) return;
         GeoFire geoFire = new GeoFire(tutorLocationRef);
         geoFire.removeLocation(getCurrentUser().getUid());
     }
