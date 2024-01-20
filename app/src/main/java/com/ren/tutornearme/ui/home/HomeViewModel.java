@@ -17,10 +17,14 @@ import com.ren.tutornearme.model.TutorSubject;
 public class HomeViewModel extends ViewModel {
     private final HomeRepository homeRepository;
     private Drawable locationButtonImage;
-    private final MutableLiveData<Boolean> isTutorWorking = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isTutorBooked = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isTutorOnline = new MutableLiveData<>(false);
     private StudentGeo mStudentGeo;
     private StudentInfo mStudentInfo;
     private TutorSubject mStudentTutorSubject;
+    private Location mTutorSessionStartLocation;
+    private double mTutorFee;
+    private String mSessionRefKey;
 
     public HomeViewModel() {
         this.homeRepository = new HomeRepository();
@@ -50,12 +54,44 @@ public class HomeViewModel extends ViewModel {
         this.mStudentTutorSubject = mStudentTutorSubject;
     }
 
-    public MutableLiveData<Boolean> getIsTutorWorking() {
-        return isTutorWorking;
+    public MutableLiveData<Boolean> getIsTutorBooked() {
+        return isTutorBooked;
     }
 
-    public void setIsTutorWorking(Boolean isTutorWorking) {
-        this.isTutorWorking.postValue(isTutorWorking);
+    public void setIsTutorOnline(Boolean isTutorOnline) {
+        this.isTutorOnline.postValue(isTutorOnline);
+    }
+
+    public MutableLiveData<Boolean> getIsTutorOnline() {
+        return isTutorOnline;
+    }
+
+    public double getmTutorFee() {
+        return mTutorFee;
+    }
+
+    public void setmTutorFee(double mTutorFee) {
+        this.mTutorFee = mTutorFee;
+    }
+
+    public String getmSessionRefKey() {
+        return mSessionRefKey;
+    }
+
+    public void setmSessionRefKey(String mSessionRefKey) {
+        this.mSessionRefKey = mSessionRefKey;
+    }
+
+    public Location getmTutorSessionStartLocation() {
+        return mTutorSessionStartLocation;
+    }
+
+    public void setmTutorSessionStartLocation(Location mtutorSessionStartLocation) {
+        this.mTutorSessionStartLocation = mtutorSessionStartLocation;
+    }
+
+    public void setIsTutorBooked(Boolean isTutorBooked) {
+        this.isTutorBooked.postValue(isTutorBooked);
     }
 
     public void setLocationButtonImage(Drawable locationButtonImage) {
@@ -78,24 +114,29 @@ public class HomeViewModel extends ViewModel {
         return homeRepository.checkTutorLocationSet(locationResult);
     }
 
-    public LiveData<DataOrException<Boolean, Exception>> isTutorLocationSet(Location location) {
-        return homeRepository.checkTutorLocationSet(location);
-    }
-
-    public LiveData<DataOrException<Boolean, Exception>> removeTutorWorking() {
-        return homeRepository.removeTutorWorking();
-    }
-
-    public LiveData<DataOrException<Boolean, Exception>> removeTutorRequest() {
-        return homeRepository.removeTutorRequest();
-    }
-
     public LiveData<DataOrException<Boolean, Exception>> checkStudentRequest(Location location) {
         return homeRepository.checkStudentRequest(location);
     }
 
     public LiveData<DataOrException<Boolean, Exception>> updateTutorWorkingLocation(Location location) {
         return homeRepository.updateTutorWorkingLocation(location);
+    }
+
+    public LiveData<DataOrException<String, Exception>> setTutorStudentSessionInfo
+            (TutorSubject tutorSubject,
+             StudentInfo studentInfo, double tutorFee, long sessionStart) {
+        return homeRepository.setTutorStudentSessionInfo
+                (tutorSubject, studentInfo, tutorFee, sessionStart);
+    }
+
+    public LiveData<DataOrException<Boolean, Exception>> setTutorStudentSessionLocation
+            (Location studentLocation, Location tutorLocation, String refKey) {
+        return homeRepository.setTutorStudentSessionLocation(studentLocation, tutorLocation, refKey);
+    }
+
+    public LiveData<DataOrException<Boolean, Exception>> setTutorStudentSessionEnd
+            (long sessionEnd, String refKey) {
+        return homeRepository.setTutorStudentSessionEnd(sessionEnd, refKey);
     }
 
     public LiveData<DataOrException<StudentInfo, Exception>> getStudentInfo() {
@@ -108,6 +149,14 @@ public class HomeViewModel extends ViewModel {
 
     public LiveData<DataOrException<StudentGeo, Exception>> getStudentGeo() {
         return homeRepository.getStudentGeo();
+    }
+
+    public LiveData<DataOrException<Boolean, Exception>> removeTutorWorking() {
+        return homeRepository.removeTutorWorking();
+    }
+
+    public LiveData<DataOrException<Boolean, Exception>> removeTutorRequest() {
+        return homeRepository.removeTutorRequest();
     }
 
     public DatabaseReference getCurrentUserRef() { return homeRepository.getCurrentUserRef(); }

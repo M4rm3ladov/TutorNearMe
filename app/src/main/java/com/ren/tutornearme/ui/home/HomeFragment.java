@@ -252,16 +252,68 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
             startLayout.setVisibility(View.GONE);
             endLayout.setVisibility(View.VISIBLE);
 
-            //add cutomer session
-            Toast.makeText(mContext, "Tutoring session started", Toast.LENGTH_SHORT).show();
+            Location studentSessionStartLocation = new Location("");
+            studentSessionStartLocation.setLatitude(homeViewModel.getmStudentGeo().getL().get(0));
+            studentSessionStartLocation.setLongitude(homeViewModel.getmStudentGeo().getL().get(1));
+
+            homeViewModel.setTutorStudentSessionInfo
+                    (homeViewModel.getmStudentTutorSubject(),
+                    homeViewModel.getmStudentInfo(),
+                    homeViewModel.getmTutorFee(),
+                    System.currentTimeMillis())
+                            .observe(getViewLifecycleOwner(), dataOrException -> {
+                                if (dataOrException.exception != null) {
+                                    showSnackBar(mContainerView, String.format("[ERROR]: %s",
+                                            dataOrException.exception.getMessage()));
+                                    return;
+                                }
+
+                                if (dataOrException.data != null) {
+                                    String refKey = dataOrException.data;
+                                    homeViewModel.setmSessionRefKey(refKey);
+
+                                    homeViewModel.setTutorStudentSessionLocation
+                                            (studentSessionStartLocation, homeViewModel.getmTutorSessionStartLocation(), refKey)
+                                            .observe(getViewLifecycleOwner(), areLocationsSet -> {
+                                                if (areLocationsSet.exception != null) {
+                                                    showSnackBar(mContainerView, String.format("[ERROR]: %s",
+                                                            dataOrException.exception.getMessage()));
+                                                    return;
+                                                }
+
+                                                if (areLocationsSet.data != null && areLocationsSet.data)
+                                                    Toast.makeText(mContext, "Tutoring session started", Toast.LENGTH_SHORT).show();
+                                            });
+                                }
+                            });
         });
+
         endSessionButton.setOnClickListener(view -> {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-            //remove tutor request
-            //remove tutor working
-            //add tutorLocation
 
+            homeViewModel.setTutorStudentSessionEnd(System.currentTimeMillis(), homeViewModel.getmSessionRefKey())
+                    .observe(getViewLifecycleOwner(), dataOrException -> {
+                        if (dataOrException.exception != null) {
+                            showSnackBar(mContainerView, String.format("[ERROR]: %s",
+                                    dataOrException.exception.getMessage()));
+                            return;
+                        }
+
+                        if (dataOrException.data != null && dataOrException.data) {
+
+                            Toast.makeText(mContext, "Session ended", Toast.LENGTH_SHORT).show();
+                            homeViewModel.removeCustomerRequestListener();
+                            homeViewModel.removeTutorRequest();
+                            homeViewModel.removeTutorWorking();
+                        }
+                    });
+
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            acceptStudentButton.setVisibility(View.VISIBLE);
+            endLayout.setVisibility(View.GONE);
+            startLayout.setVisibility(View.GONE);
         });
+
         acceptStudentButton.setOnClickListener(view -> {
             if (!isGPSAndLocationPermissionGranted()) return;
             fusedLocationProviderClient.getLastLocation().addOnCompleteListener(task -> {
@@ -277,6 +329,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
                             .key("AIzaSyDK5LORNVBfwaBxwPklkptPG2By_jZUeQ4")
                             .build();
                     routing.execute();
+
+                    homeViewModel.setmTutorSessionStartLocation(currentLocation);
+                    homeViewModel.removeTutorLocation();
 
                     acceptStudentButton.setVisibility(View.GONE);
                     startLayout.setVisibility(View.VISIBLE);
@@ -314,6 +369,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
                 double distanceInKm = Math.round((distanceInM / 1000) * 10.0) / 10.0;
                 double feeOnKm = (Math.round(distanceInKm) * FARE_PER_KM) + AVERAGE_TUTOR_FEE * tutorSubject.getSessionHours();
                 double feeOnM = AVERAGE_TUTOR_FEE * tutorSubject.getSessionHours();
+
+                if (distanceInM >= 1000)
+                    homeViewModel.setmTutorFee(feeOnKm);
+                else
+                    homeViewModel.setmTutorFee(feeOnM);
 
                 studentDistanceTextView.setText((distanceInM >= 1000) ? distanceInKm + " km" :
                         distanceInM + " m");
@@ -364,33 +424,37 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
 
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newPosition, ZOOM_VAL));
 
-                homeViewModel.getIsTutorWorking().observe(getViewLifecycleOwner(), isTutorWorking -> {
-                    if (isTutorWorking)
-                        homeViewModel.updateTutorWorkingLocation(tutorLocation)
-                                .observe(getViewLifecycleOwner(), dataOrException -> {
-                                    if (dataOrException.exception != null) {
-                                        showSnackBar(mContainerView,
-                                                dataOrException.exception.getMessage());
+                homeViewModel.getIsTutorOnline().observe(getViewLifecycleOwner(), isTutorOnline -> {
+                    if (isTutorOnline)
+                        homeViewModel.getIsTutorBooked().observe(getViewLifecycleOwner(), isTutorBooked -> {
+                            if (isTutorBooked)
+                                homeViewModel.updateTutorWorkingLocation(tutorLocation)
+                                        .observe(getViewLifecycleOwner(), dataOrException -> {
+                                            if (dataOrException.exception != null) {
+                                                showSnackBar(mContainerView,
+                                                        dataOrException.exception.getMessage());
 
-                                    }
-                                });
-                    else
-                        homeViewModel.isTutorLocationSet(locationResult).observe(mActivity,
-                                dataOrException -> {
-                                    if (dataOrException.exception != null) {
-                                        SnackBarHelper.showSnackBar(mContainerView,
-                                                "[ERROR]: " + dataOrException.exception.getMessage());
-                                        return;
-                                    }
+                                            }
+                                        });
+                            else
+                                homeViewModel.isTutorLocationSet(locationResult).observe(mActivity,
+                                        dataOrException -> {
+                                            if (dataOrException.exception != null) {
+                                                SnackBarHelper.showSnackBar(mContainerView,
+                                                        "[ERROR]: " + dataOrException.exception.getMessage());
+                                                return;
+                                            }
 
-                                    if (dataOrException.data)
-                                        Toast.makeText(mContext, "You're Online!", Toast.LENGTH_SHORT)
-                                                .show();
+                                            if (dataOrException.data)
+                                                Toast.makeText(mContext, "You're Online!", Toast.LENGTH_SHORT)
+                                                        .show();
 
-                                    acceptStudentButton.setVisibility(View.VISIBLE);
-                                    startLayout.setVisibility(View.GONE);
-                                });
+                                            acceptStudentButton.setVisibility(View.VISIBLE);
+                                            startLayout.setVisibility(View.GONE);
+                                        });
+                        });
                 });
+
                 /*try {
                     GeoJsonLayer layer = new GeoJsonLayer(mMap, R.raw.zambo_mid_res, mContext);
                     //layer.addLayerToMap();
@@ -442,14 +506,16 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
                     Toast.makeText(mContext,
                             "Awaiting student booking", Toast.LENGTH_SHORT).show();
 
+                    homeViewModel.setIsTutorOnline(true);
+
                     getLastLocation();
                 } else {
                     ((NavButtonAsyncResponse) mActivity).setProfileButtonEnabled(false);
 
-                    isTutorWorking = false;
                     workingImageButton.setImageResource(R.drawable.ic_location_off );
 
-                    homeViewModel.removeCustomerRequestListener();
+                    isTutorWorking = false;
+                    homeViewModel.setIsTutorOnline(false);
                     homeViewModel.removeTutorLocation();
 
                     Toast.makeText(mContext,
@@ -490,10 +556,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
                                             }
 
                                             if (dataOrException.data != null) {
-                                                boolean isTutorWorking = dataOrException.data;
-                                                homeViewModel.setIsTutorWorking(isTutorWorking);
+                                                boolean isTutorBooked = dataOrException.data;
+                                                homeViewModel.setIsTutorBooked(isTutorBooked);
 
-                                                if (isTutorWorking) {
+                                                if (isTutorBooked) {
                                                     getStudentRequestDetails();
                                                     workingImageButton.setVisibility(View.GONE);
                                                 } else {
