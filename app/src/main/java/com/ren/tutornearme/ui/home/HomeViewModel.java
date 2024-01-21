@@ -10,8 +10,8 @@ import androidx.lifecycle.ViewModel;
 import com.google.android.gms.location.LocationResult;
 import com.google.firebase.database.DatabaseReference;
 import com.ren.tutornearme.data.DataOrException;
-import com.ren.tutornearme.model.StudentGeo;
 import com.ren.tutornearme.model.StudentInfo;
+import com.ren.tutornearme.model.TutorRequestInfo;
 import com.ren.tutornearme.model.TutorSubject;
 
 public class HomeViewModel extends ViewModel {
@@ -19,39 +19,20 @@ public class HomeViewModel extends ViewModel {
     private Drawable locationButtonImage;
     private final MutableLiveData<Boolean> isTutorBooked = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isTutorOnline = new MutableLiveData<>(false);
-    private StudentGeo mStudentGeo;
-    private StudentInfo mStudentInfo;
-    private TutorSubject mStudentTutorSubject;
+    private TutorRequestInfo mTutorRequestInfo;
     private Location mTutorSessionStartLocation;
     private double mTutorFee;
-    private String mSessionRefKey;
 
     public HomeViewModel() {
         this.homeRepository = new HomeRepository();
     }
 
-    public StudentGeo getmStudentGeo() {
-        return mStudentGeo;
+    public TutorRequestInfo getmTutorRequestInfo() {
+        return mTutorRequestInfo;
     }
 
-    public void setmStudentGeo(StudentGeo mStudentGeo) {
-        this.mStudentGeo = mStudentGeo;
-    }
-
-    public StudentInfo getmStudentInfo() {
-        return mStudentInfo;
-    }
-
-    public void setmStudentInfo(StudentInfo mStudentInfo) {
-        this.mStudentInfo = mStudentInfo;
-    }
-
-    public TutorSubject getmStudentTutorSubject() {
-        return mStudentTutorSubject;
-    }
-
-    public void setmStudentTutorSubject(TutorSubject mStudentTutorSubject) {
-        this.mStudentTutorSubject = mStudentTutorSubject;
+    public void setmTutorRequestInfo(TutorRequestInfo mTutorRequestInfo) {
+        this.mTutorRequestInfo = mTutorRequestInfo;
     }
 
     public MutableLiveData<Boolean> getIsTutorBooked() {
@@ -72,14 +53,6 @@ public class HomeViewModel extends ViewModel {
 
     public void setmTutorFee(double mTutorFee) {
         this.mTutorFee = mTutorFee;
-    }
-
-    public String getmSessionRefKey() {
-        return mSessionRefKey;
-    }
-
-    public void setmSessionRefKey(String mSessionRefKey) {
-        this.mSessionRefKey = mSessionRefKey;
     }
 
     public Location getmTutorSessionStartLocation() {
@@ -122,11 +95,11 @@ public class HomeViewModel extends ViewModel {
         return homeRepository.updateTutorWorkingLocation(location);
     }
 
-    public LiveData<DataOrException<String, Exception>> setTutorStudentSessionInfo
+    public LiveData<DataOrException<Boolean, Exception>> setTutorStudentSessionInfo
             (TutorSubject tutorSubject,
-             StudentInfo studentInfo, double tutorFee, long sessionStart) {
+             StudentInfo studentInfo, double tutorFee, long sessionStart, String sessionKey) {
         return homeRepository.setTutorStudentSessionInfo
-                (tutorSubject, studentInfo, tutorFee, sessionStart);
+                (tutorSubject, studentInfo, tutorFee, sessionStart, sessionKey);
     }
 
     public LiveData<DataOrException<Boolean, Exception>> setTutorStudentSessionLocation
@@ -139,16 +112,8 @@ public class HomeViewModel extends ViewModel {
         return homeRepository.setTutorStudentSessionEnd(sessionEnd, refKey);
     }
 
-    public LiveData<DataOrException<StudentInfo, Exception>> getStudentInfo() {
-        return homeRepository.getStudentInfo();
-    }
-
-    public LiveData<DataOrException<TutorSubject, Exception>> getStudentTutorSubject() {
-        return homeRepository.getStudentTutorSubject();
-    }
-
-    public LiveData<DataOrException<StudentGeo, Exception>> getStudentGeo() {
-        return homeRepository.getStudentGeo();
+    public LiveData<DataOrException<TutorRequestInfo, Exception>> getTutorRequestInfo() {
+        return homeRepository.getTutorRequestInfo();
     }
 
     public LiveData<DataOrException<Boolean, Exception>> removeTutorWorking() {

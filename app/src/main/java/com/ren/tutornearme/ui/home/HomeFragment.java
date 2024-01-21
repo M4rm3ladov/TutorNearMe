@@ -28,6 +28,7 @@ import androidx.activity.result.IntentSenderRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
@@ -67,6 +68,7 @@ import com.ren.tutornearme.data.NavButtonAsyncResponse;
 import com.ren.tutornearme.databinding.FragmentHomeBinding;
 import com.ren.tutornearme.model.StudentGeo;
 import com.ren.tutornearme.model.StudentInfo;
+import com.ren.tutornearme.model.TutorRequestInfo;
 import com.ren.tutornearme.model.TutorSubject;
 import com.ren.tutornearme.ui.subject.tutor_subject.TutorSubjectViewModel;
 import com.ren.tutornearme.util.GPSHelper;
@@ -249,19 +251,27 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
         endLayout = binding.endLinearLayout;
 
         startSessionButton.setOnClickListener(view -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            builder.setTitle("Tutor Near Me")
+                    .setMessage("Tutoring session has started!")
+                    .setNegativeButton("Ok", (dialogInterface, i) -> dialogInterface.dismiss())
+                    .setCancelable(true);
+            builder.show();
             startLayout.setVisibility(View.GONE);
             endLayout.setVisibility(View.VISIBLE);
 
             Location studentSessionStartLocation = new Location("");
-            studentSessionStartLocation.setLatitude(homeViewModel.getmStudentGeo().getL().get(0));
-            studentSessionStartLocation.setLongitude(homeViewModel.getmStudentGeo().getL().get(1));
+            studentSessionStartLocation.setLatitude(homeViewModel.getmTutorRequestInfo().getStudentLocation().getL().get(0));
+            studentSessionStartLocation.setLongitude(homeViewModel.getmTutorRequestInfo().getStudentLocation().getL().get(1));
 
             homeViewModel.setTutorStudentSessionInfo
-                    (homeViewModel.getmStudentTutorSubject(),
-                    homeViewModel.getmStudentInfo(),
+                    (homeViewModel.getmTutorRequestInfo().getTutorSubject(),
+                    homeViewModel.getmTutorRequestInfo().getStudentInfo(),
                     homeViewModel.getmTutorFee(),
-                    System.currentTimeMillis())
+                    System.currentTimeMillis(),
+                    homeViewModel.getmTutorRequestInfo().getSessionKey())
                             .observe(getViewLifecycleOwner(), dataOrException -> {
+
                                 if (dataOrException.exception != null) {
                                     showSnackBar(mContainerView, String.format("[ERROR]: %s",
                                             dataOrException.exception.getMessage()));
@@ -269,29 +279,33 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
                                 }
 
                                 if (dataOrException.data != null) {
-                                    String refKey = dataOrException.data;
-                                    homeViewModel.setmSessionRefKey(refKey);
 
                                     homeViewModel.setTutorStudentSessionLocation
-                                            (studentSessionStartLocation, homeViewModel.getmTutorSessionStartLocation(), refKey)
+                                            (studentSessionStartLocation,
+                                            homeViewModel.getmTutorSessionStartLocation(),
+                                            homeViewModel.getmTutorRequestInfo().getSessionKey())
                                             .observe(getViewLifecycleOwner(), areLocationsSet -> {
+
                                                 if (areLocationsSet.exception != null) {
                                                     showSnackBar(mContainerView, String.format("[ERROR]: %s",
                                                             dataOrException.exception.getMessage()));
-                                                    return;
                                                 }
 
-                                                if (areLocationsSet.data != null && areLocationsSet.data)
-                                                    Toast.makeText(mContext, "Tutoring session started", Toast.LENGTH_SHORT).show();
                                             });
                                 }
                             });
         });
 
         endSessionButton.setOnClickListener(view -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            builder.setTitle("Tutor Near Me")
+                    .setMessage("Tutor session has concluded!")
+                    .setNegativeButton("Ok", (dialogInterface, i) -> dialogInterface.dismiss())
+                    .setCancelable(true);
+            builder.show();
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
-            homeViewModel.setTutorStudentSessionEnd(System.currentTimeMillis(), homeViewModel.getmSessionRefKey())
+            homeViewModel.setTutorStudentSessionEnd(System.currentTimeMillis(), homeViewModel.getmTutorRequestInfo().getSessionKey())
                     .observe(getViewLifecycleOwner(), dataOrException -> {
                         if (dataOrException.exception != null) {
                             showSnackBar(mContainerView, String.format("[ERROR]: %s",
@@ -300,8 +314,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
                         }
 
                         if (dataOrException.data != null && dataOrException.data) {
+                            eraseRoutePolyLines();
 
-                            Toast.makeText(mContext, "Session ended", Toast.LENGTH_SHORT).show();
                             homeViewModel.removeCustomerRequestListener();
                             homeViewModel.removeTutorRequest();
                             homeViewModel.removeTutorWorking();
@@ -320,7 +334,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
                 if (task.isSuccessful()) {
                     Location currentLocation = task.getResult();
                     LatLng start = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-                    LatLng end = new LatLng(homeViewModel.getmStudentGeo().getL().get(0), homeViewModel.getmStudentGeo().getL().get(1));
+                    LatLng end = new LatLng(homeViewModel.getmTutorRequestInfo().getStudentLocation().getL().get(0),
+                            homeViewModel.getmTutorRequestInfo().getStudentLocation().getL().get(1));
 
                     Routing routing = new Routing.Builder()
                             .travelMode(Routing.TravelMode.DRIVING)
@@ -344,7 +359,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
         });
         callStudentButton.setOnClickListener(view -> {
             Intent intent = new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel",
-                    homeViewModel.getmStudentInfo().getPhoneNumber(), null));
+                    homeViewModel.getmTutorRequestInfo().getStudentInfo().getPhoneNumber(), null));
             startActivity(intent);
         });
         clockButton.setOnClickListener(view -> {
@@ -589,42 +604,20 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Routin
 
     private void getStudentRequestDetails() {
         // get student geo
-        homeViewModel.getStudentGeo().observe(this, studentGeo -> {
-            if (studentGeo.exception != null) {
+        homeViewModel.getTutorRequestInfo().observe(getViewLifecycleOwner(), dataOrException -> {
+            if (dataOrException.exception != null) {
                 SnackBarHelper.showSnackBar(mContainerView,
-                        "[ERROR]: " + studentGeo.exception.getMessage());
+                        "[ERROR]: " + dataOrException.exception.getMessage());
                 return;
             }
 
-            if (studentGeo.data != null) {
-                // get student info
-                homeViewModel.setmStudentGeo(studentGeo.data);
-                homeViewModel.getStudentInfo().observe(this, studentInfo -> {
-                    if (studentInfo.exception != null) {
-                        SnackBarHelper.showSnackBar(mContainerView,
-                                "[ERROR]: " + studentInfo.exception.getMessage());
-                        return;
-                    }
+            if (dataOrException.data != null) {
+                TutorRequestInfo tutorRequestInfo = dataOrException.data;
+                homeViewModel.setmTutorRequestInfo(tutorRequestInfo);
 
-                    if (studentInfo.data != null) {
-                        // get tutor subject
-                        homeViewModel.setmStudentInfo(studentInfo.data);
-                        homeViewModel.getStudentTutorSubject().observe(this, tutorSubject -> {
-                            if (tutorSubject.exception != null) {
-                                SnackBarHelper.showSnackBar(mContainerView,
-                                        "[ERROR]: " + tutorSubject.exception.getMessage());
-                                return;
-                            }
-
-                            if (tutorSubject.data != null) {
-                                homeViewModel.setmStudentTutorSubject(tutorSubject.data);
-                                showStudentBottomSheet(homeViewModel.getmStudentGeo(),
-                                        homeViewModel.getmStudentTutorSubject(),
-                                        homeViewModel.getmStudentInfo());
-                            }
-                        });
-                    }
-                });
+                showStudentBottomSheet(tutorRequestInfo.getStudentLocation(),
+                        tutorRequestInfo.getTutorSubject(),
+                        tutorRequestInfo.getStudentInfo());
             }
         });
     }

@@ -8,7 +8,6 @@ import static com.ren.tutornearme.util.Common.TUTOR_WORKING_REFERENCE;
 import android.location.Location;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 
 import com.firebase.geofire.GeoFire;
@@ -22,8 +21,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.ren.tutornearme.data.DataOrException;
-import com.ren.tutornearme.model.StudentGeo;
 import com.ren.tutornearme.model.StudentInfo;
+import com.ren.tutornearme.model.TutorRequestInfo;
 import com.ren.tutornearme.model.TutorSubject;
 
 import java.util.HashMap;
@@ -98,12 +97,15 @@ public class HomeRepository {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.exists()) {
-                                dataOrException.data = true;
-                                mutableLiveData.postValue(dataOrException);
-                            } else {
+                                TutorRequestInfo tutorRequestInfo = snapshot.getValue(TutorRequestInfo.class);
+                                dataOrException.data = tutorRequestInfo != null &&
+                                        tutorRequestInfo.getStudentLocation() != null &&
+                                        tutorRequestInfo.getSessionKey() != null &&
+                                        tutorRequestInfo.getStudentInfo() != null &&
+                                        tutorRequestInfo.getTutorSubject() != null;
+                            } else
                                 dataOrException.data = false;
-                                mutableLiveData.postValue(dataOrException);
-                            }
+                            mutableLiveData.postValue(dataOrException);
                         }
 
                         @Override
@@ -134,30 +136,27 @@ public class HomeRepository {
         return mutableLiveData;
     }
 
-    public MutableLiveData<DataOrException<String, Exception>> setTutorStudentSessionInfo
-            (TutorSubject tutorSubject, StudentInfo studentInfo, double tutorFee, long sessionStart) {
-        MutableLiveData<DataOrException<String, Exception>> mutableLiveData = new MutableLiveData<>();
-        DataOrException<String, Exception> dataOrException = new DataOrException<>();
+    public MutableLiveData<DataOrException<Boolean, Exception>> setTutorStudentSessionInfo
+            (TutorSubject tutorSubject, StudentInfo studentInfo, double tutorFee, long sessionStart, String sessionKey) {
+        MutableLiveData<DataOrException<Boolean, Exception>> mutableLiveData = new MutableLiveData<>();
+        DataOrException<Boolean, Exception> dataOrException = new DataOrException<>();
 
         Map<String, Object> data = new HashMap<>();
         data.put("isOngoing", true);
         data.put("tutorSubject", tutorSubject);
-        data.put(studentInfo.getUid(), studentInfo);
+       /* data.put("studentInfo", studentInfo);*/
         data.put("tutorFee", tutorFee);
         data.put("sessionStart", sessionStart);
 
-        tutorStudentSessionRef.push().setValue(data, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
-                if (error != null)
-                    dataOrException.exception = error.toException();
-
-                else if (ref.getKey() != null) {
-                    dataOrException.data = ref.getKey();
-                }
-                mutableLiveData.postValue(dataOrException);
-            }
-        });
+        tutorStudentSessionRef.child(sessionKey).updateChildren(data)
+                .addOnSuccessListener(unused -> {
+                    dataOrException.data = true;
+                    mutableLiveData.postValue(dataOrException);
+                })
+                .addOnFailureListener(e -> {
+                    dataOrException.exception = e;
+                    mutableLiveData.postValue(dataOrException);
+                });
         return mutableLiveData;
     }
 
@@ -197,6 +196,7 @@ public class HomeRepository {
 
         Map<String, Object> data = new HashMap<>();
         data.put("sessionEnd", sessionEnd);
+        data.put("isOngoing", false);
 
         tutorStudentSessionRef.child(refKey)
                 .updateChildren(data).addOnCompleteListener(task -> {
@@ -209,57 +209,15 @@ public class HomeRepository {
         return mutableLiveData;
     }
 
-    public MutableLiveData<DataOrException<StudentGeo, Exception>> getStudentGeo() {
-        MutableLiveData<DataOrException<StudentGeo, Exception>> mutableLiveData = new MutableLiveData<>();
-        DataOrException<StudentGeo, Exception> dataOrException = new DataOrException<>();
+    public MutableLiveData<DataOrException<TutorRequestInfo, Exception>> getTutorRequestInfo() {
+        MutableLiveData<DataOrException<TutorRequestInfo, Exception>> mutableLiveData = new MutableLiveData<>();
+        DataOrException<TutorRequestInfo, Exception> dataOrException = new DataOrException<>();
 
-        tutorRequestRef.child(getCurrentUser().getUid()).child("studentLocation")
+        tutorRequestRef.child(getCurrentUser().getUid())
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        dataOrException.data = snapshot.getValue(StudentGeo.class);
-                        mutableLiveData.postValue(dataOrException);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        dataOrException.exception = error.toException();
-                        mutableLiveData.postValue(dataOrException);
-                    }
-                });
-        return mutableLiveData;
-    }
-
-    public MutableLiveData<DataOrException<TutorSubject, Exception>> getStudentTutorSubject() {
-        MutableLiveData<DataOrException<TutorSubject, Exception>> mutableLiveData = new MutableLiveData<>();
-        DataOrException<TutorSubject, Exception> dataOrException = new DataOrException<>();
-
-        tutorRequestRef.child(getCurrentUser().getUid()).child("tutorSubject")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        dataOrException.data = snapshot.getValue(TutorSubject.class);
-                        mutableLiveData.postValue(dataOrException);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        dataOrException.exception = error.toException();
-                        mutableLiveData.postValue(dataOrException);
-                    }
-                });
-        return mutableLiveData;
-    }
-
-    public MutableLiveData<DataOrException<StudentInfo, Exception>> getStudentInfo() {
-        MutableLiveData<DataOrException<StudentInfo, Exception>> mutableLiveData = new MutableLiveData<>();
-        DataOrException<StudentInfo, Exception> dataOrException = new DataOrException<>();
-
-        tutorRequestRef.child(getCurrentUser().getUid()).child("studentInfo")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        dataOrException.data = snapshot.getValue(StudentInfo.class);
+                        dataOrException.data = snapshot.getValue(TutorRequestInfo.class);
                         mutableLiveData.postValue(dataOrException);
                     }
 
