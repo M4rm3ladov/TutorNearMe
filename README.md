@@ -17,14 +17,14 @@ A capstone project for finding registered tutors in Zamboanga City.
   
   ### Admin
 
-  #### Field Of Study
+  #### i. Field Of Study
 
   * Create subject name and description
   * View and search subject name and description
   * Update subject name and description
   * Delete subject name and description
   
-  #### Verify Tutor
+  #### ii. Verify Tutor
    
   * View tutor profile image
   * View tutor profile information
@@ -33,12 +33,12 @@ A capstone project for finding registered tutors in Zamboanga City.
   * Tag tutor as verified
   * Tag tutor for resubmission through email
 
-  #### Verified Tutors
+  #### iii. Verified Tutors
 
   * View and search verified tutors
   * View and search verified tutor subjects
 
-  #### Verify Subject
+  #### iv. Verify Subject
 
   * View and search tutor subject requests
   * View tutor basic information
@@ -46,7 +46,7 @@ A capstone project for finding registered tutors in Zamboanga City.
   * Send tutor an email for resubmission of subject credential
   * Verify tutor subject
 
-  #### Session History
+  #### v. Session History
 
   * View and search tutor and student tutoring session history
     * Tutor and student's names
@@ -57,7 +57,7 @@ A capstone project for finding registered tutors in Zamboanga City.
       
   ### Tutor
 
-  #### Account creation and Profile
+  #### i. Account creation and Profile
   
   * Authenticate tutor account with phone number and OTP
   * Add tutor basic information
@@ -67,7 +67,7 @@ A capstone project for finding registered tutors in Zamboanga City.
   * Submit tutor account verification request
   * Get tutor account status tagged as: unverified, submitted, resubmit, and verified
 
-  #### My Subjects
+  #### ii. My Subjects
 
   * View and search tutor's verfied subject
   * Upload and view tutor subject request credential
@@ -75,7 +75,7 @@ A capstone project for finding registered tutors in Zamboanga City.
   * Enable tutor's verified subject for student visibility
   * Edit tutor's verified subject tutoring hour(s)
     
-  #### Home
+  #### iii. Home
 
   * Toggle tutor working status
   * View tutoring session request
@@ -88,7 +88,7 @@ A capstone project for finding registered tutors in Zamboanga City.
   * Accept student requests
   * Suggest tutor road path
 
- #### Accepted Tutoring Session
+ #### iv. Accepted Tutoring Session
 
  * View tutor's real-time location updates
  * View suggested route to student location
@@ -98,14 +98,14 @@ A capstone project for finding registered tutors in Zamboanga City.
   
   ### Student
 
-  #### Account Creation and Profile
+  #### i. Account Creation and Profile
   
   * Authenticate tutor account with phone number and OTP
   * Add student basic information
   * Add student profile image
   * Add student contact email address
 
-  #### Home
+  #### ii. Home
   
   * Search subject and locate working tutors
   * Book selected tutor
@@ -116,7 +116,7 @@ A capstone project for finding registered tutors in Zamboanga City.
     * Student's subject requested
     * Tutor's session hours and fee
    
-  #### Accepted Tutoring Session
+  #### iii. Accepted Tutoring Session
 
   * View tutor's real-time location updates
     
