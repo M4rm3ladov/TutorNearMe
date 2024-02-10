@@ -1,4 +1,4 @@
-# Tutor Near Me <img src="./app/src/main/res/drawable/book.png" width="25" alt="Logo"/>
+# Tutor Near Me <img src=".AJE/Resources/filler.jpg" width="25" alt="Logo"/>
 A capstone project for finding registered tutors in Zamboanga City.
 
 ## I. Video Demo</h2>
